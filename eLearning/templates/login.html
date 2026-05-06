@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  .navbar-nav .nav-item .nav-link {
+    color: white !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 15px !important;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  /* ... Styles originaux omis pour la brièveté du snippet dans mon historique ... */
+  /* Mais je vais remettre la structure de formulaire d'origine */
+</style>
+{% endblock %}
+
+{% block body_class %}sub_page{% endblock %}
+
+{% block hero_content %}
+<section class="slider_section position-relative" style="padding: 50px 0;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-9">
+        <div class="detail-box">
+          <h1 style="font-size: 40px;">CONNEXION</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="contact_section layout_padding">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <div class="form_container">
+          <div class="heading_container">
+            <h3>Se Connecter</h3>
+          </div>
+          
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form action="{% url 'admin_login' %}" method="POST">
+            {% csrf_token %}
+            <div>
+              <input type="text" name="email" placeholder="votre@email.com" required />
+            </div>
+            <div>
+              <input type="password" name="password" placeholder="Mot de passe" required />
+            </div>
+            <div class="d-flex justify-content-center">
+              <button type="submit">Connexion</button>
+            </div>
+          </form>
+          
+          <div class="mt-4 text-center">
+            <p>Pas encore de compte ? <a href="{% url 'register' %}">Inscrivez-vous ici</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

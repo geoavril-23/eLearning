@@ -1,0 +1,197 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mes Quiz{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 3px 16px rgba(102, 126, 234, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    .quiz-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.18);
+    }
+
+    .quiz-card-header {
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        padding: 1.25rem 1.5rem;
+        color: white;
+    }
+
+    .badge-cours {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f0f4ff;
+        color: #4a5568;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 6px;
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-view:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: #667eea;
+    }
+
+    .btn-generate-new {
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-generate-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(26, 115, 232, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-question-circle text-primary mr-2"></i>Mes Quiz
+    </h1>
+    <div class="d-flex gap-2">
+        <a href="{% url 'creer_quiz_manuel' %}"
+            class="btn btn-outline-primary rounded-pill px-4 mr-2 shadow-sm font-weight-bold">
+            <i class="fas fa-edit mr-1"></i> Créer Manuellement
+        </a>
+        <a href="{% url 'generer_quiz_ia' %}" class="btn-generate-new" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
+            <i class="fas fa-magic"></i> Générer automatiquement
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div
+    class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show rounded-lg shadow-sm mb-4">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if quiz_list %}
+<div class="row">
+    {% for quiz in quiz_list %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="quiz-card card h-100">
+            <div class="quiz-card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h6 class="mb-1 font-weight-bold" style="font-size:0.95rem;line-height:1.4;">{{ quiz.titre }}</h6>
+                    <span class="badge-cours ml-2 flex-shrink-0">
+                        <i class="fas fa-question-circle fa-xs mr-1"></i>Quiz
+                    </span>
+                </div>
+                <small class="opacity-80">{{ quiz.cours.titre }}</small>
+            </div>
+            <div class="card-body pt-3 pb-3">
+                <div class="mb-3">
+                    <span class="stat-chip">
+                        <i class="fas fa-question text-primary fa-xs"></i>
+                        {{ quiz.questions.count }} questions
+                    </span>
+                    <span class="stat-chip">
+                        <i class="fas fa-clock text-info fa-xs"></i>
+                        {{ quiz.duree }}
+                    </span>
+                    <span class="stat-chip">
+                        <i class="fas fa-star text-warning fa-xs"></i>
+                        /{{ quiz.note_max }} pts
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <a href="{% url 'detail_quiz_enseignant' quiz.id %}" class="btn-view">
+                        <i class="fas fa-eye mr-1"></i> Voir le quiz
+                    </a>
+                    <a href="{% url 'supprimer_quiz_enseignant' quiz.id %}"
+                        class="btn btn-sm btn-outline-danger rounded-lg"
+                        onclick="return confirm('Supprimer ce quiz et toutes ses questions ?')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card border-0 shadow-sm rounded-lg">
+    <div class="card-body empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-magic"></i>
+        </div>
+        <h4 class="font-weight-bold text-gray-800 mb-2">Aucun quiz généré</h4>
+        <p class="text-muted mb-4">
+            Utilisez l'assistant de création pour préparer automatiquement des questions QCM<br>
+            à partir des chapitres de vos cours.
+        </p>
+        <a href="{% url 'generer_quiz_ia' %}" class="btn-generate-new" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
+            <i class="fas fa-magic"></i> Créer mon premier Quiz
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

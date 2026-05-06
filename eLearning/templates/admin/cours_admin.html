@@ -1,0 +1,117 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Gestion des Cours - Administrateur{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestion des Cours</h1>
+        <a href="#" class="btn btn-sm btn-success shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Créer un nouveau cours</a>
+    </div>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tous les Cours de la Plateforme</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered text-center" id="dataTableCours" width="100%" cellspacing="0">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th>Image</th>
+                            <th>Titre</th>
+                            <th>Enseignant</th>
+                            <th>Niveau</th>
+                            <th>Inscrits</th>
+                            <th>Mise en avant</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in tous_les_cours %}
+                        <tr>
+                            <td><img src="{% if c.ressource %}{{ c.ressource.url }}{% else %}{% static 'admin/img/course_placeholder.jpg' %}{% endif %}" style="width: 50px; border-radius: 5px;"></td>
+                            <td>{{ c.titre }}</td>
+                            <td>{{ c.enseignant.nom }}</td>
+                            <td>{{ c.niveau }}</td>
+                            <td>{{ c.inscriptions.count }}</td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="switch{{ c.id }}" {% if c.featured %}checked{% endif %}>
+                                    <label class="custom-control-label" for="switch{{ c.id }}"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm" title="Modifier"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm" title="Supprimer"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <!-- Simulation -->
+                        <tr>
+                            <td><i class="fas fa-book fa-2x text-primary"></i></td>
+                            <td>Développement Web Complet</td>
+                            <td>Dupont Jean</td>
+                            <td>Intermédiaire</td>
+                            <td>245</td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="switchSim1" checked>
+                                    <label class="custom-control-label" for="switchSim1"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-brain fa-2x text-warning"></i></td>
+                            <td>Intelligence Artificielle</td>
+                            <td>Martin Sophie</td>
+                            <td>Avancé</td>
+                            <td>120</td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="switchSim2">
+                                    <label class="custom-control-label" for="switchSim2"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#dataTableCours').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+    });
+</script>
+{% endblock %}

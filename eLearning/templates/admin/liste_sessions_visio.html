@@ -1,0 +1,221 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Visioconférences{% endblock %}
+
+{% block extra_css %}
+<style>
+    .live-card {
+        border: none;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .live-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+
+    .live-status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        z-index: 2;
+    }
+
+    .status-avenir { background: #e3f2fd; color: #1976d2; }
+    .status-encours { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; animation: pulse 2s infinite; }
+    .status-termine { background: #f5f5f5; color: #757575; }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    .live-card-header {
+        height: 100px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+    }
+
+    .live-card-body {
+        padding: 1.5rem;
+    }
+
+    .live-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.8rem;
+    }
+
+    .live-info {
+        font-size: 0.85rem;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.4rem;
+    }
+
+    .btn-join {
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        width: 100%;
+        padding: 10px;
+        font-weight: 700;
+        margin-top: 1rem;
+        transition: all 0.3s;
+    }
+
+    .btn-join:hover {
+        filter: brightness(1.1);
+        color: white;
+        transform: scale(1.02);
+    }
+
+    .btn-delete {
+        color: #e53e3e;
+        background: #fff5f5;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+        background: #feb2b2;
+        color: #c53030;
+    }
+
+    .header-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-new-visio {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-new-visio:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="header-section">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Visioconférences Live</h1>
+            <p class="text-muted mb-0">Gérez vos réunions Google Meet et sessions en direct.</p>
+        </div>
+        {% if request.user.is_enseignant %}
+        <a href="{% url 'creer_session_visio' %}" class="btn-new-visio">
+            <i class="fas fa-plus"></i> Programmer un Live
+        </a>
+        {% endif %}
+    </div>
+
+    {% if sessions %}
+    <div class="row">
+        {% for session in sessions %}
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="live-card">
+                <span class="live-status-badge {% if session.statut == 'en cours' %}status-encours{% elif session.statut == 'terminé' %}status-termine{% else %}status-avenir{% endif %}">
+                    {% if session.statut == 'en cours' %}<i class="fas fa-circle mr-1"></i>{% endif %}
+                    {{ session.statut }}
+                </span>
+                
+                <div class="live-card-header">
+                    <i class="fas fa-video"></i>
+                </div>
+
+                <div class="live-card-body">
+                    <div class="live-title">{{ session.titre }}</div>
+                    <div class="live-info">
+                        <i class="fas fa-book-open"></i>
+                        <span>{{ session.cours.titre|default:"Général" }}</span>
+                    </div>
+                    <div class="live-info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ session.date_debut|date:"d M Y à H:i" }}</span>
+                    </div>
+                    <div class="live-info">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ session.duree }} minutes</span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        {% if session.statut != 'terminé' %}
+                        <a href="{{ session.lien_reunion }}" target="_blank" class="btn btn-join flex-grow-1">
+                            <i class="fas fa-external-link-alt mr-2"></i> Rejoindre Meet
+                        </a>
+                        {% endif %}
+                        {% if request.user.is_enseignant %}
+                        <form action="{% url 'supprimer_session_visio' session.id %}" method="POST" class="ml-2 mt-3" onsubmit="return confirm('Supprimer cette session ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-video-slash fa-4x text-gray-300"></i>
+        </div>
+        <h4 class="text-gray-600">Aucune visioconférence programmée</h4>
+        <p class="text-muted">Commencez par programmer votre première session live avec vos étudiants.</p>
+        <a href="{% url 'creer_session_visio' %}" class="btn btn-primary btn-lg mt-3" style="border-radius: 12px;">
+            Programmer maintenant
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

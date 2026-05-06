@@ -1,0 +1,131 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Créer un Quiz Manuellement{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .form-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #4e73df;
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e3e6f0;
+    }
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78,115,223,0.1);
+    }
+    .btn-create {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78,115,223,0.3);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card card">
+                <div class="form-header">
+                    <h4 class="mb-0"><i class="fas fa-edit mr-2"></i>Nouveau Quiz Manuel</h4>
+                    <p class="mb-0 opacity-75">Remplissez les informations de base avant d'ajouter des questions.</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label">Titre du Quiz</label>
+                            <input type="text" name="titre" class="form-control" placeholder="Ex: Quiz sur la structure atomique" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Cours associé</label>
+                            <select name="cours" class="form-control" required>
+                                <option value="">Choisir un cours...</option>
+                                {% for cours in mes_cours %}
+                                    <option value="{{ cours.id }}">{{ cours.titre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Durée estimée (minutes)</label>
+                                <input type="number" name="duree" class="form-control" placeholder="Ex: 15" required>
+                            </div>
+                            <div id="points-container" class="col-md-6 mb-4" style="display:none;">
+                                <label class="form-label">Points total (pour le fichier)</label>
+                                <input type="number" step="0.5" name="note_max" class="form-control" value="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Fichier du Quiz (Optionnel - PDF, Word...)</label>
+                            <div class="custom-file">
+                                <input type="file" name="fichier_quiz" class="custom-file-input" id="fichier_quiz" onchange="togglePoints(this)">
+                                <label class="custom-file-label" for="fichier_quiz">Charger un sujet complet</label>
+                            </div>
+                            <small class="text-muted">Si vous chargez un fichier, vous pourrez passer l'étape de création de questions individuelles.</small>
+                        </div>
+
+                        <div class="text-right">
+                            <a href="{% url 'liste_quiz_enseignant' %}" class="btn btn-light rounded-pill px-4 mr-2">Annuler</a>
+                            <button type="submit" class="btn-create" id="submit-btn">
+                                Étape suivante <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePoints(input) {
+        const container = document.getElementById('points-container');
+        const btn = document.getElementById('submit-btn');
+        const fileName = input.files[0] ? input.files[0].name : "Charger un sujet complet";
+        input.nextElementSibling.innerText = fileName;
+
+        if (input.files && input.files[0]) {
+            container.style.display = 'block';
+            btn.innerHTML = 'Créer le Quiz-Fichier <i class="fas fa-check-circle ml-2"></i>';
+        } else {
+            container.style.display = 'none';
+            btn.innerHTML = 'Étape suivante <i class="fas fa-arrow-right ml-2"></i>';
+        }
+    }
+</script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --teal: #2bbfbf;
+    --teal-dark: #1a9e9e;
+    --navy: #1a1a2e;
+    --yellow: #fec913;
+    --white: #ffffff;
+    --gray: #f8f9fa;
+    --text: #444;
+  }
+
+  /* SCROLLING */
+  .scrolling-container {
+    background-color: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .scrolling-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 25s linear infinite;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .scrolling-text span {
+    margin-right: 50px;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* HERO BANNER */
+  .about-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #0f3460 100%);
+    padding: 80px 0;
+    text-align: center;
+    color: white;
+  }
+
+  .about-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+  }
+
+  .about-hero h1 span {
+    color: var(--yellow);
+  }
+
+  .about-hero p {
+    font-size: 1.1rem;
+    color: #ccc;
+    max-width: 600px;
+    margin: 15px auto 0;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .section-title h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--navy);
+    display: inline-block;
+  }
+
+  .section-title h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--yellow);
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  .section-title p {
+    color: #666;
+    margin-top: 15px;
+    font-size: 1rem;
+  }
+
+  /* FEATURE CARDS */
+  .mission-section {
+    padding: 70px 0;
+    background: #fff;
+  }
+
+  .feature-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    border-top: 4px solid transparent;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    border-top-color: var(--teal);
+  }
+
+  .feature-card .icon-box {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .feature-card h4 {
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .feature-card p {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* STATS */
+  .stats-section {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    padding: 60px 0;
+    color: white;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .stat-item .number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--yellow);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-item .label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 8px;
+    display: block;
+  }
+
+  .stat-item i {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    opacity: 0.9;
+  }
+
+  /* ÉQUIPE */
+  .team-section {
+    padding: 70px 0;
+    background: var(--gray);
+  }
+
+  .team-card {
+    background: white;
+    border-radius: 15px;
+    padding: 35px 20px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+  }
+
+  .team-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .team-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 1.8rem;
+    color: white;
+    font-weight: 700;
+  }
+
+  .team-card h5 {
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 5px;
+  }
+
+  .team-card p {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  .role-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  /* POURQUOI */
+  .why-section {
+    padding: 70px 0;
+    background: white;
+  }
+
+  .why-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .why-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .why-list li:last-child {
+    border-bottom: none;
+  }
+
+  .why-list li i {
+    color: var(--teal);
+    font-size: 1.1rem;
+    min-width: 20px;
+  }
+
+  .why-img {
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    object-fit: cover;
+    height: 380px;
+  }
+
+  /* CTA */
+  .cta-section {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  .cta-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .cta-section p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 15px 0 25px;
+    font-size: 1rem;
+  }
+
+  .btn-cta {
+    background: var(--yellow);
+    color: var(--navy);
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+  }
+
+  .btn-cta:hover {
+    background: white;
+    color: var(--navy);
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
+{% block body_class %}sub_page{% endblock %}
+
+{% block hero_content %}
+<div class="scrolling-container">
+  <div class="scrolling-text">
+    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
+    <span>Nous formons en Licence & Master</span>
+    <span>Participez aux visioconférences</span>
+    <span>Téléchargez vos ressources</span>
+    <span>Obtenez des Badges et des Certifications</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="about-hero">
+  <div class="container">
+    <h1>À propos d'<span>OpenEduVerse</span></h1>
+    <p>Une plateforme moderne pensée pour rendre l'éducation accessible, interactive et efficace pour tous.</p>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Notre Mission</h2>
+      <p>Démocratiser l'accès à une éducation de qualité grâce aux technologies numériques.</p>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-graduation-cap"></i></div>
+          <h4>Formation de Qualité</h4>
+          <p>Des cours conçus par des experts pour un apprentissage structuré adapté à chaque niveau.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-laptop-code"></i></div>
+          <h4>Flexibilité Totale</h4>
+          <p>Apprenez à votre rythme, depuis n'importe quel appareil, à tout moment.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-certificate"></i></div>
+          <h4>Certifications</h4>
+          <p>Obtenez des badges et certifications reconnus après chaque formation complétée.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-video"></i></div>
+          <h4>Visioconférences</h4>
+          <p>Participez à des classes virtuelles en direct avec vos enseignants.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+          <h4>Suivi de Progression</h4>
+          <p>Visualisez vos progrès en temps réel via des tableaux de bord personnalisés.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+          <h4>Sécurité des Données</h4>
+          <p>Vos données sont protégées selon les meilleures pratiques du secteur.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3 col-6">
+        <div class="stat-item">
+          <i class="fas fa-users"></i>
+          <span class="number">1000+</span>
+          <span class="label">Étudiants Inscrits</span>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-item">
+          <i class="fas fa-book"></i>
+          <span class="number">50+</span>
+          <span class="label">Cours Disponibles</span>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-item">
+          <i class="fas fa-chalkboard-teacher"></i>
+          <span class="number">20+</span>
+          <span class="label">Formateurs Experts</span>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-item">
+          <i class="fas fa-trophy"></i>
+          <span class="number">500+</span>
+          <span class="label">Certifications Délivrées</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ÉQUIPE -->
+<section class="team-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Notre Équipe</h2>
+      <p>Les développeurs derrière OpenEduVerse</p>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-4 mb-4">
+        <div class="team-card">
+          <div class="team-avatar">BA</div>
+          <h5>BANÁDJUBA Mawelanda Achille</h5>
+          <p>Développeur Full Stack</p>
+          <span class="role-badge">Co-fondateur</span>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="team-card">
+          <div class="team-avatar">AG</div>
+          <h5>AWESSO Georges</h5>
+          <p>Développeur Full Stack</p>
+          <span class="role-badge">Co-fondateur</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI -->
+<section class="why-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6 mb-4">
+        <img src="{% static 'images/a-1.jpg' %}" alt="Pourquoi OpenEduVerse" class="why-img">
+      </div>
+      <div class="col-md-6">
+        <h2 style="font-weight:700; color:var(--navy); margin-bottom:25px;">
+          Pourquoi choisir <span style="color:var(--teal);">OpenEduVerse</span> ?
+        </h2>
+        <ul class="why-list">
+          <li><i class="fas fa-check-circle"></i> Visioconférences interactives en direct</li>
+          <li><i class="fas fa-check-circle"></i> Quiz et évaluations automatiques</li>
+          <li><i class="fas fa-check-circle"></i> Suivi de progression personnalisé</li>
+          <li><i class="fas fa-check-circle"></i> Ressources PDF et vidéos téléchargeables</li>
+          <li><i class="fas fa-check-circle"></i> Badges et certifications reconnues</li>
+          <li><i class="fas fa-check-circle"></i> Support pédagogique réactif 24/7</li>
+          <li><i class="fas fa-check-circle"></i> Interface responsive mobile, tablette, PC</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container text-center">
+    <h2>Prêt à commencer votre apprentissage ?</h2>
+    <p>Rejoignez des milliers d'étudiants qui font confiance à OpenEduVerse.</p>
+    <a href="{% url 'register' %}" class="btn-cta">S'inscrire gratuitement</a>
+  </div>
+</section>
+{% endblock %}

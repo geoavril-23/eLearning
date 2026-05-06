@@ -1,0 +1,148 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Modifier le Cours - Enseignant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        font-weight: 600;
+        letter-spacing: 1px;
+        padding: 12px 25px;
+        border-radius: 30px;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4);
+        color: white;
+    }
+
+    body.dark-mode .form-container {
+        background-color: #242632;
+        box-shadow: none;
+    }
+    
+    body.dark-mode .form-control {
+        background-color: #1a1c23;
+        border-color: #323545;
+        color: #d1d1d1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-edit text-success mr-2"></i>Modifier le Cours
+    </h1>
+    <a href="{% url 'mes_cours_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+        <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Retour à la liste
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="form-container mb-5">
+            <h5 class="font-weight-bold text-success mb-4 border-bottom pb-2">Mise à jour de : {{ cours.titre }}</h5>
+            
+            <form action="{% url 'modifier_cours_enseignant' cours.id %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group mb-4">
+                            <label for="titre" class="font-weight-bold">Titre du Cours <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="titre" name="titre" value="{{ cours.titre }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group mb-4">
+                            <label for="niveau" class="font-weight-bold">Niveau <span class="text-danger">*</span></label>
+                            <select class="form-control" id="niveau" name="niveau" required>
+                                <option value="Débutant" {% if cours.niveau == 'Débutant' %}selected{% endif %}>Débutant</option>
+                                <option value="Intermédiaire" {% if cours.niveau == 'Intermédiaire' %}selected{% endif %}>Intermédiaire</option>
+                                <option value="Avancé" {% if cours.niveau == 'Avancé' %}selected{% endif %}>Avancé</option>
+                                <option value="Licence" {% if cours.niveau == 'Licence' %}selected{% endif %}>Licence</option>
+                                <option value="Master" {% if cours.niveau == 'Master' %}selected{% endif %}>Master</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group mb-4">
+                            <label for="categorie" class="font-weight-bold">Catégorie <span class="text-danger">*</span></label>
+                            <select class="form-control" id="categorie" name="categorie" required>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if cours.categorie.id == cat.id %}selected{% endif %}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="objectif" class="font-weight-bold">Objectif principal <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="objectif" name="objectif" rows="2" required>{{ cours.objectif }}</textarea>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="description" class="font-weight-bold">Description complète <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="5" required>{{ cours.description }}</textarea>
+                </div>
+
+                <div class="form-group mb-5">
+                    <label for="ressource" class="font-weight-bold">Ressource actuelle : 
+                        {% if cours.ressource %}
+                            <span class="text-primary">{{ cours.get_extension|upper }}</span>
+                        {% else %}
+                            <span class="text-muted small">Aucune</span>
+                        {% endif %}
+                    </label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="ressource" name="ressource">
+                        <label class="custom-file-label" for="ressource">Changer de fichier (optionnel)...</label>
+                    </div>
+                </div>
+
+                <hr class="mb-4">
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-update px-5">
+                        <i class="fas fa-save mr-2"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $('.custom-file-input').on('change', function() { 
+        let fileName = $(this).val().split('\\').pop(); 
+        $(this).next('.custom-file-label').addClass("selected").html(fileName); 
+    });
+</script>
+{% endblock %}

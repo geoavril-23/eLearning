@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dashboard</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="{% static 'admin/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{% static 'admin/css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    <style>
+        /* Dark Mode variables and overrides */
+        body.dark-mode {
+            background-color: #1a1c23 !important;
+            color: #d1d1d1;
+        }
+
+        body.dark-mode #content-wrapper {
+            background-color: #1a1c23 !important;
+        }
+
+        body.dark-mode .card {
+            background-color: #242632;
+            border-color: #323545;
+            color: #d1d1d1;
+        }
+
+        body.dark-mode .card-header {
+            background-color: #2b2e3c;
+            border-bottom-color: #323545;
+        }
+
+        body.dark-mode .text-gray-800 {
+            color: #f8f9fc !important;
+        }
+
+        body.dark-mode .bg-white {
+            background-color: #242632 !important;
+        }
+
+        body.dark-mode .topbar {
+            background-color: #242632 !important;
+            border-bottom: 1px solid #323545;
+        }
+
+        body.dark-mode .sidebar {
+            background-color: #1a1c23 !important;
+        }
+
+        body.dark-mode .table {
+            color: #d1d1d1;
+        }
+
+        body.dark-mode .footer {
+            background-color: #1a1c23 !important;
+            border-top: 1px solid #323545;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+<body id="page-top">
+    <!-- Inline script to apply theme early and prevent flash -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        {% include 'admin/partials/sidebar.html' %}
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                {% include 'admin/partials/topbar.html' %}
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    {% block content %}{% endblock %}
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Your Website 2021</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Notification Toast Container - Positionné en HAUT (Style WhatsApp/Système) -->
+    <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 10px; right: 10px; left: 10px; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; z-index: 10000;">
+        <div id="messageToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="15000" style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none;">
+            <div class="toast-header bg-primary text-white" style="border-radius: 12px 12px 0 0;">
+                <i class="fas fa-envelope mr-2"></i>
+                <strong class="mr-auto" id="toastSender">Nouveau message</strong>
+                <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body" id="toastContent">
+                Vous avez un nouveau message.
+            </div>
+            <div class="toast-footer p-2 border-top bg-light">
+                <div class="d-flex justify-content-between align-items-center" id="toastActions">
+                    <a href="{% url 'messagerie_index' %}" class="btn btn-sm btn-link text-primary p-0 ml-2">Ouvrir</a>
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" id="btnQuickReply">Répondre</button>
+                </div>
+                <!-- Zone de réponse rapide cachée par défaut -->
+                <div id="quickReplyArea" style="display: none;" class="mt-2">
+                    <div class="input-group">
+                        <input type="text" id="quickReplyInput" class="form-control form-control-sm" placeholder="Votre réponse...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary btn-sm" type="button" id="btnSendQuickReply">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'admin/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'admin/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'admin/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'admin/js/sb-admin-2.min.js' %}"></script>
+
+    <!-- Notification system -->
+    <script>
+        let currentConvId = null;
+
+        function playNotificationSound() {
+            try {
+                // Son plus doux type iPhone/Mac
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        $(document).ready(function() {
+            let lastMessageCount = 0;
+
+            // Gestion du bouton Répondre
+            $('#btnQuickReply').click(function() {
+                // SÉCURITÉ : On empêche la notification de se fermer toute seule
+                $('#messageToast').toast('dispose'); // On arrête le timer de 15s
+                $('#messageToast').addClass('show').removeClass('hide'); // On la force à rester affichée
+                
+                $('#toastActions').hide();
+                $('#quickReplyArea').show();
+                $('#quickReplyInput').focus();
+            });
+
+            // Envoi de la réponse rapide
+            $('#btnSendQuickReply').click(function() {
+                const contenu = $('#quickReplyInput').val().trim();
+                if (!contenu || !currentConvId) return;
+
+                const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
+                
+                $.ajax({
+                    url: `/dashboard/messagerie/${currentConvId}/`,
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+                    data: { 'contenu': contenu },
+                    success: function(response) {
+                        $('#messageToast').toast('hide');
+                        $('#quickReplyInput').val('');
+                        $('#quickReplyArea').hide();
+                        $('#toastActions').show();
+                    }
+                });
+            });
+
+            // Permettre d'envoyer avec la touche "Entrée"
+            $('#quickReplyInput').keypress(function(e) {
+                if(e.which == 13) {
+                    $('#btnSendQuickReply').click();
+                }
+            });
+
+            function checkNewMessages() {
+                $.ajax({
+                    url: "{% url 'api_unread_messages' %}",
+                    method: 'GET',
+                    success: function(data) {
+                        if (data.count > 0) {
+                            $('#notification-badge').text(data.count > 9 ? '9+' : data.count).show();
+                            
+                            let html = '<h6 class="dropdown-header">Centre de Notifications</h6>';
+                            data.notifications.forEach(function(n) {
+                                html += `
+                                    <a class="dropdown-item d-flex align-items-center" href="${n.url}">
+                                        <div class="mr-3">
+                                            <div class="icon-circle bg-primary"><i class="fas fa-envelope text-white"></i></div>
+                                        </div>
+                                        <div>
+                                            <div class="small text-gray-500">${n.date} - ${n.sender}</div>
+                                            <span class="font-weight-bold">${n.content}</span>
+                                        </div>
+                                    </a>
+                                `;
+                            });
+                            html += '<a class="dropdown-item text-center small text-gray-500" href="{% url "messagerie_index" %}">Afficher tous les messages</a>';
+                            $('#notifications-list').html(html);
+                        } else {
+                            $('#notification-badge').hide();
+                        }
+
+                        if (data.has_new && data.count > lastMessageCount) {
+                            if (lastMessageCount > 0 || data.count === 1) {
+                                playNotificationSound();
+                                $('#toastSender').text("De : " + data.latest_sender);
+                                $('#toastContent').text(data.latest_content);
+                                currentConvId = data.latest_conversation_id; // On stocke l'ID pour la réponse
+                                $('#messageToast').toast('show');
+                            }
+                        }
+                        lastMessageCount = data.count;
+                    }
+                });
+            }
+
+            // Vérifier toutes les 10 secondes
+            setInterval(checkNewMessages, 10000);
+            
+            // Première vérification après 2 secondes pour initialiser le compteur
+            setTimeout(checkNewMessages, 2000);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,128 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Messagerie{% endblock %}
+
+{% block extra_css %}
+<style>
+    .conversation-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .conversation-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: inherit;
+    }
+    .conversation-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .unread-badge {
+        width: 12px;
+        height: 12px;
+        background-color: #e74a3b;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-envelope text-primary mr-2"></i>Messagerie
+    </h1>
+    <a href="{% url 'nouvelle_conversation' %}" class="btn btn-primary rounded-pill shadow-sm">
+        <i class="fas fa-plus fa-sm text-white-50 mr-2"></i>Nouveau Message
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-lg shadow-sm mb-4">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        {% if conversations %}
+            <div class="card shadow mb-4 border-0 rounded-lg">
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-lg">
+                        {% for conv in conversations %}
+                            {% with last_msg=conv.messages.last %}
+                            <a href="{% url 'detail_conversation' conv.id %}" class="list-group-item list-group-item-action p-3 conversation-card border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <div class="conversation-avatar mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="mb-0 font-weight-bold text-gray-900">
+                                                {% for p in conv.participants.all %}
+                                                    {% if p != request.user %}
+                                                        {{ p.nom }} {{ p.prenom }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </h6>
+                                            <small class="text-muted">
+                                                {% if last_msg %}
+                                                    {{ last_msg.date_envoi|date:"d M. H:i" }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <p class="mb-0 text-muted small text-truncate" style="max-width: 80%;">
+                                            {% if last_msg %}
+                                                {% if last_msg.expediteur == request.user %}
+                                                    <strong>Vous :</strong> 
+                                                {% endif %}
+                                                {{ last_msg.contenu }}
+                                            {% else %}
+                                                <i>Aucun message</i>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    {% if last_msg and last_msg.expediteur != request.user and not last_msg.lu %}
+                                        <div class="ml-2">
+                                            <span class="unread-badge"></span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endwith %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm rounded-lg text-center p-5">
+                <div class="mb-3">
+                    <i class="fas fa-envelope-open text-gray-300 fa-4x"></i>
+                </div>
+                <h4 class="text-gray-800 font-weight-bold">Aucune conversation</h4>
+                <p class="text-muted">Vous n'avez pas encore envoyé ou reçu de messages.</p>
+                <a href="{% url 'nouvelle_conversation' %}" class="btn btn-primary mt-2">Démarrer une discussion</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

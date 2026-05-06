@@ -1,0 +1,149 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - eLearning{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Mon Profil</h1>
+    </div>
+
+    <div class="row">
+
+        <!-- Infos Personnelles -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations Personnelles</h6>
+                </div>
+                <div class="card-body text-center">
+                    <img class="img-profile rounded-circle mb-3" src="{% static 'admin/img/undraw_profile.svg' %}" style="width: 150px;">
+                    <h5 class="font-weight-bold text-gray-800">{{ request.user.nom }} {{ request.user.prenom }}</h5>
+                    <p class="text-muted text-uppercase small">{{ request.user.role }}</p>
+                    <hr>
+                    <div class="text-left">
+                        <p><strong>Email :</strong> {{ request.user.email }}</p>
+                        <p><strong>Âge :</strong> {{ request.user.age|default:"Non renseigné" }}</p>
+                        <p><strong>Adresse :</strong> {{ request.user.adresse|default:"Non renseignée" }}</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm btn-block mt-3">Modifier mes infos</button>
+                </div>
+            </div>
+
+            <!-- Paramètres d'Affichage -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Paramètres d'Affichage</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Choisissez le thème de votre interface.</p>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <button onclick="setTheme('light')" class="btn btn-outline-secondary btn-block">
+                                <i class="fas fa-sun"></i> Clair
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button onclick="setTheme('dark')" class="btn btn-dark btn-block">
+                                <i class="fas fa-moon"></i> Sombre
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques d'apprentissage -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Mes Statistiques d'Apprentissage</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-4 text-center">
+                            <div class="h3 mb-0 font-weight-bold text-primary">{{ stats.temps_passe|default:"12h" }}</div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted">Temps Passé</div>
+                        </div>
+                        <div class="col-md-4 mb-4 text-center">
+                            <div class="h3 mb-0 font-weight-bold text-success">{{ stats.score_moyen|default:"85%" }}</div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted">Score Moyen</div>
+                        </div>
+                        <div class="col-md-4 mb-4 text-center">
+                            <div class="h3 mb-0 font-weight-bold text-info">{{ stats.cours_termines|default:"4" }}</div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted">Cours Terminés</div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4 font-weight-bold">Progression des cours en cours</h6>
+                    {% for p in progression %}
+                    <h4 class="small font-weight-bold">{{ p.cours.titre }} <span class="float-right">{{ p.pourcentage }}%</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar {{ p.css_class }}" role="progressbar" style="width: {{ p.pourcentage }}%" aria-valuenow="{{ p.pourcentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted italic small text-center my-4">Simulation : Pas de données backend encore disponibles.</p>
+                    <h4 class="small font-weight-bold">Web Design <span class="float-right">40%</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"></div>
+                    </div>
+                    <h4 class="small font-weight-bold">Python Backend <span class="float-right">75%</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 75%"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Historique d'activités -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Historique d'Activités</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline small">
+                        {% for item in historique %}
+                        <div class="mb-2">
+                            <span class="text-muted mr-2">{{ item.date|date:"d/m/Y H:i" }}</span>
+                            <span class="font-weight-bold">{{ item.action }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="mb-2">
+                            <span class="text-muted mr-2">12/04/2026 14:20</span>
+                            <span class="font-weight-bold text-dark">Connexion à la plateforme</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted mr-2">11/04/2026 10:15</span>
+                            <span class="font-weight-bold text-dark">A terminé la leçon "Introduction au Django"</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted mr-2">10/04/2026 16:45</span>
+                            <span class="font-weight-bold text-dark">A passé le quiz "Bases du HTML" avec 90%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+</script>
+{% endblock %}

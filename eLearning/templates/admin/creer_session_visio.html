@@ -1,0 +1,163 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Programmer une Visioconférence{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .icon-box {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        margin: 0 auto 1rem;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 2px solid #edf2f7;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s;
+        font-size: 1.1rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .info-card {
+        background: #f0f4ff;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        border-left: 5px solid #667eea;
+    }
+
+    .info-card i {
+        color: #667eea;
+        font-size: 1.5rem;
+    }
+
+    .info-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #4c51bf;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="form-container">
+        <div class="form-header">
+            <div class="icon-box">
+                <i class="fas fa-video"></i>
+            </div>
+            <h2 class="font-weight-bold text-gray-800">Programmer un Live</h2>
+            <p class="text-muted">Remplissez les informations pour générer une session de visioconférence.</p>
+        </div>
+
+        <div class="info-card">
+            <i class="fab fa-google"></i>
+            <p>Utilisez un lien <strong>Google Meet</strong> pour une meilleure intégration. Les étudiants recevront une notification sur leur tableau de bord.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group mb-4">
+                <label for="titre">Titre de la session</label>
+                <input type="text" name="titre" id="titre" class="form-control" placeholder="Ex: Session de questions-réponses sur le Module 1" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label for="date_debut">Date et Heure de début</label>
+                        <input type="datetime-local" name="date_debut" id="date_debut" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label for="duree">Durée prévue (minutes)</label>
+                        <input type="number" name="duree" id="duree" class="form-control" value="60" min="1" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="cours">Associer à un cours (Optionnel)</label>
+                <select name="cours" id="cours" class="form-control">
+                    <option value="">-- Session Générale --</option>
+                    {% for cours in cours_enseignant %}
+                    <option value="{{ cours.id }}">{{ cours.titre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="lien_reunion">Lien de la réunion (Google Meet)</label>
+                <input type="url" name="lien_reunion" id="lien_reunion" class="form-control" placeholder="https://meet.google.com/xxx-xxxx-xxx" required>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-calendar-check mr-2"></i> Valider la programmation
+            </button>
+            
+            <a href="{% url 'liste_sessions_visio' %}" class="btn btn-link w-100 text-muted mt-2">Annuler et revenir</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

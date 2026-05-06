@@ -1,0 +1,351 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.layout_padding {
+  padding: 75px 0;
+}
+
+.layout_padding2 {
+  padding: 45px 0;
+}
+
+.layout_padding2-top {
+  padding-top: 45px;
+}
+
+.layout_padding2-bottom {
+  padding-bottom: 45px;
+}
+
+.layout_padding-top {
+  padding-top: 75px;
+}
+
+.layout_padding-bottom {
+  padding-bottom: 75px;
+}
+
+/* header section */
+.hero_area {
+  height: 100vh;
+  background-color: #b5caee;
+  background-image: url(../images/hero-bg.jpg);
+  background-size: cover;
+}
+
+.custom_nav-container .navbar-nav .nav-item .nav-link {
+  padding: 10px 30px;
+  color: #fefeff;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.custom_nav-container .navbar-nav .nav-item.active .nav-link {
+  background-color: #133e3f;
+}
+
+.navbar-brand img {
+  width: 50px;
+}
+
+.navbar-brand span {
+  font-weight: 700;
+  color: #fefeff;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.custom_nav-container {
+  padding: 0;
+}
+
+.custom_nav-container .navbar-toggler {
+  outline: none;
+}
+
+.custom_nav-container .navbar-toggler .navbar-toggler-icon {
+  background-image: url(../images/menu.png);
+  background-size: 55px;
+}
+
+/* slider section */
+.slider_section {
+  padding: 15% 0;
+}
+
+.slider_section .detail-box h1 {
+  font-weight: 700;
+  color: #fefeff;
+  font-size: 60px;
+  text-transform: uppercase;
+}
+
+.slider_section .detail-box p {
+  color: #fefeff;
+  margin-top: 20px;
+}
+
+.slider_section .detail-box .btn-box {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-top: 30px;
+}
+
+.slider_section .detail-box .btn-box a {
+  padding: 10px 45px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.slider_section .detail-box .btn-box .btn-1 {
+  background-color: #fec913;
+  color: #ffffff;
+  margin-right: 15px;
+}
+
+.slider_section .detail-box .btn-box .btn-2 {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* about section */
+.about_section .row {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.about_section .img_container {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.about_section .img_container .img-box {
+  width: 75%;
+}
+
+.about_section .img_container .img-box img {
+  width: 100%;
+}
+
+.about_section .img_container .img-box.b1 {
+  position: relative;
+  margin-right: -100px;
+  z-index: 2;
+}
+
+.about_section .img_container .img-box.b2 {
+  margin-top: 150px;
+}
+
+.about_section .detail-box h3 {
+  font-weight: 700;
+}
+
+.about_section .detail-box p {
+  margin-top: 25px;
+}
+
+.about_section .detail-box a {
+  display: inline-block;
+  padding: 10px 45px;
+  background-color: #133e3f;
+  color: #ffffff;
+  border-radius: 5px;
+  margin-top: 35px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* contact section */
+.contact_section {
+  position: relative;
+}
+
+.contact_section .container-fluid {
+  padding: 0;
+}
+
+.contact_section .row {
+  margin: 0;
+}
+
+.contact_section .form_container {
+  padding: 45px 0 45px 15%;
+}
+
+.contact_section .form_container form {
+  margin-top: 35px;
+}
+
+.contact_section .form_container input {
+  width: 100%;
+  border: none;
+  height: 50px;
+  margin-bottom: 25px;
+  padding-left: 15px;
+  outline: none;
+  color: #101010;
+  -webkit-box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.contact_section .form_container input::-webkit-input-placeholder {
+  color: #1b1b1b;
+}
+
+.contact_section .form_container input:-ms-input-placeholder {
+  color: #1b1b1b;
+}
+
+.contact_section .form_container input::-ms-input-placeholder {
+  color: #1b1b1b;
+}
+
+.contact_section .form_container input::placeholder {
+  color: #1b1b1b;
+}
+
+.contact_section .form_container input.message-cube {
+  height: 120px;
+}
+
+.contact_section .form_container button {
+  padding: 10px 60px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  background-color: #133e3f;
+  color: #ffffff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.contact_section .map_container {
+  height: 100%;
+}
+
+.contact_section .map_container .map-box {
+  height: 100%;
+}
+
+/* login section */
+.login_section .detail-box h3 {
+  font-weight: 700;
+}
+
+.login_section .detail-box p {
+  margin-top: 15px;
+}
+
+.login_section .detail-box a {
+  display: inline-block;
+  padding: 10px 45px;
+  background-color: #fec913;
+  color: #ffffff;
+  border-radius: 5px;
+  margin-top: 35px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* info section */
+.info_section {
+  background-color: #133e3f;
+  color: #ffffff;
+}
+
+.info_section h5 {
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.info_section .info_menu ul {
+  padding: 0;
+}
+
+.info_section .info_menu ul li {
+  list-style-type: none;
+}
+
+.info_section .info_menu ul li a {
+  color: #ffffff;
+}
+
+.info_section .info_contact a {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.info_section .info_contact a img {
+  width: 20px;
+  margin-right: 15px;
+}
+
+.info_section .info_news form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.info_section .info_news form input {
+  border: none;
+  outline: none;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.info_section .info_news form button {
+  padding: 10px 45px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  background-color: #fec913;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* footer section */
+.footer_section {
+  background-color: #ffffff;
+  padding: 20px 0;
+}
+
+.footer_section p {
+  color: #133e3f;
+  margin: 0;
+  text-align: center;
+}
+
+.footer_section a {
+  color: #133e3f;
+}
+
+/* additional styles for e-learning dashboard (if needed in style.css, but ideally in admin_premium.css) */

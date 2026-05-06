@@ -1,0 +1,170 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Créer un Cours - Enseignant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .btn-publish {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        font-weight: 600;
+        letter-spacing: 1px;
+        padding: 12px 25px;
+        border-radius: 30px;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-publish:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+        color: white;
+    }
+
+    body.dark-mode .form-container {
+        background-color: #242632;
+        box-shadow: none;
+    }
+    
+    body.dark-mode .form-control {
+        background-color: #1a1c23;
+        border-color: #323545;
+        color: #d1d1d1;
+    }
+
+    body.dark-mode .form-control:focus {
+        background-color: #1a1c23;
+        border-color: #4e73df;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-plus-circle text-primary mr-2"></i>Nouveau Cours
+    </h1>
+    <a href="{% url 'dashboard_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+        <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Retour au Dashboard
+    </a>
+</div>
+
+{% if messages %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="form-container mb-5">
+            <h5 class="font-weight-bold text-primary mb-4 border-bottom pb-2">Informations du Cours</h5>
+            
+            <form action="{% url 'creer_cours_enseignant' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group mb-4">
+                            <label for="titre" class="font-weight-bold">Titre du Cours <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="titre" name="titre" placeholder="Ex: Introduction à l'Intelligence Artificielle" required>
+                            <small class="form-text text-muted">Soyez précis, c'est ce que verront les étudiants.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group mb-4">
+                            <label for="niveau" class="font-weight-bold">Niveau <span class="text-danger">*</span></label>
+                            <select class="form-control" id="niveau" name="niveau" required>
+                                <option value="" disabled selected>Sélectionner...</option>
+                                <option value="Débutant">Débutant</option>
+                                <option value="Intermédiaire">Intermédiaire</option>
+                                <option value="Avancé">Avancé</option>
+                                <option value="Licence">Licence</option>
+                                <option value="Master">Master</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group mb-4">
+                            <label for="categorie" class="font-weight-bold">Catégorie / Thématique <span class="text-danger">*</span></label>
+                            <select class="form-control" id="categorie" name="categorie" required>
+                                <option value="" disabled selected>Sélectionner la catégorie...</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Aidez les étudiants à trouver votre cours en choisissant la bonne catégorie.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="objectif" class="font-weight-bold">Objectif principal <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="objectif" name="objectif" rows="2" placeholder="Que sauront faire les étudiants à la fin de ce cours ?" required></textarea>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="description" class="font-weight-bold">Description complète <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="Décrivez le contenu pédagogique, les prérequis et le syllabus global..." required></textarea>
+                </div>
+
+                <div class="form-group mb-5">
+                    <label for="ressource" class="font-weight-bold">Fichiers ou Ressources (Syllabus, PDF, etc.)</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="ressource" name="ressource">
+                        <label class="custom-file-label" for="ressource">Choisir un fichier...</label>
+                    </div>
+                    <small class="form-text text-muted mt-1">Sera disponible en téléchargement pour les élèves inscrits.</small>
+                </div>
+
+                <hr class="mb-4">
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-publish px-5">
+                        <i class="fas fa-paper-plane mr-2"></i> Publier le Cours
+                    </button>
+                    <p class="mt-3 text-muted small">En cliquant sur Publier, le cours sera immédiatement disponible pour les inscriptions.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Pour afficher le nom du fichier sélectionné dynamiquement
+    $('.custom-file-input').on('change', function() { 
+        let fileName = $(this).val().split('\\').pop(); 
+        $(this).next('.custom-file-label').addClass("selected").html(fileName); 
+    });
+</script>
+{% endblock %}

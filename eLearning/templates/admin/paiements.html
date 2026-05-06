@@ -1,0 +1,144 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Paiements & Revenus - Administrateur{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Paiements & Revenus</h1>
+        <button class="btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Exporter en Excel</button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <!-- Revenu Total -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Revenu Total (Cumulé)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|default:"1,245,000" }} FCFA</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-money-bill-wave fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions du mois -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Transactions (Mois-ci)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_paiements_mois|default:"42" }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-shopping-cart fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taux de conversion -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Taux de Conversion (Premium)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.taux_conversion|default:"12.5" }}%</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-percentage fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Dernières Transactions</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered text-center" id="dataTablePaiements" width="100%" cellspacing="0">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th>Référence</th>
+                            <th>Étudiant</th>
+                            <th>Montant</th>
+                            <th>Date</th>
+                            <th>Moyen</th>
+                            <th>Statut</th>
+                            <th>Reçu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in tous_les_paiements %}
+                        <tr>
+                            <td>#PAY-{{ p.id }}</td>
+                            <td>{{ p.etudiant.nom }}</td>
+                            <td>{{ p.montant }} FCFA</td>
+                            <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
+                            <td>{{ p.moyen_paiement }}</td>
+                            <td><span class="badge badge-success">Validé</span></td>
+                            <td><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-invoice"></i></a></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td>#PAY-1289</td>
+                            <td>Traoré Moussa</td>
+                            <td>15,000 FCFA</td>
+                            <td>12/04/2026</td>
+                            <td>Orange Money</td>
+                            <td><span class="badge badge-success">Validé</span></td>
+                            <td><i class="fas fa-file-pdf text-danger"></i></td>
+                        </tr>
+                        <tr>
+                            <td>#PAY-1288</td>
+                            <td>Diallo Aissata</td>
+                            <td>25,000 FCFA</td>
+                            <td>11/04/2026</td>
+                            <td>Carte Bancaire</td>
+                            <td><span class="badge badge-success">Validé</span></td>
+                            <td><i class="fas fa-file-pdf text-danger"></i></td>
+                        </tr>
+                        <tr>
+                            <td>#PAY-1287</td>
+                            <td>Koffi Kouamé</td>
+                            <td>10,000 FCFA</td>
+                            <td>10/04/2026</td>
+                            <td>Moov Money</td>
+                            <td><span class="badge badge-warning">En attente</span></td>
+                            <td>-</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#dataTablePaiements').DataTable({
+            "order": [[ 3, "desc" ]],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+    });
+</script>
+{% endblock %}

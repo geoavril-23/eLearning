@@ -1,0 +1,162 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Suivi d'Activité & Engagement - Administrateur{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Suivi d'Activité & Engagement</h1>
+    </div>
+
+    <!-- Row for Charts -->
+    <div class="row">
+
+        <!-- Engagement Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Temps d'Apprentissage par Semaine (Moyenne)</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role distribution (Pie) -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Réussite aux Évaluations</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="reussitePieChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2"><i class="fas fa-circle text-success"></i> Succès</span>
+                        <span class="mr-2"><i class="fas fa-circle text-warning"></i> Moyen</span>
+                        <span class="mr-2"><i class="fas fa-circle text-danger"></i> Échec</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Activity Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Dernières Activités Utilisateurs</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="dataTableActivite">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Action</th>
+                            <th>Heure/Date</th>
+                            <th>IP / Appareil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Simulation Data -->
+                        <tr>
+                            <td><strong>Jean Dupont</strong></td>
+                            <td>A terminé le quiz "HTML5"</td>
+                            <td>Il y a 5 min</td>
+                            <td>192.168.1.1 (Mobile)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sophie Martin</strong></td>
+                            <td>A publié un nouveau cours</td>
+                            <td>Il y a 15 min</td>
+                            <td>10.0.0.12 (Desktop)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Moussa Traoré</strong></td>
+                            <td>S'est connecté à la plateforme</td>
+                            <td>Il y a 1h</td>
+                            <td>41.202.x.x (Desktop)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aissata Diallo</strong></td>
+                            <td>A visionné la vidéo "Python Loop"</td>
+                            <td>Il y a 2h</td>
+                            <td>197.x.x.x (Tablet)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Page level plugins -->
+<script src="{% static 'admin/vendor/chart.js/Chart.min.js' %}"></script>
+<script>
+    // Configuration Chart.js Engagement (Line)
+    var ctx = document.getElementById("engagementChart");
+    var myLineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+        datasets: [{
+          label: "Heures",
+          lineTension: 0.3,
+          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          borderColor: "rgba(78, 115, 223, 1)",
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointBorderColor: "rgba(78, 115, 223, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          data: [12, 19, 15, 25, 22, 10, 8],
+        }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+        scales: {
+          xAxes: [{ gridLines: { display: false, drawBorder: false } }],
+          yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 } }],
+        },
+        legend: { display: false }
+      }
+    });
+
+    // Configuration Chart.js Réussite (Pie)
+    var ctx2 = document.getElementById("reussitePieChart");
+    var myPieChart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ["Succès", "Moyen", "Échec"],
+        datasets: [{
+          data: [65, 25, 10],
+          backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
+          hoverBackgroundColor: ['#17a673', '#dda20a', '#be2617'],
+          hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+        legend: { display: false },
+        cutoutPercentage: 80,
+      },
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Nouveau Message{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-paper-plane text-primary mr-2"></i>Nouveau Message
+    </h1>
+    <a href="{% url 'messagerie_index' %}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+        <i class="fas fa-arrow-left fa-sm mr-2"></i>Retour
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-lg shadow-sm mb-4">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow border-0 rounded-lg">
+            <div class="card-body p-5">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-gray-800">À :</label>
+                        <input type="email" name="email_destinataire" class="form-control" placeholder="Entrez l'adresse email de l'utilisateur (ex: jean.dupont@email.com)" required>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-gray-800">Message :</label>
+                        <textarea name="contenu" rows="6" class="form-control" placeholder="Écrivez votre message ici..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block rounded-pill py-2 font-weight-bold">
+                        <i class="fas fa-paper-plane mr-2"></i>Envoyer le message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

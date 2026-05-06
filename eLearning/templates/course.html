@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --teal: #2bbfbf;
+    --teal-dark: #1a9e9e;
+    --navy: #1a1a2e;
+    --yellow: #fec913;
+    --gray: #f8f9fa;
+  }
+
+  .scrolling-container {
+    background-color: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .scrolling-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 25s linear infinite;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .scrolling-text span {
+    margin-right: 50px;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* HERO */
+  .course-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #0f3460 100%);
+    padding: 80px 0;
+    text-align: center;
+    color: white;
+  }
+
+  .course-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+  }
+
+  .course-hero h1 span {
+    color: var(--yellow);
+  }
+
+  .course-hero p {
+    color: #ccc;
+    font-size: 1.1rem;
+    margin-top: 15px;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .section-title h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--navy);
+    display: inline-block;
+  }
+
+  .section-title h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--yellow);
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  .section-title p {
+    color: #666;
+    margin-top: 15px;
+  }
+
+  /* COURS SECTION */
+  .course-section {
+    padding: 70px 0;
+    background: var(--gray);
+  }
+
+  /* COURSE CARDS */
+  .course-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+  }
+
+  .course-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .course-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .course-card .card-body {
+    padding: 20px;
+  }
+
+  .course-card h5 {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .course-card p {
+    color: #666;
+    /* font-size: 0.88rem; */
+    margin-bottom: 15px;
+  }
+
+  .course-card .badge-level {
+    display: inline-block;
+    background: rgba(43, 191, 191, 0.15);
+    color: var(--teal-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+
+  .btn-course {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    text-decoration: none;
+    transition: 0.3s;
+  }
+
+  .btn-course:hover {
+    background: linear-gradient(135deg, var(--teal-dark), var(--navy));
+    color: white;
+    text-decoration: none;
+  }
+
+  /* CTA BANNER */
+  .cta-banner {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    padding: 60px 0;
+    text-align: center;
+    color: white;
+  }
+
+  .cta-banner h2 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .cta-banner p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 15px 0 25px;
+  }
+
+  .btn-cta {
+    background: var(--yellow);
+    color: var(--navy);
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+  }
+
+  .btn-cta:hover {
+    background: white;
+    color: var(--navy);
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}
+
+{% block body_class %}sub_page{% endblock %}
+
+{% block hero_content %}
+<div class="scrolling-container">
+  <div class="scrolling-text">
+    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
+    <span>Nous formons en Licence & Master</span>
+    <span>Participez aux visioconférences</span>
+    <span>Téléchargez vos ressources</span>
+    <span>Obtenez des Badges et des Certifications</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="course-hero">
+  <div class="container">
+    <h1>Nos <span>Cours</span></h1>
+    <p>Développez vos compétences avec nos programmes d'apprentissage interactifs.</p>
+  </div>
+</section>
+
+<!-- COURS -->
+<section class="course-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Cours Populaires</h2>
+      <p>Choisissez parmi nos formations et commencez dès aujourd'hui.</p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/html_css_js.jpeg' %}" alt="HTML CSS JS">
+          <div class="card-body">
+            <span class="badge-level">Débutant</span>
+            <h5>Cours sur les langages HTML, CSS et JavaScript</h5>
+            <p>Maîtrisez les fondamentaux du développement web front-end.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/python.jpeg' %}" alt="Python">
+          <div class="card-body">
+            <span class="badge-level">Débutant</span>
+            <h5>Apprendre la programmation Python</h5>
+            <p>Du scripting basique à la programmation avancée avec Python.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/intelligence_artificielle.jpeg' %}" alt="IA">
+          <div class="card-body">
+            <span class="badge-level">Avancé</span>
+            <h5>Aventurez-vous dans l'Intelligence Artificielle</h5>
+            <p>Découvrez le machine learning et les réseaux de neurones.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/java.jpeg' %}" alt="Java">
+          <div class="card-body">
+            <span class="badge-level">Intermédiaire</span>
+            <h5>Maîtrisez le langage Java</h5>
+            <p>Programmation orientée objet et développement d'applications robustes.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/big_data.jpeg' %}" alt="Big Data">
+          <div class="card-body">
+            <span class="badge-level">Avancé</span>
+            <h5>Data Science et Big Data</h5>
+            <p>Analyse de données massives et visualisation avec les derniers outils.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="course-card">
+          <img src="{% static 'images/cybersecurite.jpeg' %}" alt="Cybersécurité">
+          <div class="card-body">
+            <span class="badge-level">Intermédiaire</span>
+            <h5>Découvrez le monde de la Cybersécurité</h5>
+            <p>Protégez les systèmes et apprenez les techniques de défense.</p>
+            <a href="{% url 'admin_login' %}" class="btn-course">
+              <i class="fas fa-play-circle mr-1"></i> Accéder au cours
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Prêt à vous lancer ?</h2>
+    <p>Créez votre compte gratuitement et accédez à tous nos cours.</p>
+    <a href="{% url 'register' %}" class="btn-cta">S'inscrire gratuitement</a>
+  </div>
+</section>
+{% endblock %}

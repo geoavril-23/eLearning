@@ -1,0 +1,121 @@
+{% load static %}
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'dashboard' %}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span></a>
+    </li>
+
+    <!-- Nav Item - Retour au site -->
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-fw fa-home"></i>
+            <span>Retour au site</span></a>
+    </li>
+
+    <!-- Nav Item - Profil -->
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'profil' %}">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Mon Profil</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- NAVIGATION CONDITIONNELLE SELON LE RÔLE -->
+
+    {% if request.user.is_administrateur %}
+    <!-- Section Administrateur -->
+    <div class="sidebar-heading">Panneau d'Administration</div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'liste_utilisateurs' %}"><i class="fas fa-fw fa-users"></i><span>Gestion
+                Utilisateurs</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'gestion_cours' %}"><i class="fas fa-fw fa-book"></i><span>Gestion des
+                Cours</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'paiements' %}"><i class="fas fa-fw fa-wallet"></i><span>Paiements &
+                Revenus</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'suivi_activite' %}"><i class="fas fa-fw fa-chart-line"></i><span>Suivi
+                d'Activité</span></a>
+    </li>
+
+    {% elif request.user.is_enseignant %}
+    <!-- Section Enseignant -->
+    <div class="sidebar-heading">Espace Enseignant</div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'mes_cours_enseignant' %}"><i
+                class="fas fa-fw fa-chalkboard-teacher"></i><span>Mes
+                Cours</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'creer_cours_enseignant' %}"><i
+                class="fas fa-fw fa-plus-circle"></i><span>Créer un
+                Cours</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'liste_quiz_enseignant' %}"><i class="fas fa-fw fa-question-circle"></i><span>Mes Quiz</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'generer_quiz_ia' %}"><i class="fas fa-fw fa-magic"></i><span>Assistant Création</span></a>
+    </li>
+
+    {% elif request.user.is_etudiant %}
+    <!-- Section Étudiant -->
+    <div class="sidebar-heading">Espace Étudiant</div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="#"><i class="fas fa-fw fa-graduation-cap"></i><span>Mes Formations</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#"><i class="fas fa-fw fa-pen"></i><span>Passer un Quiz</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#"><i class="fas fa-fw fa-medal"></i><span>Mes Résultats</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#"><i class="fas fa-fw fa-credit-card"></i><span>Mes Paiements</span></a>
+    </li>
+    {% endif %}
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Section Commune (Messagerie, Visioconf) -->
+    <div class="sidebar-heading">Communication</div>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'messagerie_index' %}"><i class="fas fa-fw fa-envelope"></i><span>Messagerie</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'liste_sessions_visio' %}"><i class="fas fa-fw fa-video"></i><span>Visioconférence</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>

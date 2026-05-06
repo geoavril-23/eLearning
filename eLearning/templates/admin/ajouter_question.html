@@ -1,0 +1,149 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Ajouter une Question - {{ quiz.titre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .form-header {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #1cc88a;
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e3e6f0;
+    }
+    .choice-row {
+        background: #f8f9fc;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e3e6f0;
+        transition: all 0.2s;
+    }
+    .choice-row:hover {
+        border-color: #1cc88a;
+    }
+    .btn-add {
+        background: #1cc88a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 700;
+    }
+    .btn-finish {
+        background: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 700;
+    }
+    .question-count-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="form-card card">
+                <div class="form-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0"><i class="fas fa-plus-circle mr-2"></i>Ajouter une Question</h4>
+                        <p class="mb-0 opacity-75">Quiz : {{ quiz.titre }}</p>
+                    </div>
+                    <div class="question-count-badge">
+                        {{ quiz.questions.count }} questions déjà ajoutées
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label">Énoncé de la question</label>
+                            <textarea name="texte_question" class="form-control" rows="3" placeholder="Saisissez votre question ici ou joignez un fichier ci-dessous..."></textarea>
+                            <small class="text-muted">Laissez vide si vous joignez un fichier comme énoncé (PDF, Word, etc.)</small>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Points pour cette question</label>
+                                <input type="number" name="points" step="0.5" class="form-control" value="1.0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ressource / Média (Optionnel)</label>
+                                <div class="custom-file">
+                                    <input type="file" name="media" class="custom-file-input" id="mediaFile">
+                                    <label class="custom-file-label" for="mediaFile">Choisir un fichier...</label>
+                                </div>
+                                <small class="text-muted">Image, PDF, Vidéo, etc.</small>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 font-weight-bold text-gray-800">
+                            Choix de réponses <span class="small text-muted font-weight-normal">(Optionnel pour les questions ouvertes ou fichiers)</span>
+                        </h5>
+                        
+                        {% for i in "0123" %}
+                        <div class="choice-row d-flex align-items-center">
+                            <div class="custom-control custom-checkbox mr-3">
+                                <input type="checkbox" name="choix_correct" value="{{ forloop.counter0 }}" class="custom-control-input" id="check{{ i }}">
+                                <label class="custom-control-label" for="check{{ i }}"></label>
+                            </div>
+                            <input type="text" name="choix_texte" class="form-control border-0 bg-white" placeholder="Texte du choix {{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detail_quiz_enseignant' quiz.id %}" class="btn btn-light rounded-pill px-4">Annuler</a>
+                            <div>
+                                <button type="submit" name="ajouter_autre" class="btn btn-add mr-2">
+                                    <i class="fas fa-plus mr-1"></i> Enregistrer et ajouter une autre
+                                </button>
+                                <button type="submit" name="enregistrer_et_finir" class="btn btn-finish">
+                                    <i class="fas fa-check mr-1"></i> Enregistrer et terminer
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Afficher le nom du fichier sélectionné
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('custom-file-input')) {
+            var fileName = e.target.files[0].name;
+            var nextSibling = e.target.nextElementSibling;
+            nextSibling.innerText = fileName;
+        }
+    });
+</script>
+{% endblock %}

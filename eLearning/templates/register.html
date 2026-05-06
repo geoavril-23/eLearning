@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  .scrolling-container {
+    background-color: rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .scrolling-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 25s linear infinite;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .scrolling-text span {
+    margin-right: 50px;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+
+  .navbar-nav .nav-item .nav-link {
+    color: white !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 15px !important;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .navbar-nav .nav-item .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #fec913;
+    transition: all 0.3s;
+    transform: translateX(-50%);
+  }
+
+  .navbar-nav .nav-item .nav-link:hover::after {
+    width: 70%;
+  }
+
+  .navbar-nav .nav-item .nav-link:hover {
+    color: #fec913 !important;
+  }
+
+  .navbar-nav .nav-item.active .nav-link {
+    color: #fec913 !important;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  /* AUTH */
+  .auth-wrapper {
+    background: #f4f4f4;
+    padding: 60px 0;
+  }
+
+  .auth-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 600px;
+    margin: auto;
+  }
+
+  .auth-card-header {
+    background: linear-gradient(135deg, #2bbfbf, #1a9e9e);
+    padding: 30px;
+    text-align: center;
+  }
+
+  .auth-card-header h2 {
+    color: white;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .auth-card-header h2 span {
+    color: #fec913;
+  }
+
+  .auth-card-header p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 8px 0 0;
+    font-size: 0.9rem;
+  }
+
+  .auth-card-body {
+    padding: 35px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+    outline: none;
+    display: block;
+    background: white;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #2bbfbf;
+  }
+
+  .btn-register {
+    background: #2bbfbf;
+    color: white;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn-register:hover {
+    background: #1a9e9e;
+  }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+
+  .auth-footer a {
+    color: #2bbfbf;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .error-msg {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block body_class %}sub_page{% endblock %}
+
+{% block hero_content %}
+<div class="scrolling-container">
+  <div class="scrolling-text">
+    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
+    <span>Nous formons en Licence & Master</span>
+    <span>Participez aux visioconférences</span>
+    <span>Téléchargez vos ressources</span>
+    <span>Obtenez des Badges et des Certifications</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- FORMULAIRE INSCRIPTION -->
+<section class="auth-wrapper">
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>Créer un <span>Compte</span></h2>
+        <p>Rejoignez OpenEduVerse dès aujourd'hui !</p>
+      </div>
+      <div class="auth-card-body">
+
+        <form method="POST" action="{% url 'register' %}" autocomplete="off">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Nom</label>
+                <input type="text" name="nom" placeholder="Votre nom" autocomplete="off">
+                {% if form.nom.errors %}<small style="color:red;">{{ form.nom.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" name="prenom" placeholder="Votre prénom" autocomplete="off">
+                {% if form.prenom.errors %}<small style="color:red;">{{ form.prenom.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="votre@email.com" autocomplete="off">
+            {% if form.email.errors %}<small style="color:red;">{{ form.email.errors.0 }}</small>{% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Âge</label>
+                <input type="number" name="age" placeholder="Votre âge">
+                {% if form.age.errors %}<small style="color:red;">{{ form.age.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Rôle</label>
+                <select name="role">
+                  <option value="etudiant">Étudiant</option>
+                  <option value="enseignant">Enseignant</option>
+                </select>
+                {% if form.role.errors %}<small style="color:red;">{{ form.role.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" name="adresse" placeholder="Votre adresse" autocomplete="off">
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" name="password1" placeholder="Mot de passe" autocomplete="new-password">
+                {% if form.password1.errors %}<small style="color:red;">{{ form.password1.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Confirmer le mot de passe</label>
+                <input type="password" name="password2" placeholder="Confirmer" autocomplete="new-password">
+                {% if form.password2.errors %}<small style="color:red;">{{ form.password2.errors.0 }}</small>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- SÉLECTION DES MATIÈRES -->
+          <div class="form-group" id="courses-section">
+            <label>Matières à apprendre</label>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
+              {% for course in cours_disponibles %}
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" name="courses" value="{{ course.id }}" style="width: 18px; height: 18px; cursor: pointer;">
+                <span style="font-size: 0.85rem; font-weight: 500; color: #444;">{{ course.titre }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size: 0.85rem; color: #888; margin: 0;">Aucune matière disponible pour le moment.</p>
+              {% endfor %}
+            </div>
+            <small style="color: #666; display: block; margin-top: 5px;">Cochez les matières que vous souhaitez suivre immédiatement.</small>
+          </div>
+
+          <button type="submit" class="btn-register">CRÉER MON COMPTE</button>
+        </form>
+
+        <div class="auth-footer">
+          <p style="color:#666;">
+            Déjà membre ?
+            <a href="{% url 'admin_login' %}">Se connecter</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

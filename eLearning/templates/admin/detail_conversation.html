@@ -1,0 +1,345 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Conversation{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 65vh; /* Un peu plus haut par défaut */
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #f8f9fc;
+        transition: all 0.3s ease;
+    }
+    body.dark-mode .chat-container {
+        background: #1a1c23;
+    }
+    
+    /* --- OPTIMISATION MOBILE (Style à la WhatsApp) --- */
+    @media (max-width: 768px) {
+        .chat-container {
+            height: 75vh; /* Beaucoup plus d'espace pour les messages */
+            padding: 10px;
+        }
+        .container-fluid {
+            padding: 0 !important; /* On supprime les marges du container */
+        }
+        .row {
+            margin: 0 !important;
+        }
+        .col-lg-10 {
+            padding: 0 !important;
+        }
+        .card {
+            border-radius: 0 !important; /* Carré pour prendre tout l'espace */
+            border: none !important;
+        }
+        .message-bubble {
+            max-width: 85%; /* Bulles plus larges sur mobile */
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+        .chat-header {
+            padding: 0.8rem 1rem;
+        }
+        .chat-input-area {
+            padding: 10px;
+        }
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        margin-bottom: 15px;
+        position: relative;
+        line-height: 1.4;
+    }
+    .message-received {
+        align-self: flex-start;
+        background: white;
+        color: #5a5c69;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    body.dark-mode .message-received {
+        background: #242632;
+        color: #d1d1d1;
+    }
+    .message-sent {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 2px 5px rgba(26, 115, 232, 0.3);
+    }
+    .message-meta {
+        font-size: 0.7rem;
+        margin-top: 5px;
+        opacity: 0.8;
+    }
+    .message-sent .message-meta {
+        text-align: right;
+    }
+    .chat-input-area {
+        background: white;
+        padding: 1rem;
+        border-top: 1px solid #e3e6f0;
+    }
+    body.dark-mode .chat-input-area {
+        background: #242632;
+        border-top: 1px solid #323545;
+    }
+    .chat-header {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e3e6f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    body.dark-mode .chat-header {
+        background: #242632;
+        border-bottom: 1px solid #323545;
+    }
+    .avatar-small {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow border-0 rounded-lg overflow-hidden">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'messagerie_index' %}" class="btn btn-sm btn-light mr-3 rounded-circle">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="avatar-small mr-3">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 font-weight-bold text-gray-800">
+                            {% if autre_participant %}
+                                {{ autre_participant.nom }} {{ autre_participant.prenom }}
+                            {% else %}
+                                Conversation
+                            {% endif %}
+                        </h5>
+                        <small class="text-muted">
+                            {% if autre_participant %} {{ autre_participant.role|title }} {% endif %}
+                        </small>
+                    </div>
+                </div>
+                <!-- NOUVEAU : Bouton pour débloquer le son sur Mobile -->
+                <button id="unlockSound" class="btn btn-sm btn-outline-primary rounded-pill">
+                    <i class="fas fa-volume-up mr-1"></i> Activer le son
+                </button>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="chat-container" id="chatContainer">
+                {% for message in messages_list %}
+                    {% if message.expediteur == request.user %}
+                        {# data-message-id : on stocke l'ID du message dans le HTML pour que le JS puisse le lire #}
+                        <div class="message-bubble message-sent" data-message-id="{{ message.id }}">
+                            <div>{{ message.contenu|linebreaksbr }}</div>
+                            <div class="message-meta">
+                                {{ message.date_envoi|date:"H:i" }}
+                                {% if message.lu %}
+                                    <i class="fas fa-check-double ml-1"></i>
+                                {% else %}
+                                    <i class="fas fa-check ml-1"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        {# Même chose pour les messages reçus #}
+                        <div class="message-bubble message-received" data-message-id="{{ message.id }}">
+                            <div>{{ message.contenu|linebreaksbr }}</div>
+                            <div class="message-meta">{{ message.date_envoi|date:"H:i" }}</div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="text-center text-muted my-auto">
+                        <p>Aucun message. Envoyez le premier !</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- NOUVEAU : L'élément Audio pour la notification (Son doux type iPhone) -->
+            <audio id="notifSound" preload="auto">
+                <source src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" type="audio/mpeg">
+            </audio>
+
+            <!-- Input Area -->
+            <div class="chat-input-area">
+                {# data-conversation-id : on transmet l'ID de la conversation au formulaire #}
+                {# Le JavaScript le lira avec form.dataset.conversationId pour construire l'URL de l'API #}
+                <form method="post" class="d-flex align-items-end" data-conversation-id="{{ conversation.id }}">
+                    {% csrf_token %}
+                    <div class="flex-grow-1 mr-2">
+                        <textarea name="contenu" class="form-control rounded-lg" rows="1" placeholder="Écrivez votre message..." required style="resize: none; overflow-y: hidden;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-circle" style="width: 45px; height: 45px; flex-shrink: 0;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // =====================================================================
+    // ÉTAPE 1 : Récupérer les éléments HTML dont on a besoin
+    // =====================================================================
+    var chatContainer = document.getElementById('chatContainer');
+    var form = document.querySelector('.chat-input-area form');
+    var textarea = form.querySelector('textarea[name="contenu"]');
+    var conversationId = form.dataset.conversationId;
+    
+    // Éléments pour le son
+    var notifSound = document.getElementById('notifSound');
+    var unlockBtn = document.getElementById('unlockSound');
+
+    // =====================================================================
+    // GESTION DU SON SUR MOBILE
+    // =====================================================================
+    unlockBtn.addEventListener('click', function() {
+        // Pour "débloquer" le son sur mobile, on joue le son une fois à vide
+        notifSound.play().then(() => {
+            notifSound.pause();
+            notifSound.currentTime = 0;
+            // On cache le bouton car le son est maintenant autorisé
+            unlockBtn.innerHTML = '<i class="fas fa-volume-up"></i> Son activé';
+            unlockBtn.classList.replace('btn-outline-primary', 'btn-light');
+            setTimeout(() => { unlockBtn.style.display = 'none'; }, 2000);
+        }).catch(error => {
+            console.log("Erreur de lecture :", error);
+        });
+    });
+
+    // =====================================================================
+    // ÉTAPE 2 : Mémoriser l'ID du DERNIER message
+    // =====================================================================
+    var tousLesBulles = chatContainer.querySelectorAll('[data-message-id]');
+    var dernierMessageId = 0;
+    tousLesBulles.forEach(function(bulle) {
+        var id = parseInt(bulle.dataset.messageId);
+        if (id > dernierMessageId) {
+            dernierMessageId = id;
+        }
+    });
+
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // =====================================================================
+    // ÉTAPE 4 : Créer une fonction qui construit une bulle de message
+    // =====================================================================
+    function creerBulle(msg) {
+        var bulle = document.createElement('div');
+        bulle.className = 'message-bubble ' + (msg.sent ? 'message-sent' : 'message-received');
+        bulle.dataset.messageId = msg.id;
+
+        var cocheHtml = '';
+        if (msg.sent) {
+            cocheHtml = msg.lu
+                ? '<i class="fas fa-check-double ml-1"></i>'
+                : '<i class="fas fa-check ml-1"></i>';
+        }
+
+        bulle.innerHTML =
+            '<div>' + msg.contenu.replace(/\n/g, '<br>') + '</div>' +
+            '<div class="message-meta">' + msg.date_envoi + cocheHtml + '</div>';
+
+        return bulle;
+    }
+
+    // =====================================================================
+    // ÉTAPE 5 : Envoi du formulaire en AJAX
+    // =====================================================================
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var contenu = textarea.value.trim();
+        if (!contenu) return;
+
+        textarea.value = '';
+        textarea.style.height = '';
+
+        var csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'contenu=' + encodeURIComponent(contenu),
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                // SÉCURITÉ ANTI-DOUBLON : on vérifie si l'ID n'est pas déjà là
+                if (document.querySelector('[data-message-id="' + data.id + '"]')) return;
+
+                var bulle = creerBulle({
+                    id: data.id,
+                    sent: true,
+                    contenu: data.contenu,
+                    date_envoi: data.date_envoi,
+                    lu: false,
+                });
+                chatContainer.appendChild(bulle);
+                dernierMessageId = data.id;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        });
+    });
+
+    // =====================================================================
+    // ÉTAPE 6 : Le Polling (Toutes les 3 secondes)
+    // =====================================================================
+    setInterval(function() {
+        fetch('/api/chat/' + conversationId + '/poll/?last_id=' + dernierMessageId)
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            data.messages.forEach(function(msg) {
+                // SÉCURITÉ ANTI-DOUBLON : si le message existe déjà, on l'ignore
+                if (document.querySelector('[data-message-id="' + msg.id + '"]')) return;
+
+                var bulle = creerBulle(msg);
+                chatContainer.appendChild(bulle);
+
+                // NOUVEAU : Jouer le son si on reçoit un message de l'AUTRE personne
+                if (!msg.sent) {
+                    notifSound.play().catch(e => console.log("Son bloqué par le navigateur"));
+                }
+
+                if (msg.id > dernierMessageId) {
+                    dernierMessageId = msg.id;
+                }
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        });
+    }, 3000);
+</script>
+{% endblock %}
+
+{% endblock %}

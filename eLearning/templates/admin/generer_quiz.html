@@ -1,0 +1,540 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Générer un Quiz avec l'IA{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === Gradient AI Header === */
+    .ai-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .ai-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .ai-header::after {
+        content: '';
+        position: absolute;
+        bottom: -60%;
+        right: 10%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+
+    /* === Form Card === */
+    .quiz-form-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(102, 126, 234, 0.12);
+        overflow: hidden;
+    }
+    .quiz-form-card .card-header {
+        background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+        border-bottom: 1px solid #e8ecf8;
+        padding: 1.25rem 1.5rem;
+    }
+
+    /* === Chapters Textarea === */
+    .chapters-textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 0.92rem;
+        transition: all 0.3s ease;
+        min-height: 160px;
+        resize: vertical;
+        background: #fafbff;
+        line-height: 1.7;
+    }
+    .chapters-textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        background: white;
+        outline: none;
+    }
+    .chapters-textarea::placeholder {
+        color: #a0aec0;
+        font-style: italic;
+    }
+
+    /* === Options Grid === */
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+    @media (max-width: 768px) {
+        .options-grid { grid-template-columns: 1fr; }
+    }
+    .option-box {
+        background: #f8f9ff;
+        border: 2px solid #e8ecf8;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.2s;
+    }
+    .option-box:hover { border-color: #667eea; }
+    .option-box label {
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    .option-box select,
+    .option-box input[type="number"] {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.95rem;
+        width: 100%;
+        background: white;
+        transition: border-color 0.2s;
+        color: #2d3748;
+    }
+    .option-box select:focus,
+    .option-box input[type="number"]:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102,126,234,0.1);
+        outline: none;
+    }
+
+    /* === Course Selector === */
+    .course-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        width: 100%;
+        background: #fafbff;
+        transition: all 0.3s;
+        color: #2d3748;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 40px;
+    }
+    .course-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        outline: none;
+        background-color: white;
+    }
+
+    /* === Generate Button === */
+    .btn-generate {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 14px 36px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    .btn-generate:active { transform: translateY(0); }
+    .btn-generate::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        transition: left 0.5s;
+    }
+    .btn-generate:hover::before { left: 100%; }
+
+    /* === Loading Overlay === */
+    #loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 15, 35, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    #loading-overlay.active {
+        display: flex;
+    }
+    .loading-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem 4rem;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        max-width: 400px;
+    }
+    .claude-logo {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        animation: pulse-logo 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-logo {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(102,126,234,0); }
+    }
+    .loading-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 1.5rem 0 1rem;
+    }
+    .loading-dots span {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: #667eea;
+        animation: dot-bounce 1.4s infinite ease-in-out;
+    }
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes dot-bounce {
+        0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+    .loading-step {
+        font-size: 0.85rem;
+        color: #718096;
+        min-height: 20px;
+        transition: all 0.3s;
+    }
+
+    /* === Tips Box === */
+    .tips-box {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+        border: 1px solid #c7d7ff;
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 0.75rem;
+        font-size: 0.88rem;
+        color: #4a5568;
+    }
+    .tip-item:last-child { margin-bottom: 0; }
+    .tip-icon {
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: #667eea;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- AI Header -->
+<div class="ai-header" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
+    <div class="ai-badge">
+        <i class="fas fa-magic"></i>
+        Assistant Intelligent
+    </div>
+    <h1 class="h2 mb-2 font-weight-bold" style="position:relative;z-index:1;">
+        ✨ Générateur de Quiz Intelligent
+    </h1>
+    <p class="mb-0 opacity-80" style="position:relative;z-index:1;font-size:1rem;">
+        Décrivez vos chapitres — L'assistant prépare les questions QCM automatiquement et les enregistre dans votre cours.
+    </p>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show rounded-lg shadow-sm mb-4" role="alert">
+        <strong>{{ message }}</strong>
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <!-- === MAIN FORM === -->
+    <div class="col-lg-8">
+        <div class="card quiz-form-card mb-4">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-magic text-primary mr-2"></i>
+                <h6 class="m-0 font-weight-bold text-primary">Paramètres de génération</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" id="quiz-form">
+                    {% csrf_token %}
+
+                    <!-- Sélection du cours -->
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-gray-700 mb-2">
+                            <i class="fas fa-book-open text-primary mr-1"></i>
+                            Cours associé
+                        </label>
+                        <select name="cours" class="course-select" required id="cours-select">
+                            <option value="">— Choisissez un cours —</option>
+                            {% for cours in mes_cours %}
+                            <option value="{{ cours.id }}">{{ cours.titre }} ({{ cours.niveau }})</option>
+                            {% empty %}
+                            <option disabled>Aucun cours disponible — créez d'abord un cours</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Chapitres à couvrir -->
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-gray-700 mb-2">
+                            <i class="fas fa-list-ol text-primary mr-1"></i>
+                            Chapitres / Sujets à couvrir
+                            <span class="text-danger">*</span>
+                        </label>
+                        <textarea
+                            name="chapitres"
+                            class="chapters-textarea form-control"
+                            id="chapitres"
+                            placeholder="Exemple :
+Chapitre 1 : Introduction aux algorithmes — définitions, complexité temporelle, algorithmes de tri (bubble sort, quick sort)
+Chapitre 2 : Structures de données — tableaux, listes chaînées, piles, files d'attente
+Chapitre 3 : Récursivité — principe, cas de base, exemples pratiques (factorielle, Fibonacci)
+
+Plus vous êtes précis, meilleures seront les questions générées."
+                            rows="7"
+                            required
+                        ></textarea>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Listez les chapitres avec leurs concepts clés pour des questions plus pertinentes.
+                        </small>
+                    </div>
+
+                    <!-- Instructions Personnalisées (Style de Prompt) -->
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-gray-700 mb-2">
+                            <i class="fas fa-comment-dots text-primary mr-1"></i>
+                            Style de l'IA / Consignes particulières (Optionnel)
+                        </label>
+                        <textarea
+                            name="instructions_ia"
+                            class="form-control"
+                            id="instructions_ia"
+                            placeholder="Ex: 'Utilise un ton humoristique', 'Fais des questions très techniques', 'Donne des exemples concrets du monde de l'entreprise', 'Sois très sévère dans les formulations'..."
+                            rows="3"
+                            style="border-radius: 12px; border: 2px solid #e2e8f0; background: #fafbff; padding: 12px 16px; font-size: 0.9rem;"
+                        ></textarea>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-magic mr-1"></i>
+                            Personnalisez la manière dont l'assistant rédige vos questions.
+                        </small>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="options-grid mb-4">
+                        <div class="option-box">
+                            <label><i class="fas fa-hashtag mr-1 text-primary"></i> Nombre de questions</label>
+                            <input type="number" name="nb_questions" value="5" min="3" max="20" id="nb-questions">
+                            <small class="text-muted d-block mt-1">Entre 3 et 20</small>
+                        </div>
+                        <div class="option-box">
+                            <label><i class="fas fa-signal mr-1 text-warning"></i> Niveau de difficulté</label>
+                            <select name="niveau">
+                                <option value="débutant">🟢 Débutant</option>
+                                <option value="intermédiaire" selected>🟡 Intermédiaire</option>
+                                <option value="avancé">🔴 Avancé</option>
+                                <option value="expert">⚫ Expert</option>
+                            </select>
+                        </div>
+                        <div class="option-box">
+                            <label><i class="fas fa-clock mr-1 text-info"></i> Durée (minutes)</label>
+                            <input type="number" name="duree" value="15" min="5" max="120" id="duree">
+                            <small class="text-muted d-block mt-1">Temps alloué</small>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex align-items-center">
+                    <!-- Submit -->
+                    <div class="d-flex align-items-center">
+                        <button type="submit" class="btn-generate mr-3" id="submit-btn" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
+                            <i class="fas fa-magic mr-2"></i>
+                            Générer le Quiz automatiquement
+                        </button>
+                        <a href="{% url 'liste_quiz_enseignant' %}" class="btn btn-outline-secondary rounded-lg">
+                            <i class="fas fa-list mr-1"></i> Mes Quiz
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- === TIPS PANEL === -->
+    <div class="col-lg-4">
+        <div class="card quiz-form-card mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-lightbulb mr-1 text-warning"></i>
+                    Conseils pour de meilleures questions
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="tips-box">
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
+                        <span>Mentionnez les <strong>concepts précis</strong> du chapitre (ex: "tri rapide, complexité O(n log n)")</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
+                        <span>Indiquez le <strong>contexte du cours</strong> pour des questions adaptées au niveau</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
+                        <span>Listez <strong>plusieurs chapitres</strong> pour un quiz couvrant tout le programme</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
+                        <span>Utilisez <strong>5–10 questions</strong> pour un bon équilibre durée/couverture</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example block -->
+        <div class="card quiz-form-card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-file-alt mr-1"></i>
+                    Exemple de saisie
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <small class="text-muted d-block mb-2">Pour un cours de Python :</small>
+                <div style="background:#f8f9fa;border-left:3px solid #667eea;padding:10px 14px;border-radius:0 8px 8px 0;font-size:0.82rem;line-height:1.7;color:#4a5568;">
+                    <strong>Chapitre 1 :</strong> Variables, types de données (int, str, list, dict)<br>
+                    <strong>Chapitre 2 :</strong> Boucles for/while, conditions if/elif/else<br>
+                    <strong>Chapitre 3 :</strong> Fonctions, paramètres, valeur de retour
+                </div>
+                <button class="btn btn-sm btn-outline-primary mt-3 w-100 rounded-lg" id="use-example">
+                    <i class="fas fa-paste mr-1"></i> Utiliser cet exemple
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- === LOADING OVERLAY === -->
+<div id="loading-overlay">
+    <div class="loading-card">
+        <div class="claude-logo">
+            <i class="fas fa-magic" style="color:white;"></i>
+        </div>
+        <h5 class="font-weight-bold text-gray-800 mb-1">Création de votre quiz en cours…</h5>
+        <p class="text-muted small mb-0">Analyse des chapitres en cours</p>
+        <div class="loading-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="loading-step" id="loading-step">📚 Lecture des chapitres…</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const steps = [
+    "📚 Lecture des chapitres…",
+    "🧠 Analyse du contenu pédagogique…",
+    "✍️ Rédaction des questions QCM…",
+    "🔄 Vérification des réponses…",
+    "💾 Finalisation du quiz…"
+];
+let stepIndex = 0;
+let stepInterval;
+
+document.getElementById('quiz-form').addEventListener('submit', function(e) {
+    const chapitres = document.getElementById('chapitres').value.trim();
+    const cours = document.getElementById('cours-select').value;
+    if (!chapitres || !cours) return;
+
+    // Show overlay
+    const overlay = document.getElementById('loading-overlay');
+    overlay.classList.add('active');
+    document.getElementById('submit-btn').disabled = true;
+
+    // Cycle through steps
+    stepInterval = setInterval(() => {
+        stepIndex = (stepIndex + 1) % steps.length;
+        document.getElementById('loading-step').textContent = steps[stepIndex];
+    }, 2000);
+});
+
+// Example filler
+document.getElementById('use-example').addEventListener('click', function() {
+    document.getElementById('chapitres').value =
+`Chapitre 1 : Variables et types de données — entiers, flottants, chaînes, listes, dictionnaires
+Chapitre 2 : Structures de contrôle — boucles for/while, conditions if/elif/else, break/continue
+Chapitre 3 : Fonctions — définition, paramètres, valeurs par défaut, valeur de retour, portée`;
+    document.getElementById('chapitres').focus();
+});
+
+// Character counter
+const textarea = document.getElementById('chapitres');
+textarea.addEventListener('input', function() {
+    const len = this.value.length;
+    const small = this.nextElementSibling;
+    if (len > 50) {
+        small.innerHTML = `<i class="fas fa-check-circle text-success mr-1"></i>${len} caractères — bon détail`;
+    }
+});
+</script>
+{% endblock %}

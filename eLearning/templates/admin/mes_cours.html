@@ -1,0 +1,99 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mes Cours - Enseignant{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Style pour indiquer que le texte est survolable */
+    .table td[title] {
+        cursor: help;
+    }
+    .table td[title] small {
+        border-bottom: 1px dotted #4e73df;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-book text-primary mr-2"></i>Mes Cours
+    </h1>
+    <a href="{% url 'creer_cours_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Créer un nouveau cours
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Liste de vos cours publiés</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Titre</th>
+                        <th>Catégorie</th>
+                        <th>Niveau</th>
+                        <th>Objectif</th>
+                        <th>Description</th>
+                        <th>Ressource</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cours in mes_cours %}
+                    <tr>
+                        <td class="font-weight-bold">{{ cours.titre }}</td>
+                        <td>
+                            {% if cours.categorie %}
+                                <span class="badge badge-info px-2 py-1">{{ cours.categorie }}</span>
+                            {% else %}
+                                <span class="text-muted small">Aucune</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ cours.niveau }}</td>
+                        <td title="{{ cours.objectif }}"><small>{{ cours.objectif|truncatechars:50 }}</small></td>
+                        <td title="{{ cours.description }}"><small>{{ cours.description|truncatechars:80 }}</small></td>
+                        <td class="text-center">
+                            {% if cours.ressource %}
+                                <a href="{{ cours.ressource.url }}" class="btn btn-sm btn-link" target="_blank" title="Télécharger">
+                                    <i class="fas {{ cours.get_file_icon }} fa-2x"></i>
+                                    <span class="d-block mt-1 small font-weight-bold text-uppercase text-dark">{{ cours.get_extension }}</span>
+                                </a>
+                            {% else %}
+                                <span class="text-muted small">Aucun fichier</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ cours.date_publication|date:"d/m/Y" }}</small></td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'modifier_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'supprimer_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
+                            Vous n'avez pas encore créé de cours. 
+                            <a href="{% url 'creer_cours_enseignant' %}">Cliquez ici pour commencer.</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
