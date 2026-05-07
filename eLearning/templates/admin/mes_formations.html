@@ -1,0 +1,59 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mes Formations - eLearning{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Mes Formations</h1>
+    <a href="{% url 'inscription_cours' %}" class="btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-plus fa-sm text-white-50"></i> S'inscrire à un nouveau cours
+    </a>
+</div>
+
+<div class="row">
+    {% for ins in inscriptions %}
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-primary text-white">
+                <h6 class="m-0 font-weight-bold">{{ ins.cours.categorie.nom|default:"Formation" }}</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                </div>
+                <h5 class="font-weight-bold text-gray-800 text-center">{{ ins.cours.titre }}</h5>
+                <hr>
+
+                <div class="small mb-2">
+                    <i class="fas fa-calendar-alt mr-2"></i> <strong>Inscrit le :</strong> {{ ins.date_inscription|date:"d/m/Y H:i" }}
+                </div>
+                
+                <div class="mt-4">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Progression
+                        <span class="float-right">{% if ins.statut == 'terminee' %}100%{% else %}25%{% endif %}</span>
+                    </div>
+                    <div class="progress progress-sm mr-2">
+                        <div class="progress-bar bg-success" role="progressbar"
+                            style="width: {% if ins.statut == 'terminee' %}100%{% else %}25%{% endif %}" aria-valuenow="50" aria-valuemin="0"
+                            aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="#" class="btn btn-primary btn-block btn-sm">Accéder aux cours</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-book-open fa-5x text-gray-300"></i>
+        </div>
+        <h3>Vous n'êtes inscrit à aucune formation.</h3>
+        <p class="text-muted">Parcourez notre catalogue pour commencer à apprendre !</p>
+        <a href="{% url 'course' %}" class="btn btn-primary">Voir le catalogue des cours</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    theme = models.CharField(max_length=50, default='light')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nom', 'prenom']
@@ -101,6 +102,29 @@ class Categorie(models.Model):
         if self.parent:
             return f"{self.parent.nom} > {self.nom}"
         return self.nom
+
+MATIERES_CHOICES = [
+    # Informatique Fondamentale
+    ('ALGO', 'Algorithmique et Structures de Données'),
+    ('ARCHI', 'Architecture des Ordinateurs et Systèmes d\'Exploitation (Linux/Windows)'),
+    
+    # Programmation
+    ('POO', 'Programmation Orientée Objet (Java, C++, C#)'),
+    
+    # Développement Web & Mobile
+    ('WEB_FRONT', 'Développement Web Frontend (HTML, CSS, JavaScript, React/Angular)'),
+    ('WEB_BACK', 'Développement Web Backend (PHP/Symfony, Python/Django, Node.js)'),
+    ('MOBILE', 'Développement Mobile (Android/Kotlin, iOS/Swift, Flutter)'),
+    
+    # Sécurité
+    ('SECURE_SYS', 'Sécurité des Systèmes et des Réseaux'),
+    ('CRYPTO', 'Cryptographie et Authentification'),
+    
+    # Mathématiques
+    ('MATH_DISC', 'Mathématiques Discrètes et Logique'),
+    ('ALGEBRE', 'Algèbre Linéaire et Analyse'),
+    ('PROBA', 'Probabilités et Statistiques'),
+]
 
 
 class Cours(models.Model):
@@ -167,7 +191,7 @@ class Inscription(models.Model):
         ('annulee', 'Annulée'),
         ('terminee', 'Terminée'),
     ]
-    date_inscription = models.DateField(auto_now_add=True)
+    date_inscription = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=100, choices=STATUT_CHOICES, default='en_attente')
     etudiant = models.ForeignKey(
         Etudiant,
