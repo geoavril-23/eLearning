@@ -9,7 +9,9 @@
     <!-- Topbar Search -->
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
         <div class="input-group">
-            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+            <input id="sidebarSearch" type="text" class="form-control bg-light border-0 small"
+                placeholder="Recherche rapide..." aria-label="Search" aria-describedby="basic-addon2">
+
             <div class="input-group-append">
                 <button class="btn btn-primary" type="button">
                     <i class="fas fa-search fa-sm"></i>
@@ -23,14 +25,18 @@
 
         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
         <li class="nav-item dropdown no-arrow d-sm-none">
-            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-search fa-fw"></i>
             </a>
             <!-- Dropdown - Messages -->
-            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
+            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                aria-labelledby="searchDropdown">
                 <form class="form-inline mr-auto w-100 navbar-search">
                     <div class="input-group">
-                        <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                        <input id="sidebarSearchMobile" type="text" class="form-control bg-light border-0 small"
+                            placeholder="Recherche rapide..." aria-label="Search" aria-describedby="basic-addon2">
+
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="button">
                                 <i class="fas fa-search fa-sm"></i>
@@ -43,83 +49,89 @@
 
         <!-- Nav Item - Alerts -->
         <li class="nav-item dropdown no-arrow mx-1">
-            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
                 <span id="notification-badge" class="badge badge-danger badge-counter" style="display: none;">0</span>
             </a>
             <!-- Dropdown - Alerts -->
-            <div id="notifications-list" class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+            <div id="notifications-list"
+                class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                aria-labelledby="alertsDropdown">
                 <h6 class="dropdown-header">
                     Centre de Notifications
                 </h6>
-                
-                {% for n in notifications %}
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="mr-3">
-                        <div class="icon-circle {{ n.bg_color|default:'bg-primary' }}">
-                            <i class="fas {{ n.icon|default:'fa-bell' }} text-white"></i>
-                        </div>
+
+                <div id="dynamic-notifications">
+                    <!-- Les notifications seront insérées ici par AJAX -->
+                    <div class="dropdown-item text-center small text-gray-500 py-3 no-notifications-msg">
+                        Aucune nouvelle notification.
                     </div>
-                    <div>
-                        <div class="small text-gray-500">{{ n.date }}</div>
-                        <span class="{% if n.is_unread %}font-weight-bold{% endif %}">{{ n.message }}</span>
-                    </div>
-                </a>
-                {% empty %}
-                <!-- Simulation de Notifications eLearning -->
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="mr-3">
-                        <div class="icon-circle bg-primary">
-                            <i class="fas fa-book-open text-white"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small text-gray-500">12 Avril 2026</div>
-                        <span class="font-weight-bold">Une nouvelle leçon est disponible en Python !</span>
-                    </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="mr-3">
-                        <div class="icon-circle bg-warning">
-                            <i class="fas fa-exclamation-triangle text-white"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small text-gray-500">11 Avril 2026</div>
-                        Rappel : Votre quiz final de "Web Design" expire demain.
-                    </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="mr-3">
-                        <div class="icon-circle bg-success">
-                            <i class="fas fa-graduation-cap text-white"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small text-gray-500">10 Avril 2026</div>
-                        Félicitations ! Vous avez obtenu 18/20 au quiz de HTML.
-                    </div>
-                </a>
-                {% endfor %}
-                
+                </div>
+
                 <a class="dropdown-item text-center small text-gray-500" href="#">Afficher toutes les notifications</a>
             </div>
         </li>
 
         <div class="topbar-divider d-none d-sm-block"></div>
 
+        {% if request.user.is_etudiant %}
+        <!-- Nav Item - Wallet -->
+        <li class="nav-item mx-1 d-flex align-items-center">
+            <div
+                style="
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 6px 14px;
+                    border-radius: 50px;
+                    background: #FFC107;
+                    color: #133e3f;
+                    font-weight: 700;
+                    font-size: 0.82rem;
+                    box-shadow: 0 3px 10px rgba(255,193,7,0.40);
+                    white-space: nowrap;
+                "
+                title="Solde du portefeuille"
+            >
+                <i class="fas fa-wallet" style="margin-right: 6px;"></i>
+                <span id="user-solde-display">{{ request.user.etudiant.solde|floatformat:0 }}</span>&nbsp;FCFA
+            </div>
+        </li>
+        {% endif %}
+
+
+        <!-- Nav Item - Theme Toggle -->
+
+        <li class="nav-item mx-1 d-flex align-items-center">
+            <a class="nav-link px-2" href="#" id="themeToggle" title="Changer de thème">
+                {% if request.user.theme == 'dark' %}
+                <i class="fas fa-sun fa-fw text-warning"></i>
+                {% else %}
+                <i class="fas fa-moon fa-fw text-gray-400"></i>
+                {% endif %}
+            </a>
+        </li>
+
         <!-- Nav Item - User Information -->
+
+
         <li class="nav-item dropdown no-arrow">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.nom|default:user.email }}</span>
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ request.user.prenom|default:request.user.email }}</span>
+                {% if request.user.photo_profil %}
+                <img class="img-profile rounded-circle" src="{{ request.user.photo_profil.url }}"
+                    style="object-fit: cover;">
+                {% else %}
                 <img class="img-profile rounded-circle" src="{% static 'admin/img/undraw_profile.svg' %}">
+                {% endif %}
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="{% url 'profil' %}">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Profile
+                    Profil
                 </a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{% url 'admin_logout' %}">
@@ -132,3 +144,41 @@
     </ul>
 
 </nav>
+
+<!-- JS Notifications -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let seenIds = new Set();
+        const badge = document.getElementById('notification-badge');
+        const listContainer = document.getElementById('dynamic-notifications');
+        const emptyMsg = listContainer.querySelector('.no-notifications-msg');
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 5000 });
+
+        function check() {
+            fetch("{% url 'fetch_notifications' %}")
+                .then(r => r.json())
+                .then(d => {
+                    if (badge) { badge.innerText = d.count; badge.style.display = d.count > 0 ? 'block' : 'none'; }
+
+                    if (d.count > 0 && emptyMsg) { emptyMsg.style.display = 'none'; }
+
+                    d.notifications.forEach(n => {
+                        if (!seenIds.has(n.id)) {
+                            seenIds.add(n.id);
+                            Toast.fire({ icon: 'info', title: n.message });
+
+                            const newNotif = `
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3"><div class="icon-circle ${n.color}"><i class="fas ${n.icon} text-white"></i></div></div>
+                                    <div><div class="small text-gray-500">${n.date}</div><span class="font-weight-bold">${n.message}</span></div>
+                                </a>`;
+                            listContainer.insertAdjacentHTML('afterbegin', newNotif);
+                        }
+                    });
+                });
+        }
+        setInterval(check, 5000);
+        check();
+    });
+</script>

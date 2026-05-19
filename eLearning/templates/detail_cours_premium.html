@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cours.titre }} - Chapitres Premium{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+  .course-detail-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 60px 0;
+    color: white;
+  }
+
+  .chapter-list {
+    padding: 50px 0;
+    background: #f8fafc;
+  }
+
+  .chapter-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #edf2f7;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  }
+
+  .chapter-card:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e0;
+  }
+
+  .chapter-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .chapter-number {
+    width: 40px;
+    height: 40px;
+    background: #edf2f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #4a5568;
+    flex-shrink: 0;
+  }
+
+  .chapter-details h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  .chapter-details p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    color: #718096;
+  }
+
+  .chapter-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .badge-premium {
+    background: #fff5f5;
+    color: #e53e3e;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .badge-unlocked {
+    background: #f0fff4;
+    color: #38a169;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .locked-overlay {
+    filter: blur(2px);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .btn-pay {
+    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
+    color: #1a1a2e;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(246, 194, 62, 0.2);
+  }
+
+  .btn-pay:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(246, 194, 62, 0.3);
+  }
+
+  .btn-view {
+    background: #2d3748;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  .btn-view:hover {
+    background: #1a202c;
+    color: white;
+  }
+
+  .icon-lock {
+    font-size: 1.5rem;
+    color: #cbd5e0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="course-detail-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="mb-3 font-weight-bold">{{ cours.titre }}</h1>
+        <p class="lead text-gray-400">{{ cours.description|truncatewords:30 }}</p>
+        <div class="mt-4 d-flex align-items-center gap-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-user-circle fa-2x text-warning"></i>
+            <div>
+              <div class="small text-uppercase font-weight-bold" style="color: #a0aec0; letter-spacing: 1px;">Enseignant
+              </div>
+              <div class="font-weight-bold">{{ cours.enseignant.nom }} {{ cours.enseignant.prenom }}</div>
+            </div>
+          </div>
+          <div class="divider mx-3" style="width: 1px; height: 30px; background: rgba(255,255,255,0.2);"></div>
+          <div>
+            <div class="small text-uppercase font-weight-bold" style="color: #a0aec0; letter-spacing: 1px;">Catégorie
+            </div>
+            <div class="font-weight-bold">{{ cours.categorie.nom|default:"Général" }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 text-center d-none d-md-block">
+        <img src="{% if cours.image %}{{ cours.image.url }}{% else %}{% static 'images/algorithme.jpeg' %}{% endif %}"
+          class="img-fluid rounded-lg shadow-2xl" style="max-height: 250px; border: 4px solid rgba(255,255,255,0.1);">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter-list">
+  <div class="container">
+    <h2 class="mb-5 font-weight-bold text-gray-800">Contenu de la formation</h2>
+
+    <div class="row">
+      <div class="col-lg-9 mx-auto">
+        {% for chapitre in chapitres %}
+        <div class="chapter-card" id="chapter-{{ chapitre.id }}">
+          <div class="chapter-info">
+            <div class="chapter-number">{{ forloop.counter }}</div>
+            <div class="chapter-details">
+              <h4>{{ chapitre.titre }}</h4>
+              <p>{{ chapitre.description|truncatechars:100 }}</p>
+            </div>
+          </div>
+
+          <div class="chapter-status">
+            {% if chapitre.est_premium %}
+            {% if chapitre.id in chapitres_debloques_ids or est_inscrit %}
+            <span class="badge-unlocked"><i class="fas fa-check-circle"></i> Débloqué</span>
+            {% if chapitre.ressource %}
+            <a href="{{ chapitre.ressource.url }}" class="btn-view" target="_blank"><i
+                class="fas fa-file-download mr-1"></i> Consulter</a>
+            {% endif %}
+            {% if chapitre.lien_youtube %}
+            <a href="{{ chapitre.lien_youtube }}" class="btn-view bg-danger" target="_blank"><i
+                class="fab fa-youtube mr-1"></i> Vidéo</a>
+            {% endif %}
+            {% else %}
+            <div class="text-right">
+              <span class="badge-premium mb-2 d-inline-block"><i class="fas fa-crown"></i> Premium</span>
+              <div class="d-flex align-items-center gap-3">
+                <span class="font-weight-bold text-dark">{{ chapitre.prix|floatformat:0 }} FCFA</span>
+                <button class="btn-pay"
+                  onclick="unlockChapter('{{ chapitre.id }}', '{{ chapitre.titre }}', '{{ chapitre.prix|floatformat:0 }}')">
+                  <i class="fas fa-unlock mr-1"></i> Débloquer
+                </button>
+              </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <span class="badge badge-light p-2 px-3 rounded-pill text-muted font-weight-bold">Gratuit</span>
+            {% if chapitre.ressource %}
+            <a href="{{ chapitre.ressource.url }}" class="btn-view" target="_blank"><i
+                class="fas fa-file-download mr-1"></i> Consulter</a>
+            {% endif %}
+            {% if chapitre.lien_youtube %}
+            <a href="{{ chapitre.lien_youtube }}" class="btn-view bg-danger" target="_blank"><i
+                class="fab fa-youtube mr-1"></i> Vidéo</a>
+            {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+          <i class="fas fa-folder-open fa-3x text-gray-300 mb-3"></i>
+          <p class="text-gray-500">Aucun chapitre n'a encore été ajouté à ce cours.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function unlockChapter(chapterId, title, price) {
+    Swal.fire({
+      title: 'Débloquer ce chapitre ?',
+      text: `Souhaitez-vous acheter le chapitre "${title}" pour ${price} FCFA ?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#1cc88a',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Oui, débloquer !',
+      cancelButtonText: 'Annuler',
+      background: document.body.classList.contains('dark-mode') ? '#242632' : '#fff',
+      color: document.body.classList.contains('dark-mode') ? '#fff' : '#545454'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Afficher loader
+        Swal.fire({
+          title: 'Traitement du paiement...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Requête AJAX
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
+
+        $.ajax({
+          url: `/api/chapitre/${chapterId}/acheter/`,
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          success: function (response) {
+            Swal.fire({
+              title: 'Succès !',
+              text: response.message,
+              icon: 'success',
+              confirmButtonColor: '#1cc88a'
+            }).then(() => {
+              // Mettre à jour le solde dans le topbar si présent
+              const soldeDisplay = document.getElementById('user-solde-display');
+              if (soldeDisplay) {
+                soldeDisplay.innerText = response.nouveau_solde.toLocaleString();
+              }
+              // Recharger la page pour voir le contenu
+              location.reload();
+            });
+          },
+          error: function (xhr) {
+            const error = xhr.responseJSON ? xhr.responseJSON.message : "Une erreur est survenue.";
+            Swal.fire({
+              title: 'Erreur',
+              text: error,
+              icon: 'error',
+              confirmButtonColor: '#4e73df'
+            });
+          }
+        });
+      }
+    });
+  }
+</script>
+{% endblock %}

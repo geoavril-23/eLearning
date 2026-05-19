@@ -1,121 +1,225 @@
-{% load static %}
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar"
+  style="background: linear-gradient(180deg, #133e3f 0%, #1a5556 100%);">
 
-    <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
-    </a>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider my-0">
-
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
-        <a class="nav-link" href="{% url 'dashboard' %}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
-
-    <!-- Nav Item - Retour au site -->
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">
-            <i class="fas fa-fw fa-home"></i>
-            <span>Retour au site</span></a>
-    </li>
-
-    <!-- Nav Item - Profil -->
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'profil' %}">
-            <i class="fas fa-fw fa-user"></i>
-            <span>Mon Profil</span></a>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- NAVIGATION CONDITIONNELLE SELON LE RÔLE -->
-
-    {% if request.user.is_administrateur %}
-    <!-- Section Administrateur -->
-    <div class="sidebar-heading">Panneau d'Administration</div>
-
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'liste_utilisateurs' %}"><i class="fas fa-fw fa-users"></i><span>Gestion
-                Utilisateurs</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'gestion_cours' %}"><i class="fas fa-fw fa-book"></i><span>Gestion des
-                Cours</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'paiements' %}"><i class="fas fa-fw fa-wallet"></i><span>Paiements &
-                Revenus</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'suivi_activite' %}"><i class="fas fa-fw fa-chart-line"></i><span>Suivi
-                d'Activité</span></a>
-    </li>
-
-    {% elif request.user.is_enseignant %}
-    <!-- Section Enseignant -->
-    <div class="sidebar-heading">Espace Enseignant</div>
-
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'mes_cours_enseignant' %}"><i
-                class="fas fa-fw fa-chalkboard-teacher"></i><span>Mes
-                Cours</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'creer_cours_enseignant' %}"><i
-                class="fas fa-fw fa-plus-circle"></i><span>Créer un
-                Cours</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'liste_quiz_enseignant' %}"><i class="fas fa-fw fa-question-circle"></i><span>Mes Quiz</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'generer_quiz_ia' %}"><i class="fas fa-fw fa-magic"></i><span>Assistant Création</span></a>
-    </li>
-
-    {% elif request.user.is_etudiant %}
-    <!-- Section Étudiant -->
-    <div class="sidebar-heading">Espace Étudiant</div>
-
-    <li class="nav-item">
-        <a class="nav-link" href="#"><i class="fas fa-fw fa-graduation-cap"></i><span>Mes Formations</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#"><i class="fas fa-fw fa-pen"></i><span>Passer un Quiz</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#"><i class="fas fa-fw fa-medal"></i><span>Mes Résultats</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#"><i class="fas fa-fw fa-credit-card"></i><span>Mes Paiements</span></a>
-    </li>
-    {% endif %}
-
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Section Commune (Messagerie, Visioconf) -->
-    <div class="sidebar-heading">Communication</div>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'messagerie_index' %}"><i class="fas fa-fw fa-envelope"></i><span>Messagerie</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'liste_sessions_visio' %}"><i class="fas fa-fw fa-video"></i><span>Visioconférence</span></a>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block">
-
-    <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  <!-- Sidebar - Brand -->
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
+    <div class="sidebar-brand-icon">
+      <i class="fas fa-graduation-cap" style="color: #fec913;"></i>
     </div>
+    <div class="sidebar-brand-text mx-3">OpenEduVerse</div>
+  </a>
+
+  <!-- Divider -->
+  <hr class="sidebar-divider my-0">
+
+  <!-- Nav Item - Dashboard -->
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'dashboard' %}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Dashboard</span>
+    </a>
+  </li>
+
+  <!-- Nav Item - Retour au site -->
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'index' %}">
+      <i class="fas fa-fw fa-home"></i>
+      <span>Retour au site</span>
+    </a>
+  </li>
+
+  <!-- Nav Item - Profil -->
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'profil' %}">
+      <i class="fas fa-fw fa-user"></i>
+      <span>Mon Profil</span>
+    </a>
+  </li>
+
+  <!-- Divider -->
+  <hr class="sidebar-divider">
+
+  <!-- NAVIGATION CONDITIONNELLE SELON LE RÔLE -->
+
+  {% if request.user.is_administrateur %}
+  <!-- Section Administrateur -->
+  <div class="sidebar-heading">Panneau d'Administration</div>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'liste_utilisateurs' %}"><i class="fas fa-fw fa-users"></i><span>Gestion
+        Utilisateurs</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'gestion_cours' %}"><i class="fas fa-fw fa-book"></i><span>Gestion des
+        Cours</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'paiements' %}"><i class="fas fa-fw fa-wallet"></i><span>Paiements &
+        Revenus</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'suivi_activite' %}"><i class="fas fa-fw fa-chart-line"></i><span>Suivi
+        d'Activité</span></a>
+  </li>
+
+  {% elif request.user.is_enseignant %}
+  <!-- Section Enseignant -->
+  <div class="sidebar-heading">Espace Enseignant</div>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_cours_enseignant' %}"><i class="fas fa-fw fa-chalkboard-teacher"></i><span>Mes
+        Cours</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'creer_cours_enseignant' %}"><i class="fas fa-fw fa-plus-circle"></i><span>Créer un
+        Cours</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'liste_quiz_enseignant' %}"><i class="fas fa-fw fa-question-circle"></i><span>Mes
+        Quiz</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'corrections_attente' %}"><i
+        class="fas fa-fw fa-check-double"></i><span>Corrections</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'generer_quiz_ia' %}"><i class="fas fa-fw fa-magic"></i><span>Assistant
+        Création</span></a>
+  </li>
+
+  {% elif request.user.is_etudiant %}
+  <!-- Section Étudiant -->
+  <div class="sidebar-heading">Espace Étudiant</div>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_courses' %}"><i class="fas fa-fw fa-graduation-cap"></i><span>Mes
+        Formations</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'liste_cours_premium' %}"><i
+        class="fas fa-fw fa-crown text-warning"></i><span>Cours Premium</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_chapitres_debloques' %}"><i class="fas fa-fw fa-unlock"></i><span>Chapitres
+        Débloqués</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'messagerie_index' %}"><i
+        class="fas fa-fw fa-envelope"></i><span>Messagerie</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_quiz_etudiant' %}"><i class="fas fa-fw fa-pen"></i><span>Mes Quiz</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_resultats_etudiant' %}"><i class="fas fa-fw fa-medal"></i><span>Mes
+        Résultats</span></a>
+  </li>
+
+  <!-- ★ Mon Portefeuille — Liquid Glass ★ -->
+  <li class="nav-item" id="ooPortefeuilleItem">
+    <a class="nav-link" id="ooPortefeuilleLink" href="{% url 'paiements' %}">
+      <i class="fas fa-fw fa-wallet"></i><span>Mon Portefeuille</span>
+    </a>
+  </li>
+  {% endif %}
+
+  <!-- Divider -->
+  <hr class="sidebar-divider">
+
+  <!-- Section Commune -->
+  <div class="sidebar-heading">Communication</div>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'messagerie_index' %}"><i
+        class="fas fa-fw fa-envelope"></i><span>Messagerie</span></a>
+  </li>
+  {% if not request.user.is_administrateur %}
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'liste_sessions_visio' %}"><i
+        class="fas fa-fw fa-video"></i><span>Visioconférence</span></a>
+  </li>
+  {% endif %}
+
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none d-md-block">
+
+  <!-- Sidebar Toggler -->
+  <div class="text-center d-none d-md-inline">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
 
 </ul>
+
+<!-- ====== Liquid Glass — All Sidebar Items ====== -->
+<style>
+  /* ── li : recule latéralement pour laisser voir les coins ronds ── */
+  .sidebar .nav-item {
+    list-style: none;
+    transition: margin 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  .sidebar .nav-item:hover,
+  .sidebar .nav-item.oo-liquid-glass-active {
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+  }
+
+  /* ── Lien : état de base ── */
+  .sidebar .nav-item .nav-link {
+    position: relative !important;
+    overflow: hidden !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  }
+
+  /* ── Shimmer wave : sweep effect ── */
+  .sidebar .nav-item .nav-link::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 60% !important;
+    height: 100% !important;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    ) !important;
+    transition: left 0.5s ease !important;
+    pointer-events: none !important;
+  }
+
+  /* ── HOVER : Apple iOS 26 glass effect ── */
+  .sidebar .nav-item:hover>.nav-link,
+  .sidebar .nav-item.oo-liquid-glass-active>.nav-link {
+    position: relative !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(24px) saturate(200%) brightness(1.15) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) brightness(1.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    border-radius: 10px !important;
+    color: #FFC107 !important;
+  }
+
+  /* ── HOVER : shimmer wave déclenché ── */
+  .sidebar .nav-item:hover>.nav-link::before,
+  .sidebar .nav-item.oo-liquid-glass-active>.nav-link::before {
+    left: 140% !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sidebarItems = document.querySelectorAll('.sidebar .nav-item');
+    sidebarItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        item.classList.add('oo-liquid-glass-active');
+      });
+      item.addEventListener('mouseleave', () => {
+        item.classList.remove('oo-liquid-glass-active');
+      });
+    });
+  });
+</script>

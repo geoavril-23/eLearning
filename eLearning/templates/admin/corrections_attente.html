@@ -1,0 +1,90 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Corrections en Attente | eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #4e73df;
+        margin: 0;
+    }
+    
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 1.2rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 900px; margin: 0 auto 2rem auto;">
+    <h1><i class="fas fa-tasks mr-2"></i>Corrections en Attente</h1>
+</div>
+
+{% if messages %}
+    <div style="max-width: 900px; margin: 0 auto;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endfor %}
+    </div>
+{% endif %}
+
+<div class="table-container">
+    {% if soumissions %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Étudiant</th>
+                        <th>Quiz</th>
+                        <th>Cours</th>
+                        <th>Date de Soumission</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for soumission in soumissions %}
+                    <tr>
+                        <td>
+                            <div class="font-weight-bold text-gray-800">{{ soumission.etudiant.nom }} {{ soumission.etudiant.prenom }}</div>
+                        </td>
+                        <td>{{ soumission.quiz.titre }}</td>
+                        <td><span class="badge badge-info">{{ soumission.quiz.cours.titre }}</span></td>
+                        <td>{{ soumission.date_soumission|date:"d M Y, H:i" }}</td>
+                        <td>
+                            <a href="{% url 'corriger_soumission' soumission.id %}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                                <i class="fas fa-edit mr-1"></i> Évaluer
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-check-double fa-3x text-gray-300 mb-3"></i>
+            <h5 class="text-gray-500 font-weight-bold">Aucune copie en attente</h5>
+            <p class="text-muted small">Vous êtes à jour dans vos corrections !</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

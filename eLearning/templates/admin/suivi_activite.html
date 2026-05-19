@@ -41,9 +41,9 @@
                         <canvas id="reussitePieChart"></canvas>
                     </div>
                     <div class="mt-4 text-center small">
-                        <span class="mr-2"><i class="fas fa-circle text-success"></i> Succès</span>
-                        <span class="mr-2"><i class="fas fa-circle text-warning"></i> Moyen</span>
-                        <span class="mr-2"><i class="fas fa-circle text-danger"></i> Échec</span>
+                        <span class="mr-2"><i class="fas fa-circle" style="color:#133e3f;"></i> Succès</span>
+                        <span class="mr-2"><i class="fas fa-circle" style="color:#FFC107;"></i> Moyen</span>
+                        <span class="mr-2"><i class="fas fa-circle" style="color:#4ecdc4;"></i> Échec</span>
                     </div>
                 </div>
             </div>
@@ -67,31 +67,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Simulation Data -->
+                        {% for act in activites %}
                         <tr>
-                            <td><strong>Jean Dupont</strong></td>
-                            <td>A terminé le quiz "HTML5"</td>
-                            <td>Il y a 5 min</td>
-                            <td>192.168.1.1 (Mobile)</td>
+                            <td><strong>{{ act.utilisateur.nom }} {{ act.utilisateur.prenom }}</strong></td>
+                            <td>{{ act.action }}</td>
+                            <td>{{ act.date_action|timesince }}</td>
+                            <td>{{ act.ip_address|default:"127.0.0.1" }}</td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td><strong>Sophie Martin</strong></td>
-                            <td>A publié un nouveau cours</td>
-                            <td>Il y a 15 min</td>
-                            <td>10.0.0.12 (Desktop)</td>
+                            <td colspan="4" class="text-center text-muted">Aucune activité récente.</td>
                         </tr>
-                        <tr>
-                            <td><strong>Moussa Traoré</strong></td>
-                            <td>S'est connecté à la plateforme</td>
-                            <td>Il y a 1h</td>
-                            <td>41.202.x.x (Desktop)</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Aissata Diallo</strong></td>
-                            <td>A visionné la vidéo "Python Loop"</td>
-                            <td>Il y a 2h</td>
-                            <td>197.x.x.x (Tablet)</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -110,21 +97,21 @@
     var myLineChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+        labels: {{ jours_labels|safe }},
         datasets: [{
-          label: "Heures",
+      label: "Heures",
           lineTension: 0.3,
-          backgroundColor: "rgba(78, 115, 223, 0.05)",
-          borderColor: "rgba(78, 115, 223, 1)",
+          backgroundColor: "rgba(19, 62, 63, 0.08)",
+          borderColor: "rgba(19, 62, 63, 1)",
           pointRadius: 3,
-          pointBackgroundColor: "rgba(78, 115, 223, 1)",
-          pointBorderColor: "rgba(78, 115, 223, 1)",
-          pointHoverRadius: 3,
-          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+          pointBackgroundColor: "rgba(19, 62, 63, 1)",
+          pointBorderColor: "#ffffff",
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: "#FFC107",
+          pointHoverBorderColor: "rgba(19, 62, 63, 1)",
           pointHitRadius: 10,
           pointBorderWidth: 2,
-          data: [12, 19, 15, 25, 22, 10, 8],
+          data: {{ temps_data|safe }},
         }],
       },
       options: {
@@ -132,7 +119,7 @@
         layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
         scales: {
           xAxes: [{ gridLines: { display: false, drawBorder: false } }],
-          yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 } }],
+          yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10, beginAtZero: true } }],
         },
         legend: { display: false }
       }
@@ -145,9 +132,9 @@
       data: {
         labels: ["Succès", "Moyen", "Échec"],
         datasets: [{
-          data: [65, 25, 10],
-          backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
-          hoverBackgroundColor: ['#17a673', '#dda20a', '#be2617'],
+          data: {{ reussite_data|safe }},
+          backgroundColor: ['#133e3f', '#FFC107', '#4ecdc4'],
+          hoverBackgroundColor: ['#1a5556', '#e6ac00', '#38b2ac'],
           hoverBorderColor: "rgba(234, 236, 244, 1)",
         }],
       },

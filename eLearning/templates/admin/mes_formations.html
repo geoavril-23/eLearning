@@ -3,57 +3,423 @@
 
 {% block title %}Mes Formations - eLearning{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* ── En-tête de page ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+        gap: .75rem;
+    }
+    .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+    .btn-nouveau-cours {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: .85rem;
+        padding: .55rem 1.2rem;
+        border-radius: 50px;
+        border: none;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(78, 115, 223, .35);
+        transition: transform .15s, box-shadow .15s;
+    }
+    .btn-nouveau-cours:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(78, 115, 223, .45);
+        text-decoration: none;
+    }
+
+    /* ── Tableau liste de cours ── */
+    .formations-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 20px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+    .formations-card .card-header-custom {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+    .formations-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .formations-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.1rem 1.5rem;
+        border-bottom: 1px solid #f0f0f5;
+        transition: background .15s;
+        position: relative;
+    }
+    .formations-list li:last-child { border-bottom: none; }
+    .formations-list li:hover { background: #f8f9fd; }
+
+    /* Case à cocher visuelle — toujours cochée */
+    .cours-check {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #1cc88a, #17a673);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+        box-shadow: 0 2px 6px rgba(28,200,138,.3);
+    }
+    .cours-check i { color: #fff; font-size: .75rem; }
+
+    /* Infos du cours */
+    .cours-info { flex: 1; min-width: 0; }
+    .cours-titre {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: .95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .cours-meta {
+        font-size: .78rem;
+        color: #8898aa;
+        margin-top: .2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+    .cours-meta span { display: inline-flex; align-items: center; gap: .25rem; }
+
+    /* Badge statut */
+    .badge-statut {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .3rem .75rem;
+        border-radius: 50px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .badge-validee  { background: #e6f9f2; color: #1cc88a; }
+    .badge-terminee { background: #eaf2ff; color: #4e73df; }
+    .badge-en_attente { background: #fff8e7; color: #f6c23e; }
+    .badge-annulee  { background: #fde8e8; color: #e74a3b; }
+
+    /* Barre de progression */
+    .progress-mini {
+        height: 5px;
+        border-radius: 10px;
+        background: #e9ecef;
+        overflow: hidden;
+        margin-top: .5rem;
+    }
+    .progress-mini .bar {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #1cc88a, #17a673);
+        transition: width .6s ease;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+        color: #8898aa;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        color: #d6d8ea;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .empty-state h4 { color: #5a5c69; font-weight: 700; margin-bottom: .5rem; }
+
+    /* Dark mode */
+    body.dark-mode .formations-card { background: #242632; }
+    body.dark-mode .formations-list li { border-bottom-color: #323545; }
+    body.dark-mode .formations-list li:hover { background: #2b2e3c; }
+    body.dark-mode .cours-titre { color: #f8f9fc; }
+    body.dark-mode .page-header h1 { color: #f8f9fc; }
+    body.dark-mode .progress-mini { background: #323545; }
+
+    /* ── Cartes Nouveaux cours ── */
+    .nouveau-cours-card {
+        background: #fff;
+        border: 2px solid #e8f5e9;
+        border-radius: 12px;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform .15s, box-shadow .15s;
+        height: 100%;
+    }
+    .nouveau-cours-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(28,200,138,.15);
+    }
+    .nouveau-cours-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #1cc88a, #17a673);
+    }
+    .nouveau-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .65rem;
+        font-weight: 800;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #1cc88a, #17a673);
+        color: #fff;
+        padding: .25rem .65rem;
+        border-radius: 50px;
+        margin-bottom: .6rem;
+        animation: pulse-green 2s infinite;
+    }
+    @keyframes pulse-green {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(28,200,138,.4); }
+        50%       { box-shadow: 0 0 0 6px rgba(28,200,138,0); }
+    }
+    .nouveau-categorie {
+        font-size: .72rem;
+        font-weight: 600;
+        color: #1cc88a;
+        margin-bottom: .35rem;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+    .nouveau-titre {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: .9rem;
+        margin-bottom: .5rem;
+        line-height: 1.3;
+    }
+    .nouveau-meta {
+        font-size: .75rem;
+        color: #8898aa;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem .8rem;
+        margin-bottom: .75rem;
+    }
+    .nouveau-meta span { display: inline-flex; align-items: center; gap: .25rem; }
+    .btn-inscrire {
+        background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: .8rem;
+        border: none;
+        border-radius: 50px;
+        padding: .45rem .9rem;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .3rem;
+    }
+    .btn-inscrire:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(28,200,138,.4);
+        color: #fff;
+    }
+    body.dark-mode .nouveau-cours-card { background: #2b2e3c; border-color: #1a4a3a; }
+    body.dark-mode .nouveau-titre { color: #f8f9fc; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Mes Formations</h1>
-    <a href="{% url 'inscription_cours' %}" class="btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-plus fa-sm text-white-50"></i> S'inscrire à un nouveau cours
+
+<!-- ── En-tête de page ── -->
+<div class="page-header">
+    <h1><i class="fas fa-graduation-cap mr-2 text-primary"></i>Mes Formations</h1>
+    <a href="{% url 'course' %}" class="btn-nouveau-cours" id="btn-nouveau-cours">
+        <i class="fas fa-plus-circle"></i> Nouveau cours
     </a>
 </div>
 
-<div class="row">
-    {% for ins in inscriptions %}
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-primary text-white">
-                <h6 class="m-0 font-weight-bold">{{ ins.cours.categorie.nom|default:"Formation" }}</h6>
-            </div>
+<!-- ── Statistiques rapides ── -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-left-primary shadow-sm h-100 py-2">
             <div class="card-body">
-                <div class="text-center mb-3">
-                    <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Cours inscrits</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ inscriptions|length }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-book fa-2x text-gray-300"></i></div>
                 </div>
-                <h5 class="font-weight-bold text-gray-800 text-center">{{ ins.cours.titre }}</h5>
-                <hr>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-left-success shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">En cours</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_en_cours|default:"0" }}</div>
 
-                <div class="small mb-2">
-                    <i class="fas fa-calendar-alt mr-2"></i> <strong>Inscrit le :</strong> {{ ins.date_inscription|date:"d/m/Y H:i" }}
-                </div>
-                
-                <div class="mt-4">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Progression
-                        <span class="float-right">{% if ins.statut == 'terminee' %}100%{% else %}25%{% endif %}</span>
                     </div>
-                    <div class="progress progress-sm mr-2">
-                        <div class="progress-bar bg-success" role="progressbar"
-                            style="width: {% if ins.statut == 'terminee' %}100%{% else %}25%{% endif %}" aria-valuenow="50" aria-valuemin="0"
-                            aria-valuemax="100"></div>
-                    </div>
+                    <div class="col-auto"><i class="fas fa-spinner fa-2x text-gray-300"></i></div>
                 </div>
-            </div>
-            <div class="card-footer bg-white">
-                <a href="#" class="btn btn-primary btn-block btn-sm">Accéder aux cours</a>
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12 text-center py-5">
-        <div class="mb-4">
-            <i class="fas fa-book-open fa-5x text-gray-300"></i>
+    <div class="col-md-4 mb-3">
+        <div class="card border-left-info shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Terminés</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_termines|default:"0" }}</div>
+
+                    </div>
+                    <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
         </div>
-        <h3>Vous n'êtes inscrit à aucune formation.</h3>
-        <p class="text-muted">Parcourez notre catalogue pour commencer à apprendre !</p>
-        <a href="{% url 'course' %}" class="btn btn-primary">Voir le catalogue des cours</a>
     </div>
-    {% endfor %}
 </div>
+
+<!-- ── Liste des cours inscrits ── -->
+<div class="formations-card">
+    <div class="card-header-custom">
+        <i class="fas fa-list-check"></i>
+        Mes cours inscrits
+        <span class="badge badge-light ml-auto" style="color:#4e73df;">{{ inscriptions|length }} cours</span>
+    </div>
+
+    {% if inscriptions %}
+    <ul class="formations-list" id="cours-inscrits-list">
+        {% for ins in inscriptions %}
+        <li id="cours-item-{{ ins.id }}">
+
+            <!-- ✅ Case cochée -->
+            <div class="cours-check" title="Inscrit(e)">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <!-- Infos -->
+            <div class="cours-info">
+                <div class="cours-titre">{{ ins.cours.titre }}</div>
+                <div class="cours-meta">
+                    {% if ins.cours.categorie %}
+                    <span><i class="fas fa-tag"></i> {{ ins.cours.categorie.nom }}</span>
+                    {% endif %}
+                    <span><i class="fas fa-layer-group"></i> {{ ins.cours.niveau }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> Inscrit le {{ ins.date_inscription|date:"d/m/Y" }}</span>
+                </div>
+                <div class="progress-mini">
+                    <div class="bar" style="width: {{ ins.progression }}%"></div>
+                </div>
+
+            </div>
+
+            <!-- Badge statut -->
+            <div>
+                {% if ins.statut == 'validee' %}
+                    <span class="badge-statut badge-validee"><i class="fas fa-circle" style="font-size:.5rem;"></i> Actif</span>
+                {% elif ins.statut == 'terminee' %}
+                    <span class="badge-statut badge-terminee"><i class="fas fa-check-circle"></i> Terminé</span>
+                {% elif ins.statut == 'en_attente' %}
+                    <span class="badge-statut badge-en_attente"><i class="fas fa-clock"></i> En attente</span>
+                {% elif ins.statut == 'annulee' %}
+                    <span class="badge-statut badge-annulee"><i class="fas fa-times-circle"></i> Annulé</span>
+                {% endif %}
+            </div>
+
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% else %}
+    <!-- ── Aucun cours ── -->
+    <div class="empty-state" id="empty-formations">
+        <i class="fas fa-book-open"></i>
+        <h4>Aucune formation inscrite</h4>
+        <p>Vous n'êtes encore inscrit(e) à aucun cours.<br>Parcourez le catalogue pour commencer à apprendre !</p>
+        <a href="{% url 'course' %}" class="btn btn-primary px-4 rounded-pill mt-2" id="btn-catalogue-empty">
+            <i class="fas fa-search mr-1"></i> Voir le catalogue
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if nouveaux_cours %}
+<!-- ── Section Nouveaux cours disponibles dans vos domaines ── -->
+<div class="mt-4">
+    <div class="formations-card">
+        <div class="card-header-custom" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);">
+            <i class="fas fa-star"></i>
+            Nouveaux cours dans vos domaines
+            <span class="badge badge-light ml-auto" style="color:#1cc88a;">{{ nouveaux_cours|length }} disponible{% if nouveaux_cours|length > 1 %}s{% endif %}</span>
+        </div>
+        <div style="padding: 1.25rem 1.5rem;">
+            <div class="row">
+                {% for cours in nouveaux_cours %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="nouveau-cours-card" id="nouveau-cours-{{ cours.id }}">
+                        <!-- Badge NOUVEAU -->
+                        <div class="nouveau-badge">
+                            <i class="fas fa-bolt"></i> NOUVEAU
+                        </div>
+                        <!-- Catégorie -->
+                        <div class="nouveau-categorie">
+                            <i class="fas fa-tag mr-1"></i>
+                            {{ cours.categorie.nom|default:"Formation" }}
+                        </div>
+                        <!-- Titre -->
+                        <h6 class="nouveau-titre">{{ cours.titre }}</h6>
+                        <!-- Méta -->
+                        <div class="nouveau-meta">
+                            <span><i class="fas fa-layer-group"></i> {{ cours.niveau }}</span>
+                            <span><i class="fas fa-user-tie"></i> {{ cours.enseignant.nom }} {{ cours.enseignant.prenom }}</span>
+                            <span><i class="fas fa-calendar-alt"></i> {{ cours.date_publication|date:"d/m/Y" }}</span>
+                        </div>
+                        <!-- Bouton inscription -->
+                        <form action="{% url 'inscription_cours' cours.id %}" method="POST" class="mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-inscrire w-100" id="btn-inscrire-{{ cours.id }}">
+                                <i class="fas fa-plus-circle mr-1"></i> S'inscrire maintenant
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

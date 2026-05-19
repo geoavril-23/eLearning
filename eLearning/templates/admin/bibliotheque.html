@@ -1,0 +1,127 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Bibliothèque Numérique{% endblock %}
+
+{% block extra_css %}
+<style>
+    .book-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        height: 100%;
+    }
+    .book-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .book-cover {
+        height: 250px;
+        background-color: #f8f9fc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .book-cover img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: cover;
+    }
+    .book-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+    }
+    .price-tag {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #4e73df;
+    }
+    .btn-buy {
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-book-reader text-primary mr-2"></i>Bibliothèque Numérique
+        </h1>
+        <div class="text-right">
+            <span class="badge badge-light p-2 shadow-sm">
+                <i class="fas fa-wallet mr-1 text-primary"></i> Mon Solde : <strong>{{ user.etudiant.solde|floatformat:0 }} FCFA</strong>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for livre in livres %}
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="card book-card shadow-sm">
+                <div class="book-cover">
+                    {% if livre.couverture %}
+                        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
+                    {% else %}
+                        <div class="text-center p-4">
+                            <i class="fas fa-book fa-4x text-gray-300 mb-3"></i>
+                            <p class="small text-muted">Pas de couverture</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if livre.id in livres_achetes %}
+                        <span class="badge badge-success book-badge"><i class="fas fa-check-circle mr-1"></i>Déjà acquis</span>
+                    {% elif livre.est_premium %}
+                        <span class="badge badge-warning book-badge"><i class="fas fa-crown mr-1"></i>Premium</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold text-dark mb-1">{{ livre.titre }}</h5>
+                    <p class="text-muted small mb-3">Par {{ livre.auteur }}</p>
+                    
+                    <p class="card-text small text-gray-600 mb-4">
+                        {{ livre.description|truncatechars:100 }}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="price-tag">
+                            {% if livre.prix == 0 %}Gratuit{% else %}{{ livre.prix|floatformat:0 }} <small>FCFA</small>{% endif %}
+                        </div>
+                        
+                        {% if livre.id in livres_achetes %}
+                            <a href="{{ livre.lien_externe|default:'#' }}" target="_blank" class="btn btn-primary btn-sm btn-buy">
+                                <i class="fas fa-external-link-alt mr-1"></i> Lire
+                            </a>
+                        {% else %}
+                            <form action="{% url 'acheter_livre' livre.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm btn-buy">
+                                    <i class="fas fa-shopping-cart mr-1"></i> Acheter
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-books fa-5x text-gray-200 mb-4"></i>
+            <h3>La bibliothèque est vide pour le moment</h3>
+            <p class="text-muted">Revenez bientôt pour découvrir de nouveaux ouvrages !</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -22,51 +22,209 @@
     <link href="{% static 'admin/css/sb-admin-2.min.css' %}" rel="stylesheet">
 
     <style>
-        /* Dark Mode variables and overrides */
-        body.dark-mode {
-            background-color: #1a1c23 !important;
-            color: #d1d1d1;
+        /* =====================================================
+           OpenEduVerse Dashboard — Palette #133e3f / #FFC107
+           ===================================================== */
+        :root {
+            --oe-dark:  #133e3f;
+            --oe-gold:  #FFC107;
+            --oe-teal:  #4ecdc4;
+            --oe-gold-hover-text: #133e3f;
         }
 
-        body.dark-mode #content-wrapper {
-            background-color: #1a1c23 !important;
+        /* ── 1. Search button (topbar + mobile dropdown) ─────── */
+        .navbar-search .btn-primary,
+        .btn-primary {
+            background-color: var(--oe-dark) !important;
+            border-color:     var(--oe-dark) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+            transition: background-color 0.2s ease,
+                        color 0.2s ease,
+                        border-color 0.2s ease !important;
+        }
+        .navbar-search .btn-primary:hover,
+        .btn-primary:hover {
+            background-color: var(--oe-gold) !important;
+            border-color:     var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
+        }
+        .navbar-search .btn-primary:focus,
+        .btn-primary:focus,
+        .navbar-search .btn-primary:active,
+        .btn-primary:active {
+            background-color: var(--oe-gold) !important;
+            border-color:     var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
+            box-shadow: 0 0 0 0.2rem rgba(255,193,7,0.35) !important;
         }
 
-        body.dark-mode .card {
-            background-color: #242632;
-            border-color: #323545;
-            color: #d1d1d1;
+        /* ── 2. Sidebar active menu item ─────────────────────── */
+        #accordionSidebar .nav-item.active > .nav-link,
+        #accordionSidebar .nav-item > .nav-link.active {
+            color: var(--oe-gold) !important;
+            border-left: 3px solid var(--oe-gold) !important;
+            padding-left: calc(1rem - 3px) !important;
+            font-weight: 700;
+        }
+        #accordionSidebar .nav-item > .nav-link:hover {
+            color: var(--oe-gold) !important;
         }
 
-        body.dark-mode .card-header {
-            background-color: #2b2e3c;
-            border-bottom-color: #323545;
+        /* ── 3. Chart color tokens (referenced in JS) ────────── */
+        :root {
+            --chart-color-1: #133e3f;   /* dark teal  */
+            --chart-color-2: #FFC107;   /* gold       */
+            --chart-color-3: #4ecdc4;   /* teal accent*/
+            --chart-color-4: #1a5556;   /* mid teal   */
         }
 
-        body.dark-mode .text-gray-800 {
-            color: #f8f9fc !important;
+        /* ── 4. Toast header (was bg-primary / blue) ─────────── */
+        .toast-header.bg-primary {
+            background-color: var(--oe-dark) !important;
+        }
+        .toast .btn-primary {
+            background-color: var(--oe-dark) !important;
+            border-color: var(--oe-dark) !important;
+        }
+        .toast .btn-primary:hover {
+            background-color: var(--oe-gold) !important;
+            border-color: var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
         }
 
-        body.dark-mode .bg-white {
-            background-color: #242632 !important;
+        /* ── 5. Notification icon-circle (was bg-primary) ───── */
+        .icon-circle.bg-primary {
+            background-color: var(--oe-dark) !important;
         }
 
-        body.dark-mode .topbar {
-            background-color: #242632 !important;
-            border-bottom: 1px solid #323545;
+        /* ── 6. Badge / links inside toast ──────────────────── */
+        .toast .btn-link.text-primary,
+        .toast a.text-primary {
+            color: var(--oe-dark) !important;
         }
 
-        body.dark-mode .sidebar {
-            background-color: #1a1c23 !important;
+        /* ── 7. Quick-reply send button ──────────────────────── */
+        #btnSendQuickReply {
+            background-color: var(--oe-dark) !important;
+            border-color: var(--oe-dark) !important;
+        }
+        #btnSendQuickReply:hover {
+            background-color: var(--oe-gold) !important;
+            border-color: var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
         }
 
-        body.dark-mode .table {
-            color: #d1d1d1;
+        /* ── 8. Scroll-to-top button ─────────────────────────── */
+        a.scroll-to-top {
+            background-color: var(--oe-dark) !important;
+        }
+        a.scroll-to-top:hover {
+            background-color: var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
         }
 
-        body.dark-mode .footer {
-            background-color: #1a1c23 !important;
-            border-top: 1px solid #323545;
+        /* ── Dark Mode overrides (kept) ─────────────────────── */
+        body.dark-mode { background-color: #1a1c23 !important; color: #d1d1d1; }
+        body.dark-mode #content-wrapper { background-color: #1a1c23 !important; }
+        body.dark-mode .card, [data-theme="dark"] .card, .dark-theme .card { 
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+        /* Preserve card colored left borders in dark mode globally */
+        body.dark-mode .border-left-primary, [data-theme="dark"] .border-left-primary, .dark-theme .border-left-primary { border-left: .25rem solid #fec913 !important; }
+        body.dark-mode .border-left-success, [data-theme="dark"] .border-left-success, .dark-theme .border-left-success { border-left: .25rem solid #2ecc71 !important; }
+        body.dark-mode .border-left-info, [data-theme="dark"] .border-left-info, .dark-theme .border-left-info { border-left: .25rem solid #3498db !important; }
+        body.dark-mode .border-left-warning, [data-theme="dark"] .border-left-warning, .dark-theme .border-left-warning { border-left: .25rem solid #fec913 !important; }
+        body.dark-mode .border-left-danger, [data-theme="dark"] .border-left-danger, .dark-theme .border-left-danger { border-left: .25rem solid #e74a3b !important; }
+        body.dark-mode .card-header, [data-theme="dark"] .card-header, .dark-theme .card-header { background-color: rgba(255, 255, 255, 0.02) !important; border-bottom-color: rgba(255, 255, 255, 0.08) !important; }
+        body.dark-mode .text-gray-800 { color: #f8f9fc !important; }
+        body.dark-mode .bg-white { background-color: #242632 !important; }
+        body.dark-mode .topbar { background-color: #242632 !important; border-bottom: 1px solid #323545; }
+        body.dark-mode .sidebar { background-color: #1a1c23 !important; }
+        body.dark-mode .table { color: #d1d1d1; }
+        body.dark-mode .footer { background-color: #1a1c23 !important; border-top: 1px solid #323545; }
+
+        /* General dark mode visibility fixes */
+        body.dark-mode .text-muted, [data-theme="dark"] .text-muted, .dark-theme .text-muted { color: #ffffff !important; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6,
+        [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+        .dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6 { color: #FFC107 !important; }
+        body.dark-mode p, body.dark-mode span, body.dark-mode li, body.dark-mode td, body.dark-mode th,
+        [data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] li, [data-theme="dark"] td, [data-theme="dark"] th,
+        .dark-theme p, .dark-theme span, .dark-theme li, .dark-theme td, .dark-theme th { color: #ffffff !important; }
+
+        body.dark-mode [style*="color:#133e3f"], body.dark-mode [style*="color: #133e3f"],
+        [data-theme="dark"] [style*="color:#133e3f"], [data-theme="dark"] [style*="color: #133e3f"],
+        .dark-theme [style*="color:#133e3f"], .dark-theme [style*="color: #133e3f"],
+        body.dark-mode .text-primary, [data-theme="dark"] .text-primary, .dark-theme .text-primary {
+            color: #FFC107 !important;
+        }
+
+        body.dark-mode .text-secondary, [data-theme="dark"] .text-secondary, .dark-theme .text-secondary,
+        body.dark-mode .text-gray-600, [data-theme="dark"] .text-gray-600, .dark-theme .text-gray-600,
+        body.dark-mode .text-gray-700, [data-theme="dark"] .text-gray-700, .dark-theme .text-gray-700 {
+            color: #ffffff !important;
+        }
+        /* ── Fix 1: Chart cards border radius ── */
+        .card { border-radius: 24px !important; overflow: hidden !important; }
+        .chart-card { border-radius: 24px !important; overflow: hidden !important; }
+
+        /* ── Fix 2: Mobile responsiveness ── */
+        #sidebarToggleMobile {
+            display: none;
+            position: fixed; 
+            top: 12px; 
+            left: 12px; 
+            z-index: 1000; 
+            background: #133e3f; 
+            color: white;
+            border: none; 
+            border-radius: 8px; 
+            padding: 8px 12px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggleMobile {
+                display: block;
+            }
+
+            /* Sidebar hidden by default on mobile */
+            .sidebar {
+                position: fixed !important;
+                left: -260px;
+                transition: left 0.3s ease;
+                z-index: 999;
+                height: 100vh;
+            }
+            .sidebar.open { left: 0; }
+
+            /* Main content takes full width */
+            .main-content, .dashboard-content, #content-wrapper {
+                margin-left: 0 !important;
+                padding: 12px !important;
+                width: 100% !important;
+            }
+
+            /* Cards stack vertically */
+            .row, .cards-row, .grid {
+                flex-direction: column !important;
+            }
+
+            /* Charts full width */
+            .chart-card, .col-md-8, .col-md-4, .col-xl-8, .col-xl-4, .col-lg-7, .col-lg-5 {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-bottom: 16px;
+                flex: 0 0 100% !important;
+            }
+
+            /* Navbar items compact */
+            .dashboard-navbar, .topbar {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 
@@ -74,13 +232,24 @@
 
 </head>
 
-<body id="page-top">
+<body id="page-top" class="{% if request.user.is_authenticated and request.user.theme == 'dark' %}dark-mode{% endif %}">
+    
+    <!-- Mobile Sidebar Toggle -->
+    <button id="sidebarToggleMobile">☰</button>
+
     <!-- Inline script to apply theme early and prevent flash -->
     <script>
         (function () {
+            {% if request.user.is_authenticated %}
+            const theme = "{{ request.user.theme }}";
+            {% else %}
             const theme = localStorage.getItem('theme');
+            {% endif %}
+
             if (theme === 'dark') {
                 document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
             }
         })();
     </script>
@@ -133,8 +302,11 @@
     </a>
 
     <!-- Notification Toast Container - Positionné en HAUT (Style WhatsApp/Système) -->
-    <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 10px; right: 10px; left: 10px; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; z-index: 10000;">
-        <div id="messageToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="15000" style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none;">
+    <div aria-live="polite" aria-atomic="true"
+        style="position: fixed; top: 10px; right: 10px; left: 10px; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; z-index: 10000;">
+        <div id="messageToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true"
+            data-delay="15000"
+            style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none;">
             <div class="toast-header bg-primary text-white" style="border-radius: 12px 12px 0 0;">
                 <i class="fas fa-envelope mr-2"></i>
                 <strong class="mr-auto" id="toastSender">Nouveau message</strong>
@@ -148,12 +320,14 @@
             <div class="toast-footer p-2 border-top bg-light">
                 <div class="d-flex justify-content-between align-items-center" id="toastActions">
                     <a href="{% url 'messagerie_index' %}" class="btn btn-sm btn-link text-primary p-0 ml-2">Ouvrir</a>
-                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" id="btnQuickReply">Répondre</button>
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3"
+                        id="btnQuickReply">Répondre</button>
                 </div>
                 <!-- Zone de réponse rapide cachée par défaut -->
                 <div id="quickReplyArea" style="display: none;" class="mt-2">
                     <div class="input-group">
-                        <input type="text" id="quickReplyInput" class="form-control form-control-sm" placeholder="Votre réponse...">
+                        <input type="text" id="quickReplyInput" class="form-control form-control-sm"
+                            placeholder="Votre réponse...">
                         <div class="input-group-append">
                             <button class="btn btn-primary btn-sm" type="button" id="btnSendQuickReply">
                                 <i class="fas fa-paper-plane"></i>
@@ -196,36 +370,36 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 0.3);
-            } catch (e) {}
+            } catch (e) { }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             let lastMessageCount = 0;
 
             // Gestion du bouton Répondre
-            $('#btnQuickReply').click(function() {
+            $('#btnQuickReply').click(function () {
                 // SÉCURITÉ : On empêche la notification de se fermer toute seule
                 $('#messageToast').toast('dispose'); // On arrête le timer de 15s
                 $('#messageToast').addClass('show').removeClass('hide'); // On la force à rester affichée
-                
+
                 $('#toastActions').hide();
                 $('#quickReplyArea').show();
                 $('#quickReplyInput').focus();
             });
 
             // Envoi de la réponse rapide
-            $('#btnSendQuickReply').click(function() {
+            $('#btnSendQuickReply').click(function () {
                 const contenu = $('#quickReplyInput').val().trim();
                 if (!contenu || !currentConvId) return;
 
                 const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
-                
+
                 $.ajax({
                     url: `/dashboard/messagerie/${currentConvId}/`,
                     method: 'POST',
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
                     data: { 'contenu': contenu },
-                    success: function(response) {
+                    success: function (response) {
                         $('#messageToast').toast('hide');
                         $('#quickReplyInput').val('');
                         $('#quickReplyArea').hide();
@@ -235,8 +409,8 @@
             });
 
             // Permettre d'envoyer avec la touche "Entrée"
-            $('#quickReplyInput').keypress(function(e) {
-                if(e.which == 13) {
+            $('#quickReplyInput').keypress(function (e) {
+                if (e.which == 13) {
                     $('#btnSendQuickReply').click();
                 }
             });
@@ -245,12 +419,12 @@
                 $.ajax({
                     url: "{% url 'api_unread_messages' %}",
                     method: 'GET',
-                    success: function(data) {
+                    success: function (data) {
                         if (data.count > 0) {
                             $('#notification-badge').text(data.count > 9 ? '9+' : data.count).show();
-                            
+
                             let html = '<h6 class="dropdown-header">Centre de Notifications</h6>';
-                            data.notifications.forEach(function(n) {
+                            data.notifications.forEach(function (n) {
                                 html += `
                                     <a class="dropdown-item d-flex align-items-center" href="${n.url}">
                                         <div class="mr-3">
@@ -285,10 +459,100 @@
 
             // Vérifier toutes les 10 secondes
             setInterval(checkNewMessages, 10000);
-            
+
             // Première vérification après 2 secondes pour initialiser le compteur
             setTimeout(checkNewMessages, 2000);
         });
+    </script>
+
+    <script>
+        // Recherche intelligente dans le sidebar
+        function setupSidebarSearch(inputId) {
+            const searchInput = document.getElementById(inputId);
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function () {
+                const filter = this.value.toLowerCase().trim();
+                const sidebar = document.getElementById('accordionSidebar');
+                if (!sidebar) return;
+
+                const items = sidebar.querySelectorAll('.nav-item');
+                const headings = sidebar.querySelectorAll('.sidebar-heading');
+                const dividers = sidebar.querySelectorAll('.sidebar-divider');
+
+                if (filter === "") {
+                    // Reset if empty
+                    items.forEach(el => el.style.display = "");
+                    headings.forEach(el => el.style.display = "");
+                    dividers.forEach(el => el.style.display = "");
+                    return;
+                }
+
+                // Filter items
+                items.forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    // Don't hide the brand or the toggler
+                    if (item.classList.contains('sidebar-brand') || item.querySelector('#sidebarToggle')) return;
+
+                    if (text.includes(filter)) {
+                        item.style.display = "";
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+
+                // Hide headings and dividers during search for a cleaner look
+                headings.forEach(el => el.style.display = "none");
+                dividers.forEach(el => el.style.display = "none");
+            });
+        }
+
+        // Fonction globale pour changer le thème
+        function setTheme(theme) {
+            fetch("{% url 'toggle_theme' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'theme=' + theme
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const currentTheme = "{{ request.user.theme|default:'light' }}";
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        $(document).ready(function() {
+            $('#themeToggle').on('click', function (e) {
+                e.preventDefault();
+                toggleTheme();
+            });
+
+            setupSidebarSearch('sidebarSearch');
+            setupSidebarSearch('sidebarSearchMobile');
+        });
+    </script>
+
+
+    <script>
+        var sidebarBtn = document.getElementById('sidebarToggleMobile');
+        if (sidebarBtn) {
+            sidebarBtn.addEventListener('click', function() {
+                var sidebar = document.querySelector('.sidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('open');
+                }
+            });
+        }
     </script>
 </body>
 

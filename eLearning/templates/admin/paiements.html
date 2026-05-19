@@ -1,122 +1,151 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block title %}Paiements & Revenus - Administrateur{% endblock %}
+{% block title %}
+    {% if user.is_etudiant %}Mon Portefeuille{% else %}Paiements & Revenus{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .balance-card {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    .balance-card .circles {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        opacity: 0.1;
+    }
+    .transaction-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .bg-light-success { background-color: rgba(28, 200, 138, 0.1); color: #1cc88a; }
+    .bg-light-primary { background-color: rgba(78, 115, 223, 0.1); color: #4e73df; }
+    .bg-light-warning { background-color: rgba(246, 194, 62, 0.1); color: #f6c23e; }
+    .bg-light-info { background-color: rgba(54, 185, 204, 0.1); color: #36b9cc; }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Paiements & Revenus</h1>
-        <button class="btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Exporter en Excel</button>
+        <h1 class="h3 mb-0 text-gray-800">
+            {% if user.is_etudiant %}Mon Portefeuille{% else %}Gestion des Paiements{% endif %}
+        </h1>
+        {% if user.is_etudiant %}
+        <button class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#rechargeModal">
+            <i class="fas fa-plus fa-sm text-white-50 mr-2"></i>Recharger mon solde
+        </button>
+        {% endif %}
     </div>
 
-    <!-- Stats Cards -->
+    {% if user.is_etudiant %}
+    <!-- Vue Étudiant -->
     <div class="row">
-        <!-- Revenu Total -->
+        <!-- Solde Actuel -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+            <div class="card balance-card shadow h-100 py-3">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Revenu Total (Cumulé)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|default:"1,245,000" }} FCFA</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-money-bill-wave fa-2x text-gray-300"></i></div>
+                    <div class="circles">
+                        <i class="fas fa-circle fa-9x"></i>
+                    </div>
+                    <div class="text-xs font-weight-bold text-uppercase mb-1 opacity-75">Solde Disponible</div>
+                    <div class="h2 mb-0 font-weight-bold">{{ etudiant.solde|floatformat:0 }} FCFA</div>
+                    <div class="mt-3 small">
+                        <i class="fas fa-shield-alt mr-1"></i> Argent simulé pour démo
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Transactions du mois -->
+        <!-- Total Dépensé -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Transactions (Mois-ci)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_paiements_mois|default:"42" }}</div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Dépensé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_depense|floatformat:0 }} FCFA</div>
                         </div>
                         <div class="col-auto"><i class="fas fa-shopping-cart fa-2x text-gray-300"></i></div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Taux de conversion -->
+        <!-- Total Rechargé -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+            <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Taux de Conversion (Premium)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.taux_conversion|default:"12.5" }}%</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Rechargé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_recharge|floatformat:0 }} FCFA</div>
                         </div>
-                        <div class="col-auto"><i class="fas fa-percentage fa-2x text-gray-300"></i></div>
+                        <div class="col-auto"><i class="fas fa-arrow-circle-up fa-2x text-gray-300"></i></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- DataTales Example -->
+
+    <!-- Historique des Transactions -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Dernières Transactions</h6>
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Historique des Transactions</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered text-center" id="dataTablePaiements" width="100%" cellspacing="0">
-                    <thead class="bg-gray-100">
+                <table class="table table-hover" id="dataTableTransactions" width="100%" cellspacing="0">
+                    <thead>
                         <tr>
-                            <th>Référence</th>
-                            <th>Étudiant</th>
+                            <th>Type</th>
+                            <th>Description</th>
                             <th>Montant</th>
                             <th>Date</th>
-                            <th>Moyen</th>
                             <th>Statut</th>
-                            <th>Reçu</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for p in tous_les_paiements %}
+                        {% for t in transactions %}
                         <tr>
-                            <td>#PAY-{{ p.id }}</td>
-                            <td>{{ p.etudiant.nom }}</td>
-                            <td>{{ p.montant }} FCFA</td>
-                            <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
-                            <td>{{ p.moyen_paiement }}</td>
-                            <td><span class="badge badge-success">Validé</span></td>
-                            <td><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-invoice"></i></a></td>
+                            <td>
+                                {% if t.type_transaction == 'recharge' %}
+                                    <div class="transaction-icon bg-light-success"><i class="fas fa-arrow-down"></i></div>
+                                {% elif t.type_transaction == 'achat_cours' %}
+                                    <div class="transaction-icon bg-light-primary"><i class="fas fa-graduation-cap"></i></div>
+                                {% elif t.type_transaction == 'achat_chapitre' %}
+                                    <div class="transaction-icon bg-light-info"><i class="fas fa-unlock"></i></div>
+                                {% else %}
+                                    <div class="transaction-icon bg-light-warning"><i class="fas fa-book"></i></div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="font-weight-bold">{{ t.get_type_transaction_display }}</span><br>
+                                <small class="text-muted">{{ t.description }}</small>
+                            </td>
+                            <td>
+                                <span class="{% if t.type_transaction == 'recharge' %}text-success{% else %}text-danger{% endif %} font-weight-bold">
+                                    {% if t.type_transaction == 'recharge' %}+{% else %}-{% endif %} {{ t.montant|floatformat:0 }} FCFA
+                                </span>
+                            </td>
+                            <td>{{ t.date_transaction|date:"d/m/Y H:i" }}</td>
+                            <td><span class="badge badge-success">Confirmé</span></td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td>#PAY-1289</td>
-                            <td>Traoré Moussa</td>
-                            <td>15,000 FCFA</td>
-                            <td>12/04/2026</td>
-                            <td>Orange Money</td>
-                            <td><span class="badge badge-success">Validé</span></td>
-                            <td><i class="fas fa-file-pdf text-danger"></i></td>
-                        </tr>
-                        <tr>
-                            <td>#PAY-1288</td>
-                            <td>Diallo Aissata</td>
-                            <td>25,000 FCFA</td>
-                            <td>11/04/2026</td>
-                            <td>Carte Bancaire</td>
-                            <td><span class="badge badge-success">Validé</span></td>
-                            <td><i class="fas fa-file-pdf text-danger"></i></td>
-                        </tr>
-                        <tr>
-                            <td>#PAY-1287</td>
-                            <td>Koffi Kouamé</td>
-                            <td>10,000 FCFA</td>
-                            <td>10/04/2026</td>
-                            <td>Moov Money</td>
-                            <td><span class="badge badge-warning">En attente</span></td>
-                            <td>-</td>
+                            <td colspan="5" class="text-center py-4 text-muted">Aucune transaction effectuée.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -124,6 +153,193 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Recharge -->
+    <div class="modal fade" id="rechargeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recharger mon solde (Simulation)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'recharger_solde' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Montant de la recharge (FCFA)</label>
+                            <select name="montant" class="form-control">
+                                <option value="5000">5,000 FCFA</option>
+                                <option value="10000" selected>10,000 FCFA</option>
+                                <option value="25000">25,000 FCFA</option>
+                                <option value="50000">50,000 FCFA</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle mr-1"></i> Cette action est purement fictive et sert à tester le système de paiement.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Confirmer la recharge</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ══ Vue Admin/Enseignant ══ -->
+    <!-- Cartes de statistiques -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Dépensé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|floatformat:0 }} FCFA</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-money-bill-wave fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Rechargé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_recharges|floatformat:0 }} FCFA</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-wallet fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Étudiants Actifs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_etudiants_actifs }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Nb Transactions</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_transactions }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-exchange-alt fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des soldes par étudiant -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-users mr-2"></i>Portefeuilles des Étudiants</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="dataTableEtudiants" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Solde Actuel</th>
+                            <th>Total Rechargé</th>
+                            <th>Total Dépensé</th>
+                            <th>Nb Opérations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in etudiants_data %}
+                        <tr>
+                            <td>
+                                <div class="font-weight-bold">{{ item.user.nom }} {{ item.user.prenom }}</div>
+                                <div class="small text-muted">{{ item.user.email }}</div>
+                            </td>
+                            <td><span class="font-weight-bold text-primary">{{ item.solde|floatformat:0 }} FCFA</span></td>
+                            <td><span class="text-success">+{{ item.total_recharge|floatformat:0 }} FCFA</span></td>
+                            <td><span class="text-danger">-{{ item.total_depense|floatformat:0 }} FCFA</span></td>
+                            <td>
+                                <span class="badge badge-secondary px-3 py-1">{{ item.nb_transactions }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">Aucun étudiant inscrit.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique complet de toutes les transactions -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Historique Complet des Transactions</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTablePaiementsAdmin" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Montant</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in toutes_transactions %}
+                        <tr>
+                            <td>
+                                <div class="font-weight-bold">{{ t.etudiant.nom }} {{ t.etudiant.prenom }}</div>
+                                <div class="small text-muted">{{ t.etudiant.email }}</div>
+                            </td>
+                            <td>
+                                {% if t.type_transaction == 'recharge' %}
+                                    <span class="badge badge-success px-2 py-1 rounded-pill"><i class="fas fa-arrow-down mr-1"></i>Recharge</span>
+                                {% elif t.type_transaction == 'achat_cours' %}
+                                    <span class="badge badge-primary px-2 py-1 rounded-pill"><i class="fas fa-graduation-cap mr-1"></i>Cours</span>
+                                {% elif t.type_transaction == 'achat_chapitre' %}
+                                    <span class="badge badge-info px-2 py-1 rounded-pill"><i class="fas fa-unlock mr-1"></i>Chapitre</span>
+                                {% else %}
+                                    <span class="badge badge-warning px-2 py-1 rounded-pill"><i class="fas fa-book mr-1"></i>Livre</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ t.description }}</td>
+                            <td>
+                                <span class="font-weight-bold {% if t.type_transaction == 'recharge' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if t.type_transaction == 'recharge' %}+{% else %}-{% endif %}{{ t.montant|floatformat:0 }} FCFA
+                                </span>
+                            </td>
+                            <td>{{ t.date_transaction|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">Aucune transaction.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 
 </div>
 {% endblock %}
@@ -133,7 +349,7 @@
 <script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 <script>
     $(document).ready(function() {
-        $('#dataTablePaiements').DataTable({
+        $('#dataTableTransactions, #dataTablePaiementsAdmin').DataTable({
             "order": [[ 3, "desc" ]],
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"

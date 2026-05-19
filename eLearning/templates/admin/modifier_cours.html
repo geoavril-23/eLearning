@@ -111,7 +111,7 @@
                     <textarea class="form-control" id="description" name="description" rows="5" required>{{ cours.description }}</textarea>
                 </div>
 
-                <div class="form-group mb-5">
+                <div class="form-group mb-4">
                     <label for="ressource" class="font-weight-bold">Ressource actuelle : 
                         {% if cours.ressource %}
                             <span class="text-primary">{{ cours.get_extension|upper }}</span>
@@ -122,6 +122,36 @@
                     <div class="custom-file">
                         <input type="file" class="custom-file-input" id="ressource" name="ressource">
                         <label class="custom-file-label" for="ressource">Changer de fichier (optionnel)...</label>
+                    </div>
+                </div>
+
+                <div class="card bg-light border-left-success mb-5">
+                    <div class="card-body">
+                        <h6 class="font-weight-bold text-success mb-3">
+                            <i class="fas fa-crown mr-2"></i>Options Premium
+                        </h6>
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="est_premium" name="est_premium" {% if cours.est_premium %}checked{% endif %}>
+                                    <label class="custom-control-label font-weight-bold" for="est_premium">Cours Premium</label>
+                                </div>
+                                <small class="text-muted">Rendre ce cours payant.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="prix" class="small font-weight-bold">Prix (FCFA)</label>
+                                    <input type="number" class="form-control form-control-sm" id="prix" name="prix" value="{{ cours.prix|floatformat:0 }}" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="lien_youtube" class="small font-weight-bold">Lien Vidéo Premium (YouTube)</label>
+                                    <input type="url" class="form-control form-control-sm" id="lien_youtube" name="lien_youtube" value="{{ cours.lien_youtube|default:'' }}" placeholder="https://youtube.com/...">
+                                </div>
+                                <small class="text-muted small">Visible seulement après achat.</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

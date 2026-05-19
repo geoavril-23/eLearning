@@ -1,0 +1,155 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Corriger une copie | eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #4e73df;
+        margin: 0;
+    }
+    
+    .student-info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #1cc88a;
+    }
+    
+    .content-box {
+        background: #f8f9fc;
+        border: 1px solid #e3e6f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .grading-box {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 2rem;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .answer-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #4e73df;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <a href="{% url 'corrections_attente' %}" class="btn btn-sm btn-light rounded-circle mr-2" style="width:35px; height:35px; line-height:23px; padding:0;">
+            <i class="fas fa-arrow-left text-primary"></i>
+        </a>
+        Correction de Copie
+    </h1>
+</div>
+
+<div class="student-info-card">
+    <div class="row align-items-center">
+        <div class="col-md-3 border-right text-center">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.75rem;">Étudiant</h6>
+            <div class="font-weight-bold text-gray-800" style="font-size: 1.2rem;">{{ soumission.etudiant.nom }} {{ soumission.etudiant.prenom }}</div>
+        </div>
+        <div class="col-md-3 border-right text-center">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.75rem;">Quiz</h6>
+            <div class="font-weight-bold text-gray-800">{{ soumission.quiz.titre }}</div>
+        </div>
+        <div class="col-md-3 border-right text-center">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.75rem;">Soumis le</h6>
+            <div class="font-weight-bold text-gray-800">{{ soumission.date_soumission|date:"d/m/Y à H:i" }}</div>
+        </div>
+        <div class="col-md-3 text-center">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.75rem;">Note Maximale</h6>
+            <div class="font-weight-bold text-warning" style="font-size: 1.2rem;"><i class="fas fa-star mr-1"></i> {{ soumission.quiz.note_max }} pts</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Colonne Travail de l'étudiant -->
+    <div class="col-lg-8 mb-4">
+        <h5 class="font-weight-bold text-gray-800 mb-3"><i class="fas fa-file-alt mr-2 text-primary"></i>Travail soumis</h5>
+        
+        <div class="content-box">
+            {% if soumission.fichier_reponse %}
+                <div class="text-center py-4">
+                    <i class="fas fa-file-word fa-4x text-primary mb-3"></i>
+                    <h4 class="text-gray-800 mb-2">Fichier de réponse fourni</h4>
+                    <p class="text-muted mb-4">{{ soumission.fichier_reponse.name|slice:"17:" }}</p>
+                    <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-primary rounded-pill px-4 shadow-sm" download target="_blank">
+                        <i class="fas fa-download mr-2"></i> Télécharger et lire la copie
+                    </a>
+                </div>
+            {% elif questions_info %}
+                <h6 class="text-uppercase text-muted font-weight-bold mb-3">Réponses au QCM interactif</h6>
+                {% for q in questions_info %}
+                <div class="answer-item">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="font-weight-bold text-gray-800">{{ q.question }}</div>
+                        <span class="badge badge-light border">{{ q.points }} pts</span>
+                    </div>
+                    <div class="text-primary mt-2">
+                        <i class="fas fa-reply fa-rotate-180 mr-2 opacity-50"></i> <strong>Réponse de l'étudiant :</strong> {{ q.reponse }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-warning text-center">
+                    Aucun contenu trouvé pour cette soumission. L'étudiant a peut-être soumis un formulaire vide.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Colonne Évaluation -->
+    <div class="col-lg-4">
+        <div class="grading-box sticky-top" style="top: 2rem;">
+            <h5 class="font-weight-bold text-gray-800 mb-4"><i class="fas fa-check-circle mr-2 text-success"></i>Évaluation</h5>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group mb-4">
+                    <label class="font-weight-bold text-gray-700">Note attribuée</label>
+                    <div class="input-group">
+                        <input type="number" step="0.5" min="0" max="{{ soumission.quiz.note_max }}" name="note" class="form-control form-control-lg text-center font-weight-bold text-success" required placeholder="0.0">
+                        <div class="input-group-append">
+                            <span class="input-group-text bg-light font-weight-bold">/ {{ soumission.quiz.note_max }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="font-weight-bold text-gray-700">Commentaire (Feedback)</label>
+                    <textarea class="form-control" name="commentaires" rows="5" placeholder="Saisissez vos observations pour aider l'étudiant à progresser..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-lg btn-block rounded-pill shadow-sm font-weight-bold">
+                    <i class="fas fa-save mr-2"></i> Enregistrer la correction
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -86,6 +86,14 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="form-label">Type de correction</label>
+                            <select name="type_correction" class="form-control" required>
+                                <option value="manuelle">Correction Manuelle (par l'enseignant)</option>
+                                <option value="auto">Correction Automatique (par l'IA Gemini)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label">Fichier du Quiz (Optionnel - PDF, Word...)</label>
                             <div class="custom-file">
                                 <input type="file" name="fichier_quiz" class="custom-file-input" id="fichier_quiz" onchange="togglePoints(this)">

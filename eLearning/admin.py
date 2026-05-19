@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Etudiant, Administrateur, Enseignant, Inscription, Cours, Quiz, Paiement
+from .models import User, Etudiant, Administrateur, Enseignant, Inscription, Cours, Quiz, Paiement, Chapitre, ChapitreDebloque, TransactionSimulee
 
 
 class CustomUserAdmin(UserAdmin):
@@ -25,12 +25,12 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Etudiant)
 class EtudiantAdmin(admin.ModelAdmin):
-    list_display = ['email', 'nom', 'prenom', 'niveau', 'etablissement', 'is_active']
+    list_display = ['email', 'nom', 'prenom', 'niveau', 'solde', 'is_active']
     list_filter = ['niveau', 'is_active']
     search_fields = ['email', 'nom', 'prenom', 'etablissement']
     fieldsets = (
         ('Informations utilisateur', {'fields': ('email', 'nom', 'prenom', 'age', 'adresse', 'password')}),
-        ('Informations étudiant', {'fields': ('niveau', 'etablissement')}),
+        ('Informations étudiant', {'fields': ('niveau', 'etablissement', 'solde')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
     )
 
@@ -75,13 +75,17 @@ class QuizInline(admin.TabularInline):
     extra = 0
 
 
+class ChapitreInline(admin.TabularInline):
+    model = Chapitre
+    extra = 1
+
 @admin.register(Cours)
 class CoursAdmin(admin.ModelAdmin):
-    list_display = ['titre', 'niveau', 'enseignant', 'date_publication']
+    list_display = ['titre', 'niveau', 'enseignant', 'date_publication', 'image']
     list_filter = ['niveau', 'date_publication']
     search_fields = ['titre', 'description', 'objectif']
     readonly_fields = ['date_publication']
-    inlines = [QuizInline]
+    inlines = [QuizInline, ChapitreInline]
 
 
 @admin.register(Quiz)
@@ -106,5 +110,21 @@ class PaiementAdmin(admin.ModelAdmin):
     search_fields = ['etudiant__nom', 'etudiant__prenom', 'etudiant__email']
     readonly_fields = ['date_paiement']
 
+
+@admin.register(Chapitre)
+class ChapitreAdmin(admin.ModelAdmin):
+    list_display = ['titre', 'cours', 'est_premium', 'prix', 'ordre']
+    list_filter = ['cours', 'est_premium']
+    search_fields = ['titre', 'description']
+
+@admin.register(ChapitreDebloque)
+class ChapitreDebloqueAdmin(admin.ModelAdmin):
+    list_display = ['etudiant', 'chapitre', 'date_deblocage']
+    list_filter = ['date_deblocage']
+
+@admin.register(TransactionSimulee)
+class TransactionSimuleeAdmin(admin.ModelAdmin):
+    list_display = ['etudiant', 'type_transaction', 'montant', 'date_transaction']
+    list_filter = ['type_transaction', 'date_transaction']
 
 admin.site.register(User, CustomUserAdmin)

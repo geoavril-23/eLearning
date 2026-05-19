@@ -1,340 +1,588 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<style>
-  :root {
-    --teal: #2bbfbf;
-    --teal-dark: #1a9e9e;
-    --navy: #1a1a2e;
-    --yellow: #fec913;
-    --gray: #f8f9fa;
-  }
-
-  .scrolling-container {
-    background-color: rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 10px 0;
-  }
-
-  .scrolling-text {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 25s linear infinite;
-    color: #fff;
-    font-weight: 600;
-    font-size: 1rem;
-    text-transform: uppercase;
-  }
-
-  .scrolling-text span {
-    margin-right: 50px;
-  }
-
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-  /* HERO */
-  .contact-hero {
-    background: linear-gradient(135deg, var(--navy) 0%, #0f3460 100%);
-    padding: 80px 0;
-    text-align: center;
-    color: white;
-  }
-
-  .contact-hero h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-  }
-
-  .contact-hero h1 span {
-    color: var(--yellow);
-  }
-
-  .contact-hero p {
-    color: #ccc;
-    font-size: 1.1rem;
-    margin-top: 15px;
-  }
-
-  /* SECTION TITLE */
-  .section-title {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-
-  .section-title h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--navy);
-    display: inline-block;
-  }
-
-  .section-title h2::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 4px;
-    background: var(--yellow);
-    margin: 10px auto 0;
-    border-radius: 2px;
-  }
-
-  /* CONTACT SECTION */
-  .contact-section {
-    padding: 70px 0;
-    background: var(--gray);
-  }
-
-  /* INFO CARDS */
-  .info-card {
-    background: white;
-    border-radius: 15px;
-    padding: 30px 20px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s, box-shadow 0.3s;
-    height: 100%;
-    border-top: 4px solid var(--teal);
-  }
-
-  .info-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  }
-
-  .info-card .icon-box {
-    width: 65px;
-    height: 65px;
-    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px;
-    font-size: 1.6rem;
-    color: white;
-  }
-
-  .info-card h5 {
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 10px;
-  }
-
-  .info-card p {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 0;
-    line-height: 1.8;
-  }
-
-  .info-card a {
-    color: #666;
-    text-decoration: none;
-    display: block;
-    font-size: 0.9rem;
-  }
-
-  .info-card a:hover {
-    color: var(--teal);
-  }
-
-  /* FORM */
-  .form-section {
-    padding: 70px 0;
-    background: white;
-  }
-
-  .form-card {
-    background: white;
-    border-radius: 15px;
-    padding: 45px 40px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    border-top: 5px solid var(--teal);
-  }
-
-  .form-card h3 {
-    font-weight: 700;
-    color: var(--navy);
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .form-card h3 span {
-    color: var(--teal);
-  }
-
-  .form-group label {
-    font-weight: 600;
-    color: var(--navy);
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-  }
-
-  .form-group .form-control {
-    border: 2px solid #eee;
-    border-radius: 8px;
-    padding: 12px 15px;
-    font-size: 0.95rem;
-    transition: border-color 0.3s;
-  }
-
-  .form-group .form-control:focus {
-    border-color: var(--teal);
-    box-shadow: 0 0 0 0.2rem rgba(43, 191, 191, 0.2);
-    outline: none;
-  }
-
-  .btn-send {
-    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-    color: white;
-    border: none;
-    padding: 14px 50px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
-    width: 100%;
-  }
-
-  .btn-send:hover {
-    background: linear-gradient(135deg, var(--teal-dark), var(--navy));
-    transform: translateY(-2px);
-  }
-
-  /* MAP PLACEHOLDER */
-  .map-section {
-    padding: 0;
-  }
-
-  .map-placeholder {
-    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-</style>
-{% endblock %}
-
 {% block body_class %}sub_page{% endblock %}
 
 {% block hero_content %}
-<div class="scrolling-container">
-  <div class="scrolling-text">
-    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
-    <span>Nous formons en Licence & Master</span>
-    <span>Participez aux visioconférences</span>
-    <span>Téléchargez vos ressources</span>
-    <span>Obtenez des Badges et des Certifications</span>
+<section class="oo-contact-hero" aria-label="Contact OpenEduVerse">
+  <div class="oo-contact-hero__overlay" aria-hidden="true"></div>
+
+  <div class="container oo-contact-hero__center">
+    <div class="row align-items-stretch justify-content-center">
+      <div class="col-lg-10">
+        <div class="oo-contact-grid" role="group" aria-label="Formulaire de contact et coordonnées">
+          <!-- LEFT: Contact form card -->
+          <article
+            class="oo-glass-card oo-glass-card--tilt oo-glass-card--form"
+            tabindex="0"
+            aria-label="Formulaire de contact"
+            data-tilt
+          >
+            <div class="oo-liquid-border" aria-hidden="true"></div>
+
+            <div class="oo-glass-card__inner oo-glass-card__inner--stack">
+              <header class="oo-card-header">
+                <h1 class="oo-card-title">
+                  Contactez<span class="oo-card-title__accent">-nous</span>
+                </h1>
+                <p class="oo-card-subtitle">
+                  Une question ? Un besoin d'accompagnement ? Notre équipe est là pour vous répondre dans les plus brefs délais.
+                </p>
+              </header>
+
+              {% if messages %}
+                <div class="oo-messages" aria-live="polite">
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} oo-alert">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <form action="" method="POST" class="oo-form" autocomplete="on">
+                {% csrf_token %}
+
+                <div class="oo-field">
+                  <label for="id_name">Votre Nom</label>
+                  <input
+                    id="id_name"
+                    type="text"
+                    name="name"
+                    class="oo-input"
+                    placeholder="Entrez votre nom complet"
+                    required
+                  />
+                </div>
+
+                <div class="oo-field">
+                  <label for="id_email">Votre Email</label>
+                  <input
+                    id="id_email"
+                    type="email"
+                    name="email"
+                    class="oo-input"
+                    placeholder="exemple@domaine.com"
+                    required
+                  />
+                </div>
+
+                <div class="oo-field">
+                  <label for="id_message">Votre Message</label>
+                  <textarea
+                    id="id_message"
+                    name="message"
+                    class="oo-textarea"
+                    rows="5"
+                    placeholder="Comment pouvons-nous vous aider ?"
+                    required
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="oo-submit-btn" aria-label="Envoyer le message">
+                  <i class="fas fa-paper-plane oo-submit-btn__icon" aria-hidden="true"></i>
+                  Envoyer le message
+                </button>
+
+                <p class="oo-form-hint">
+                  En envoyant ce message, vous acceptez d'être contacté par OpenEduVerse.
+                </p>
+              </form>
+            </div>
+          </article>
+
+          <!-- RIGHT: Coordinates + map card -->
+          <aside
+            class="oo-glass-card oo-glass-card--tilt oo-glass-card--coords"
+            tabindex="0"
+            aria-label="Coordonnées"
+            data-tilt
+          >
+            <div class="oo-liquid-border" aria-hidden="true"></div>
+
+            <div class="oo-glass-card__inner">
+              <header class="oo-card-header oo-card-header--compact">
+                <h2 class="oo-card-title oo-card-title--sm">
+                  Nos<span class="oo-card-title__accent"> Coordonnées</span>
+                </h2>
+              </header>
+
+              <div class="oo-coord-list" aria-label="Coordonnées">
+                <div class="oo-coord-item">
+                  <div class="oo-coord-icon" aria-hidden="true">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div class="oo-coord-text">
+                    <div class="oo-coord-label">Adresse</div>
+                    <div class="oo-coord-value">Lomé, Togo</div>
+                  </div>
+                </div>
+
+                <div class="oo-coord-item">
+                  <div class="oo-coord-icon oo-coord-icon--alt" aria-hidden="true">
+                    <i class="fas fa-phone-alt"></i>
+                  </div>
+                  <div class="oo-coord-text">
+                    <div class="oo-coord-label">Téléphone</div>
+                    <div class="oo-coord-value">+228 90 44 35 04 / 93 55 86 68</div>
+                  </div>
+                </div>
+
+                <div class="oo-coord-item">
+                  <div class="oo-coord-icon" aria-hidden="true">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <div class="oo-coord-text">
+                    <div class="oo-coord-label">Email Support</div>
+                    <div class="oo-coord-value">support@openeduverse.com</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="oo-map-wrap" aria-label="Carte Lomé">
+                <iframe
+                  class="oo-map-iframe"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126906.91771146317!2d1.1390453303643764!3d6.192135081075677!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1023e1c5324e44f9%3A0x13009772ba6e1b6c!2sLom%C3%A9!5e0!3m2!1sfr!2stg!4v1715694000000!5m2!1sfr!2stg"
+                  width="100%"
+                  height="100%"
+                  style="border:0;"
+                  allowfullscreen=""
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Carte Lomé - Togo"
+                ></iframe>
+              </div>
+
+              <div class="oo-coords-footer">
+                <a href="tel:+22890443504" class="oo-link">📞 Appeler</a>
+                <span class="oo-link-sep" aria-hidden="true">•</span>
+                <a href="mailto:support@openeduverse.com" class="oo-link">✉️ Écrire</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <style>
+    :root {
+      --oo-teal-1: rgba(0, 210, 200, 0.70);
+      --oo-teal-2: rgba(19, 62, 63, 0.80);
+      --oo-gold: #FFC107;
+      --oo-green: #133e3f;
+      --oo-text: rgba(255, 255, 255, 0.92);
+    }
+
+    /* Hero */
+    .oo-contact-hero {
+      position: relative;
+      width: 100%;
+      min-height: 78vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 70px 0;
+      overflow: hidden;
+      background-image: url({% static 'images/login-bg.jpg' %});
+      background-size: cover;
+      background-position: center;
+    }
+
+    .oo-contact-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--oo-teal-1), var(--oo-teal-2));
+      z-index: 0;
+    }
+
+    .oo-contact-hero__center {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Two-column inside hero */
+    .oo-contact-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    @media (max-width: 992px) {
+      .oo-contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Glass card base */
+    .oo-glass-card {
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 900px;
+      border-radius: 28px;
+      animation: oo-float 4.6s ease-in-out infinite;
+      outline: none;
+      user-select: none;
+      min-height: 420px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+
+    .oo-glass-card--coords {
+      min-height: 420px;
+      animation-delay: 0.15s;
+    }
+
+    @keyframes oo-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Liquid / blob border morph */
+    .oo-liquid-border {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 28px;
+      border: 2px solid rgba(255, 193, 7, 0.35);
+      box-shadow: 0 0 0 rgba(255, 193, 7, 0.0);
+      background: rgba(255, 255, 255, 0.05);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      overflow: hidden;
+    }
+
+    .oo-glass-card:hover .oo-liquid-border {
+      border-color: rgba(255, 193, 7, 0.95);
+      box-shadow: 0 22px 70px rgba(255, 193, 7, 0.20);
+      animation: oo-liquid-border-morph 1.18s ease-in-out infinite;
+    }
+
+    @keyframes oo-liquid-border-morph {
+      0% { border-radius: 28px 45px 25px 55px; }
+      25% { border-radius: 45px 28px 55px 25px; }
+      50% { border-radius: 30px 60px 30px 50px; }
+      75% { border-radius: 60px 35px 50px 28px; }
+      100% { border-radius: 28px 45px 25px 55px; }
+    }
+
+    /* Inner */
+    .oo-glass-card__inner {
+      position: relative;
+      z-index: 1;
+      padding: 28px 28px 22px;
+      transform: translateZ(30px);
+      color: var(--oo-text);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .oo-glass-card__inner--stack {
+      gap: 14px;
+    }
+
+    .oo-card-header {
+      margin-bottom: 2px;
+    }
+
+    .oo-card-header--compact {
+      margin-bottom: 0;
+    }
+
+    .oo-card-title {
+      margin: 0;
+      font-weight: 800;
+      font-size: 2.25rem;
+      letter-spacing: 0.2px;
+      color: rgba(255, 255, 255, 0.97);
+      text-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    }
+
+    .oo-card-title--sm {
+      font-size: 1.65rem;
+    }
+
+    .oo-card-title__accent {
+      color: var(--oo-gold);
+    }
+
+    .oo-card-subtitle {
+      margin: 10px 0 0;
+      font-size: 1.02rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    /* Messages */
+    .oo-messages {
+      margin-top: 4px;
+    }
+
+    .oo-alert {
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    /* Form */
+    .oo-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .oo-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .oo-field label {
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 0.95rem;
+    }
+
+    .oo-input, .oo-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .oo-input::placeholder, .oo-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.70);
+    }
+
+    .oo-input:focus, .oo-textarea:focus {
+      border-color: rgba(255, 193, 7, 0.9);
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .oo-submit-btn {
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(19, 62, 63, 0.95) 0%, rgba(26, 85, 86, 1) 100%);
+      box-shadow: 0 18px 35px rgba(19, 62, 63, 0.25);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+
+    .oo-submit-btn__icon {
+      margin-right: 10px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .oo-submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(255, 193, 7, 0.0) 30%,
+        rgba(255, 193, 7, 0.55) 50%,
+        rgba(255, 193, 7, 0.0) 70%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      transition: transform 0.7s ease;
+      pointer-events: none;
+    }
+
+    .oo-submit-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 25px 60px rgba(19, 62, 63, 0.30);
+      filter: brightness(1.05);
+    }
+
+    .oo-submit-btn:hover::after {
+      transform: translateX(120%);
+    }
+
+    .oo-form-hint {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    /* Coordinates */
+    .oo-coord-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding-top: 4px;
+    }
+
+    .oo-coord-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .oo-coord-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: var(--oo-gold);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      flex: 0 0 auto;
+    }
+
+    .oo-coord-icon--alt {
+      color: rgba(255, 255, 255, 0.92);
+      border-color: rgba(255, 255, 255, 0.30);
+    }
+
+    .oo-coord-label {
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.96);
+      margin-bottom: 4px;
+    }
+
+    .oo-coord-value {
+      color: rgba(255, 255, 255, 0.80);
+      line-height: 1.4;
+    }
+
+    /* Map */
+    .oo-map-wrap {
+      margin-top: auto;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.10);
+      box-shadow: 0 18px 55px rgba(0,0,0,0.18);
+      height: 250px;
+    }
+
+    .oo-map-iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      filter: saturate(1.1) contrast(1.05);
+    }
+
+    .oo-coords-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 6px;
+      color: rgba(255,255,255,0.88);
+      font-weight: 800;
+    }
+
+    .oo-link {
+      color: var(--oo-gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 193, 7, 0.45);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .oo-link:hover {
+      color: #FFD54F;
+      border-color: rgba(255, 193, 7, 0.95);
+    }
+
+    .oo-link-sep {
+      opacity: 0.6;
+    }
+
+    /* Parallax tilt (separate cards) */
+    .oo-glass-card--tilt {
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .oo-glass-card { animation: none; }
+      .oo-submit-btn::after { transition: none; }
+      .oo-glass-card:hover .oo-liquid-border { animation: none; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      const cards = document.querySelectorAll('[data-tilt]');
+      if (!cards || !cards.length) return;
+
+      const maxTilt = 11; // degrees
+      let rafMap = new Map();
+
+      function setTilt(card, rx, ry) {
+        card.style.transform = `translateY(-8px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      }
+
+      function resetTilt(card) {
+        card.style.transform = '';
+      }
+
+      cards.forEach((card) => {
+        // Ensure float animation remains; we only override on hover.
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width; // 0..1
+          const y = (e.clientY - rect.top) / rect.height; // 0..1
+
+          const rotY = (x - 0.5) * (2 * maxTilt);
+          const rotX = -(y - 0.5) * (2 * maxTilt);
+
+          const prev = rafMap.get(card);
+          if (prev) cancelAnimationFrame(prev);
+
+          const id = requestAnimationFrame(() => {
+            setTilt(card, rotX, rotY);
+          });
+          rafMap.set(card, id);
+        });
+
+        card.addEventListener('mouseleave', () => {
+          const prev = rafMap.get(card);
+          if (prev) cancelAnimationFrame(prev);
+          resetTilt(card);
+        });
+
+        card.addEventListener('touchend', () => {
+          const prev = rafMap.get(card);
+          if (prev) cancelAnimationFrame(prev);
+          resetTilt(card);
+        });
+      });
+    })();
+  </script>
+</section>
 {% endblock %}
 
 {% block content %}
-<!-- HERO -->
-<section class="contact-hero">
-  <div class="container">
-    <h1>Contactez <span>OpenEduVerse</span></h1>
-    <p>Notre équipe est disponible pour répondre à toutes vos questions.</p>
-  </div>
-</section>
-
-<!-- INFO CARDS -->
-<section class="contact-section">
-  <div class="container">
-    <div class="section-title">
-      <h2>Nos Coordonnées</h2>
-    </div>
-    <div class="row">
-      <div class="col-md-4 mb-4">
-        <div class="info-card">
-          <div class="icon-box"><i class="fas fa-envelope"></i></div>
-          <h5>Email</h5>
-          <a href="mailto:awessogeorges01@gmail.com">awessogeorges01@gmail.com</a>
-          <a href="mailto:achille.banadjuba7@gmail.com">achille.banadjuba7@gmail.com</a>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="info-card">
-          <div class="icon-box"><i class="fas fa-phone-alt"></i></div>
-          <h5>Téléphone</h5>
-          <a href="tel:+22890443504">+228 90 44 35 04</a>
-          <a href="tel:+22893558668">+228 93 55 86 68</a>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="info-card">
-          <div class="icon-box"><i class="fas fa-clock"></i></div>
-          <h5>Heures d'ouverture</h5>
-          <p>Lundi - Vendredi</p>
-          <p>8h00 - 18h00</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FORMULAIRE -->
-<section class="form-section">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="form-card">
-          <h3>Envoyez-nous un <span>message</span></h3>
-          <form>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Nom complet</label>
-                  <input type="text" class="form-control" placeholder="Votre nom complet">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Email</label>
-                  <input type="email" class="form-control" placeholder="votre@email.com">
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Téléphone</label>
-                  <input type="tel" class="form-control" placeholder="+228 XX XXX XXX">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Sujet</label>
-                  <input type="text" class="form-control" placeholder="Sujet de votre message">
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Message</label>
-              <textarea class="form-control" rows="6" placeholder="Décrivez votre demande..."></textarea>
-            </div>
-            <button type="submit" class="btn-send">
-              <i class="fas fa-paper-plane mr-2"></i> Envoyer le message
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 {% endblock %}
+

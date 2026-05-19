@@ -1,0 +1,19 @@
+To fix the current error: views.py lacks def mes_courses. We'll append mes_courses at end of file (or appropriate section) to match urls.py and render templates/mes_courses.html.
+The UI request earlier said: bring mes_formations.html -> page mes_formations directive exists.
+
+Implementation to add:
+
+@login_required
+def mes_courses(request):
+    if not request.user.is_etudiant:
+        messages.error(request, 'Accès réservé aux étudiants.')
+        return redirect('dashboard')
+
+    inscriptions = Inscription.objects.filter(
+        etudiant=request.user.etudiant
+    ).select_related('cours', 'cours__categorie')
+
+    return render(request, 'mes_courses.html', {'inscriptions': inscriptions})
+
+(Or filter statut='validee' if desired.)
+

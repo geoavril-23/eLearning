@@ -1,74 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<style>
-  .scrolling-container {
-    background-color: rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 10px 0;
-  }
-
-  .scrolling-text {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 25s linear infinite;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-  }
-
-  .scrolling-text span {
-    margin-right: 50px;
-  }
-
-  @keyframes marquee {
-    0% {
-      transform: translate(0, 0);
-    }
-
-    100% {
-      transform: translate(-100%, 0);
-    }
-  }
-
-  .detail-box h1 {
-    color: #ffffff;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  }
-</style>
-{% endblock %}
-
 {% block hero_content %}
-<div class="scrolling-container">
-  <div class="scrolling-text">
-    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
-    <span></span>
-    <span>Nous formons en Licence & Master</span>
-    <span></span>
-    <span>Participez aux visioconférences</span>
-    <span></span>
-    <span>Téléchargez vos ressources</span>
-    <span></span>
-    <span>Obtenez des Badges et des Certifications</span>
-    <span>OpenEduVerse : L'avenir de votre éducation</span>
-  </div>
-</div>
-
-<section class="slider_section position-relative">
-  <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <div class="container">
-          <div class="row">
-            <div class="col">
-              <div class="detail-box">
-                <h1>EDUCATION DE QUALITÉ</h1>
-                <p style="color: white;">Rejoignez la révolution numérique de l'apprentissage.</p>
-              </div>
-            </div>
+<section class="slider_section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="detail-box">
+          <h1>ÉDUCATION DE <span>QUALITÉ</span></h1>
+          <div class="description-card">
+            <p>
+              <i class="fas fa-magic" style="color: #fec913; margin-right: 10px;"></i>
+              Rejoignez la révolution numérique et transformez votre avenir avec des formations certifiantes de haut niveau.
+            </p>
+          </div>
+          <div class="btn-box">
+            <a href="{% url 'course' %}" class="btn-yellow-glass">Explorer les cours</a>
+            <a href="{% url 'a_propos' %}" class="btn-green-glass">En savoir plus</a>
           </div>
         </div>
       </div>
@@ -79,22 +27,22 @@
 
 {% block content %}
 <section class="about_section layout_padding">
-  <div class="side_img">
-    <img src="{% static 'images/side-img.png' %}" alt="" />
-  </div>
   <div class="container">
     <div class="row">
       <div class="col-md-6">
         <div class="img_container">
-          <div class="img-box b1"><img src="{% static 'images/a-1.jpg' %}" alt="" /></div>
-          <div class="img-box b2"><img src="{% static 'images/a-2.jpg' %}" alt="" /></div>
+          <div class="img-box b1"><img src="{% static 'images/a-1.jpg' %}" alt="" class="img-fluid" /></div>
+          <div class="img-box b2" style="margin-top: -50px; margin-left: 50px;"><img src="{% static 'images/a-2.jpg' %}" alt="" class="img-fluid" /></div>
         </div>
       </div>
       <div class="col-md-6">
         <div class="detail-box">
-          <h3>À propos de notre plateforme de E-learning</h3>
-          <p>Nous offrons un environnement d'apprentissage conçu pour aider les étudiants à réaliser leur plein
-            potentiel grâce à des ressources modernes, des suivis personnalisés et une flexibilité totale.</p>
+          <h2>À propos d'OpenEduVerse</h2>
+          <p>
+            Nous offrons un environnement d'apprentissage conçu pour aider les étudiants à réaliser leur plein
+            potentiel grâce à des ressources modernes, des suivis personnalisés et une flexibilité totale.
+          </p>
+          <a href="{% url 'a_propos' %}" class="btn-yellow-glass">Découvrir notre mission</a>
         </div>
       </div>
     </div>
@@ -106,25 +54,21 @@
     <div class="row">
       <div class="col-md-6">
         <div class="detail-box">
-          <h3>OBTENEZ DES COURS EN LIGNE GRATUITEMENT</h3><br>
-          <p>Créez votre compte gratuit dès maintenant et profitez d'un accès immédiat à des centaines de ressources
-            pédagogiques.</p>
+          <h3 style="color: #133e3f; font-weight: bold;">ACCÉDEZ À DES COURS GRATUITS</h3>
+          <p>
+            Créez votre compte dès aujourd'hui et rejoignez une communauté d'apprenants passionnés. Accédez à des centaines de ressources pédagogiques sans frais.
+          </p>
           {% if user.is_authenticated %}
-          <a href="{% url 'dashboard' %}"
-            style="background:#fec913; color:#fff; padding:10px 25px; border-radius:5px; font-weight:700; text-decoration:none;">
-            Accéder à mon tableau de bord
-          </a>
+          <a href="{% url 'dashboard' %}">Mon tableau de bord</a>
           {% else %}
-          <a href="{% url 'register' %}"
-            style="background:#fec913; color:#fff; padding:10px 25px; border-radius:5px; font-weight:700; text-decoration:none;">
-            S'inscrire gratuitement
-          </a>
+          <a href="{% url 'register' %}" class="btn-yellow-glass">S'inscrire gratuitement</a>
           {% endif %}
         </div>
       </div>
-      <div class="col-md-6 text-center">
-        <img src="{% static 'images/event-img.jpg' %}" alt="E-learning" class="img-fluid rounded shadow"
-          style="max-height: 250px;">
+      <div class="col-md-6">
+        <div class="img-box">
+          <img src="{% static 'images/event-img.jpg' %}" alt="E-learning" class="img-fluid">
+        </div>
       </div>
     </div>
   </div>

@@ -19,19 +19,201 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
 
   <!-- fonts style -->
-  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
 
   <!-- Custom styles for this template -->
-  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/style.css' %}?v=1.1" rel="stylesheet" />
   <!-- responsive style -->
   <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
   
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  
+  <style>
+    /* Injected CSS to bypass cache */
+    .btn-yellow-glass, .btn-green-glass {
+      display: inline-block !important;
+      padding: 12px 35px !important;
+      border-radius: 50px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      text-decoration: none !important;
+      border: 2px solid transparent !important;
+    }
+    
+    .btn-yellow-glass {
+      background-color: #fec913 !important;
+      color: #ffffff !important;
+      border-color: #fec913 !important;
+    }
+    
+    .btn-yellow-glass:hover {
+      background-color: rgba(254, 201, 19, 0.3) !important;
+      color: #fec913 !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      box-shadow: 0 8px 32px 0 rgba(254, 201, 19, 0.4), inset 0 0 10px rgba(255,255,255,0.2) !important;
+      transform: translateY(-3px) scale(1.05) !important;
+    }
+    
+    .btn-green-glass {
+      background-color: #133e3f !important;
+      color: #ffffff !important;
+      border-color: #133e3f !important;
+    }
+    
+    .btn-green-glass:hover {
+      background-color: rgba(19, 62, 63, 0.3) !important;
+      color: #133e3f !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      box-shadow: 0 8px 32px 0 rgba(19, 62, 63, 0.4), inset 0 0 10px rgba(255,255,255,0.2) !important;
+      transform: translateY(-3px) scale(1.05) !important;
+    }
+    
+    .btn-green-glass:active, .btn-yellow-glass:active {
+      background-color: transparent !important;
+      transform: scale(0.95) !important;
+    }
+    
+    /* Nav Glass Effect */
+    .nav-glass {
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      border-radius: 50px !important;
+    }
+    
+    .nav-glass:hover {
+      background-color: rgba(254, 201, 19, 0.2) !important;
+      color: #fec913 !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      box-shadow: 0 4px 15px 0 rgba(254, 201, 19, 0.3) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* Description Card Enhancement */
+    .description-card {
+      background: rgba(255, 255, 255, 0.12) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border-left: 5px solid #fec913 !important;
+      padding: 22px 32px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 8px 32px 0 rgba(19, 62, 63, 0.1) !important;
+      margin: 25px 0 !important;
+      animation: fadeInUp 0.8s ease-out forwards !important;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .description-card:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      transform: translateY(-5px) scale(1.02) !important;
+      box-shadow: 0 15px 45px rgba(254, 201, 19, 0.2) !important;
+      border-left-width: 8px !important;
+    }
+
+    .description-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: all 0.6s;
+    }
+
+    .description-card:hover::before {
+      left: 100%;
+    }
+
+    .description-card p {
+      margin: 0 !important;
+      color: #133e3f !important;
+      font-size: 1.25rem !important;
+      line-height: 1.6 !important;
+      font-weight: 500 !important;
+      transition: color 0.3s ease !important;
+    }
+
+    .description-card:hover p {
+      color: #0c0c0c !important;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* ====== Logo Navbar — Spin + Pulse au hover ====== */
+    .oo-logo-img {
+      will-change: transform;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.3s ease;
+      display: block;
+    }
+
+    /* État repos → pas de spin */
+    .oo-logo-img.oo-logo--idle {
+      transform: scale(1) rotate(0deg);
+    }
+
+    /* Spin continu avec scale — appliqué par JS sur mouseenter */
+    .oo-logo-img.oo-logo--spinning {
+      animation: oo-logo-spin 1s linear infinite;
+      box-shadow: 0 0 22px rgba(254, 201, 19, 0.55),
+                  0 4px 10px rgba(0,0,0,0.12);
+      border-color: #fff !important;
+    }
+
+    /* Transition de sortie douce : scale revient à 1 */
+    .oo-logo-img.oo-logo--leaving {
+      animation: none;
+      transform: scale(1) rotate(0deg);
+      transition: transform 0.4s ease,
+                  box-shadow 0.35s ease;
+    }
+
+    @keyframes oo-logo-spin {
+      from { transform: scale(1.15) rotate(0deg); }
+      to   { transform: scale(1.15) rotate(360deg); }
+    }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
   <div class="hero_area">
     {% include 'partials/nav.html' %}
+    
+    <div class="scrolling-container" style="margin-top: -10px;" onmouseover="this.querySelector('.scrolling-text').style.animationPlayState='paused'"
+      onmouseout="this.querySelector('.scrolling-text').style.animationPlayState='running'">
+      <div class="scrolling-text">
+        <span>✨ Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
+        <span>✨ Participez à vos visioconférences interactives en direct</span>
+        <span>✨ Obtenez des badges et des certifications reconnues</span>
+        <span>✨ Accédez à des ressources PDF & Vidéos téléchargeables</span>
+        <span>✨ Quiz, évaluations et suivi de progression personnalisé</span>
+        <span>✨ Formations de Licence & Master en ligne</span>
+      </div>
+    </div>
     
     {% block hero_content %}{% endblock %}
   </div>
@@ -42,6 +224,42 @@
 
   <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
   <script src="{% static 'js/bootstrap.js' %}"></script>
+
+  <script>
+    /* ====== Logo Navbar — Spin + Pulse ====== */
+    (function () {
+      var logo = document.getElementById('ooLogoImg');
+      if (!logo) return;
+
+      var leaveTimer = null;
+
+      function startSpin() {
+        clearTimeout(leaveTimer);
+        logo.classList.remove('oo-logo--idle', 'oo-logo--leaving');
+        logo.classList.add('oo-logo--spinning');
+      }
+
+      function stopSpin() {
+        logo.classList.remove('oo-logo--spinning');
+        logo.classList.add('oo-logo--leaving');
+        /* Après la transition de sortie (0.4s), revenir à l'état repos */
+        leaveTimer = setTimeout(function () {
+          logo.classList.remove('oo-logo--leaving');
+          logo.classList.add('oo-logo--idle');
+        }, 420);
+      }
+
+      logo.addEventListener('mouseenter', startSpin);
+      logo.addEventListener('mouseleave', stopSpin);
+
+      /* Support tactile */
+      logo.addEventListener('touchstart', startSpin,  { passive: true });
+      logo.addEventListener('touchend',   stopSpin,   { passive: true });
+
+      /* État initial */
+      logo.classList.add('oo-logo--idle');
+    })();
+  </script>
 </body>
 
 </html>

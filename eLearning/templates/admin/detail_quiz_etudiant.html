@@ -1,0 +1,234 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Traiter le Quiz - {{ quiz.titre }} | eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #4e73df;
+        margin: 0;
+    }
+    
+    .quiz-info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #4e73df;
+    }
+    
+    .question-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eaecf4;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .question-number {
+        font-weight: 800;
+        color: #4e73df;
+        font-size: 1.1rem;
+    }
+    
+    .question-points {
+        background: #f8f9fc;
+        color: #5a5c69;
+        padding: 0.2rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+        color: #3a3b45;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+    
+    .choix-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .choix-item {
+        background: #f8f9fc;
+        border: 1px solid #eaecf4;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    
+    .choix-item:hover {
+        background: #eaecf4;
+        border-color: #d1d3e2;
+    }
+    
+    .choix-item input[type="radio"] {
+        margin-right: 1rem;
+        transform: scale(1.2);
+    }
+    
+    .file-quiz-container {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: #f8f9fc;
+        border-radius: 12px;
+        border: 2px dashed #d1d3e2;
+    }
+    
+    .file-quiz-container i {
+        font-size: 4rem;
+        color: #4e73df;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Dark mode */
+    body.dark-mode .quiz-info-card, body.dark-mode .question-card { background: #242632; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    body.dark-mode .question-text { color: #f8f9fc; }
+    body.dark-mode .choix-item { background: #2b2e3c; border-color: #323545; color: #d1d3e2; }
+    body.dark-mode .choix-item:hover { background: #323545; }
+    body.dark-mode .file-quiz-container { background: #242632; border-color: #323545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <a href="{% url 'mes_quiz_etudiant' %}" class="btn btn-sm btn-light rounded-circle mr-2" style="width:35px; height:35px; line-height:23px; padding:0;">
+            <i class="fas fa-arrow-left text-primary"></i>
+        </a>
+        Épreuve : {{ quiz.titre }}
+    </h1>
+</div>
+
+<div class="quiz-info-card">
+    <div class="row text-center">
+        <div class="col-md-3 mb-2 mb-md-0">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.7rem;">Cours</h6>
+            <div class="font-weight-bold text-gray-800">{{ quiz.cours.titre }}</div>
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0 border-left">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.7rem;">Enseignant</h6>
+            <div class="font-weight-bold text-gray-800">{{ quiz.cours.enseignant.nom }} {{ quiz.cours.enseignant.prenom }}</div>
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0 border-left">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.7rem;">Durée</h6>
+            <div class="font-weight-bold text-gray-800"><i class="fas fa-clock text-warning mr-1"></i> {{ quiz.duree }}</div>
+        </div>
+        <div class="col-md-3 border-left">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-1" style="font-size: 0.7rem;">Note Maximale</h6>
+            <div class="font-weight-bold text-gray-800"><i class="fas fa-star text-warning mr-1"></i> {{ quiz.note_max }} pts</div>
+        </div>
+    </div>
+</div>
+
+{% if quiz.fichier_quiz %}
+<!-- Si le quiz est un fichier -->
+<div class="file-quiz-container">
+    <i class="fas fa-file-download"></i>
+    <h3 class="text-gray-800 font-weight-bold mb-3">Épreuve au format document</h3>
+    <p class="text-muted mb-4">Ce quiz n'est pas un QCM interactif. Veuillez télécharger le document ci-dessous pour traiter l'épreuve.</p>
+    
+    <a href="{{ quiz.fichier_quiz.url }}" class="btn btn-outline-primary btn-lg rounded-pill px-5 shadow-sm mb-4" download target="_blank">
+        <i class="fas fa-download mr-2"></i> Télécharger le sujet
+    </a>
+
+    <hr class="my-4">
+    
+    <h5 class="font-weight-bold text-gray-800 mb-3">Soumettre votre réponse</h5>
+    <form action="{% url 'soumettre_quiz' quiz.id %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group mb-4 text-left" style="max-width: 400px; margin: 0 auto;">
+            <label class="font-weight-bold">Fichier de réponse (PDF, Word, Image) :</label>
+            <input type="file" name="fichier_reponse" class="form-control-file" required>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 shadow-sm">
+            <i class="fas fa-paper-plane mr-2"></i> Envoyer ma copie
+        </button>
+    </form>
+</div>
+
+{% else %}
+<!-- Si le quiz est un QCM -->
+{% if questions %}
+<form action="{% url 'soumettre_quiz' quiz.id %}" method="POST" id="quizForm">
+    {% csrf_token %}
+    
+    {% for question in questions %}
+    <div class="question-card">
+        <div class="question-header">
+            <div class="question-number">Question {{ forloop.counter }}</div>
+            <div class="question-points">{{ question.points }} point{{ question.points|pluralize }}</div>
+        </div>
+        
+        <div class="question-text">
+            {{ question.texte|linebreaksbr }}
+        </div>
+        
+        {% if question.media %}
+        <div class="mb-4 text-center">
+            <img src="{{ question.media.url }}" alt="Média de la question" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+        </div>
+        {% endif %}
+        
+        {% if not question.est_ouverte %}
+        <ul class="choix-list">
+            {% for choix in question.choix.all %}
+            <label class="choix-item" for="choix_{{ choix.id }}">
+                <input type="radio" name="question_{{ question.id }}" id="choix_{{ choix.id }}" value="{{ choix.texte }}" required>
+                <span>{{ choix.texte }}</span>
+            </label>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="form-group mt-3">
+            <textarea class="form-control" name="question_{{ question.id }}" rows="4" placeholder="Saisissez votre réponse ici..." required></textarea>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    
+    <div class="text-center mt-4 mb-5">
+        <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 shadow-sm">
+            <i class="fas fa-paper-plane mr-2"></i> Soumettre mes réponses
+        </button>
+    </div>
+</form>
+
+{% else %}
+<div class="alert alert-warning text-center rounded-pill py-3">
+    <i class="fas fa-exclamation-triangle mr-2"></i> Ce QCM ne contient aucune question pour le moment.
+</div>
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

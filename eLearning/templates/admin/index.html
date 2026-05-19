@@ -4,299 +4,279 @@
 {% block title %}Dashboard - eLearning{% endblock %}
 
 {% block content %}
+<style>
+    /* MODERN DASHBOARD SYSTEM */
+    .stat-panel {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 25px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+    }
+
+    .stat-panel:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Left border styles for premium look */
+    .stat-panel.border-left-primary { border-left: 6px solid #133e3f !important; }
+    .stat-panel.border-left-success { border-left: 6px solid #1cc88a !important; }
+    .stat-panel.border-left-info { border-left: 6px solid #36b9cc !important; }
+    .stat-panel.border-left-warning { border-left: 6px solid #fec913 !important; }
+    .stat-panel.border-left-danger { border-left: 6px solid #e74a3b !important; }
+
+    /* Dark mode support for stat-panel */
+    body.dark-mode .stat-panel {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    body.dark-mode .stat-panel.border-left-primary { border-left: 6px solid #fec913 !important; }
+    body.dark-mode .stat-panel.border-left-success { border-left: 6px solid #2ecc71 !important; }
+    body.dark-mode .stat-panel.border-left-info { border-left: 6px solid #3498db !important; }
+    body.dark-mode .stat-panel.border-left-warning { border-left: 6px solid #fec913 !important; }
+    body.dark-mode .stat-panel.border-left-danger { border-left: 6px solid #e74a3b !important; }
+
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .panel-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .panel-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #133e3f;
+    }
+
+    body.dark-mode .panel-value {
+        color: #ffffff !important;
+    }
+    body.dark-mode .panel-title {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>
+
 <!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">
-        {% if request.user.is_administrateur %}Tableau de Bord Administrateur
+<div class="d-sm-flex align-items-center justify-content-between mb-5">
+    <h1 class="h3 mb-0" style="font-weight: 800; color: #133e3f;">
+        {% if request.user.is_administrateur %}Dashboard Administrateur
         {% elif request.user.is_enseignant %}Espace Enseignant
         {% else %}Mon Espace Apprenant{% endif %}
     </h1>
-    <div>
-        {% if request.user.is_administrateur %}
-        <a href="{% url 'liste_utilisateurs' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2"><i class="fas fa-users fa-sm text-white-50"></i> Gérer Utilisateurs</a>
-        {% endif %}
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Générer Rapport</a>
-    </div>
+    {% if request.user.is_administrateur %}
+    <a href="{% url 'liste_utilisateurs' %}" class="btn btn-sm btn-primary shadow-sm"
+        style="border-radius: 10px; padding: 8px 20px; background: #133e3f; border: none;">
+        <i class="fas fa-users mr-2"></i> Gérer Utilisateurs
+    </a>
+    {% endif %}
 </div>
 
-<!-- STATS CARDS (Dynamic by Role) -->
-<div class="row">
-
+<!-- STATS CARDS -->
+<div class="row mb-5">
     {% if request.user.is_administrateur %}
-        <!-- Admin Cards -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Utilisateurs Total</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_users|default:"1,250" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
-                    </div>
+    <!-- Admin Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Utilisateurs Total</div>
+                    <div class="panel-value">{{ stats.total_users|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(19, 62, 63, 0.1); color: #133e3f;">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Cours Publiés</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_courses|default:"48" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-book fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Cours Publiés</div>
+                    <div class="panel-value">{{ stats.total_courses|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
+                    <i class="fas fa-book"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Taux d'Engagement</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.engagement|default:"78" }}%</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-chart-line fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Engagement</div>
+                    <div class="panel-value">{{ stats.engagement|default:"0" }}%</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
+                    <i class="fas fa-chart-line"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Revenus (Mois)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_mois|default:"450,000" }} FCFA</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-wallet fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Revenus (Mois)</div>
+                    <div class="panel-value">{{ stats.revenu_mois|default:"0" }} <small style="font-size: 0.9rem; font-weight: 700;">FCFA</small></div>
+                </div>
+                <div class="icon-circle" style="background: rgba(254, 201, 19, 0.1); color: #fec913;">
+                    <i class="fas fa-wallet"></i>
                 </div>
             </div>
         </div>
+    </div>
 
     {% elif request.user.is_enseignant %}
-        <!-- Teacher Cards -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Mes Cours</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.mes_cours|default:"5" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i></div>
-                    </div>
+    <!-- Teacher Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Mes Cours</div>
+                    <div class="panel-value">{{ stats.mes_cours|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(19, 62, 63, 0.1); color: #133e3f;">
+                    <i class="fas fa-chalkboard-teacher"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Apprenants</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_eleves|default:"320" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-user-graduate fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Total Apprenants</div>
+                    <div class="panel-value">{{ stats.total_eleves|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
+                    <i class="fas fa-user-graduate"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Réussite Quiz</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.reussite_quiz|default:"82" }}%</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-medal fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Réussite Quiz</div>
+                    <div class="panel-value">{{ stats.reussite_quiz|default:"0" }}%</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
+                    <i class="fas fa-medal"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Questions en attente</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.questions_attente|default:"12" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-comments fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Questions en attente</div>
+                    <div class="panel-value">{{ stats.questions_attente|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(254, 201, 19, 0.1); color: #fec913;">
+                    <i class="fas fa-comments"></i>
                 </div>
             </div>
         </div>
+    </div>
 
     {% else %}
-        <!-- Student Cards -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Cours Suivis</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.cours_suivis|default:"3" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-graduation-cap fa-2x text-gray-300"></i></div>
-                    </div>
+    <!-- Student Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Cours Suivis</div>
+                    <div class="panel-value">{{ stats.cours_suivis|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(19, 62, 63, 0.1); color: #133e3f;">
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Progression Globale</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.progression|default:"65" }}%</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-tasks fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Progression Globale</div>
+                    <div class="panel-value">{{ stats.progression|default:"0" }}%</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
+                    <i class="fas fa-tasks"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Moyenne Quiz</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.moyenne|default:"14.5" }}/20</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-pen-nib fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Moyenne Quiz</div>
+                    <div class="panel-value">{{ stats.moyenne|default:"0" }}/20</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
+                    <i class="fas fa-pen-nib"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Temps Apprentissage</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.temps|default:"24h" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-clock fa-2x text-gray-300"></i></div>
-                    </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-panel border-left-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="panel-title">Temps Apprentissage</div>
+                    <div class="panel-value">{{ stats.temps|default:"0" }}</div>
+                </div>
+                <div class="icon-circle" style="background: rgba(254, 201, 19, 0.1); color: #fec913;">
+                    <i class="fas fa-clock"></i>
                 </div>
             </div>
         </div>
+    </div>
     {% endif %}
-
 </div>
-<!-- Row for Graphs and Lists -->
-<div class="row">
 
-    <!-- Area Chart (Engagement / Inscriptions) -->
+<!-- CHARTS AREA -->
+<div class="row">
     <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    {% if request.user.is_administrateur %}Inscriptions par mois
-                    {% elif request.user.is_enseignant %}Progression des élèves
-                    {% else %}Mon Activité Hebdomadaire{% endif %}
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="chart-area">
-                    <canvas id="myAreaChart"></canvas>
-                </div>
+        <div class="stat-panel chart-card mb-4 p-4">
+            <h6 class="font-weight-bold mb-4" style="color: #133e3f;">Activité & Engagement</h6>
+            <div class="chart-area" style="height: 320px;">
+                <canvas id="myAreaChart"></canvas>
             </div>
         </div>
     </div>
-
-    <!-- Pie Chart (Repartition / Reussite) -->
     <div class="col-xl-4 col-lg-5">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    {% if request.user.is_administrateur %}Répartition des rôles
-                    {% elif request.user.is_enseignant %}Taux de réussite
-                    {% else %}Répartition du temps{% endif %}
-                </h6>
+        <div class="stat-panel chart-card mb-4 p-4">
+            <h6 class="font-weight-bold mb-4" style="color: #133e3f;">Répartition</h6>
+            <div class="chart-pie pt-4 pb-2" style="height: 250px;">
+                <canvas id="myPieChart"></canvas>
             </div>
-            <div class="card-body">
-                <div class="chart-pie pt-4 pb-2">
-                    <canvas id="myPieChart"></canvas>
-                </div>
-                <div class="mt-4 text-center small">
-                    <span class="mr-2"><i class="fas fa-circle text-primary"></i> Data 1</span>
-                    <span class="mr-2"><i class="fas fa-circle text-success"></i> Data 2</span>
-                    <span class="mr-2"><i class="fas fa-circle text-info"></i> Data 3</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bottom Section: specific lists -->
-<div class="row">
-
-    <!-- Progress Column (Specific for Students or Teachers) -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    {% if request.user.is_etudiant %}Mes Matières Choisies
-                    {% else %}Cours les plus populaires{% endif %}
-                </h6>
-            </div>
-            <div class="card-body">
-                {% if request.user.is_etudiant %}
-                    {% for inscription in mes_inscriptions %}
-                    <h4 class="small font-weight-bold">{{ inscription.cours.titre }} <span class="float-right">{% if inscription.statut == 'terminee' %}100%{% else %}En cours{% endif %}</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar {% if forloop.counter|divisibleby:2 %}bg-success{% else %}bg-info{% endif %}" role="progressbar" style="width: {% if inscription.statut == 'terminee' %}100%{% else %}25%{% endif %}"></div>
-                    </div>
-                    {% empty %}
-                    <p class="text-center py-4">Vous n'avez pas encore choisi de matières.</p>
-                    <div class="text-center">
-                        <a href="{% url 'course' %}" class="btn btn-primary btn-sm">Découvrir les cours</a>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <h4 class="small font-weight-bold">Développement Web <span class="float-right">20%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Python Backend <span class="float-right">40%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Intelligence Artificielle <span class="float-right">60%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar" role="progressbar" style="width: 60%"></div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Side Info -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Plateforme eLearning</h6>
-            </div>
-            <div class="card-body">
-                <p>Bienvenue sur votre espace personnalisé. Utilisez le menu latéral pour accéder à vos cours, statistiques et paramètres.</p>
-                <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 15rem;" src="{% static 'admin/img/undraw_posting_photo.svg' %}" alt="...">
-                </div>
+            <div class="mt-4 text-center small">
+                <span class="mr-2"><i class="fas fa-circle" style="color:#133e3f;"></i> Actif</span>
+                <span class="mr-2"><i class="fas fa-circle" style="color:#FFC107;"></i> Complété</span>
+                <span class="mr-2"><i class="fas fa-circle" style="color:#4ecdc4;"></i> En attente</span>
             </div>
         </div>
     </div>
@@ -307,60 +287,53 @@
 {% block extra_js %}
 <script src="{% static 'admin/vendor/chart.js/Chart.min.js' %}"></script>
 <script>
-    // Configuration globale de Chart.js pour un look Premium
-    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    // Modern Chart.js Config
+    Chart.defaults.global.defaultFontFamily = 'Poppins', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
     Chart.defaults.global.defaultFontColor = '#858796';
 
-    // 1. AREA CHART (Progression / Inscriptions)
     var ctxArea = document.getElementById("myAreaChart");
     var myAreaChart = new Chart(ctxArea, {
         type: 'line',
         data: {
-            labels: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
-            datasets: [{
-                label: "Activité",
-                lineTension: 0.3,
-                backgroundColor: "rgba(78, 115, 223, 0.05)",
-                borderColor: "rgba(78, 115, 223, 1)",
-                pointRadius: 3,
-                pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                pointBorderColor: "rgba(78, 115, 223, 1)",
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                pointHitRadius: 10,
-                pointBorderWidth: 2,
-                data: {{ activite_data|safe }}, // Données réelles envoyées par Python
+            labels: {{ activite_labels|default:'["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]'|safe }},
+    datasets: [{
+        label: "Activité",
+        lineTension: 0.4,
+        backgroundColor: "rgba(19, 62, 63, 0.05)",
+        borderColor: "rgba(19, 62, 63, 1)",
+        pointRadius: 4,
+        pointBackgroundColor: "rgba(19, 62, 63, 1)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        data: {{ activite_data|default:"[]"|safe }},
             }],
         },
-        options: {
-            maintainAspectRatio: false,
+    options: {
+        maintainAspectRatio: false,
             layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
-            scales: {
-                xAxes: [{ gridLines: { display: false, drawBorder: false } }],
-                yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
+        scales: {
+            xAxes: [{ gridLines: { display: false, drawBorder: false } }],
+                yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "#f1f5f9", zeroLineColor: "#f1f5f9", drawBorder: false } }],
             },
-            legend: { display: false },
-            tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleFontColor: '#6e707e', borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 }
-        }
+        legend: { display: false },
+        tooltips: { backgroundColor: "#fff", bodyFontColor: "#555", titleFontColor: '#133e3f', borderColor: '#edf2f7', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 }
+    }
     });
 
-    // 2. PIE CHART (Répartition)
     var ctxPie = document.getElementById("myPieChart");
     var myPieChart = new Chart(ctxPie, {
         type: 'doughnut',
         data: {
-            labels: ["Succès", "Moyen", "Échec"],
+            labels: ["Direct", "Social", "Referral"],
             datasets: [{
-                data: {{ reussite_data|safe }},
-                backgroundColor: ['#1cc88a', '#4e73df', '#e74a3b'],
-                hoverBackgroundColor: ['#17a673', '#2e59d9', '#be2617'],
+                data: [55, 30, 15],
+                backgroundColor: ['#133e3f', '#fec913', '#4bc5b8'],
                 hoverBorderColor: "rgba(234, 236, 244, 1)",
             }],
         },
         options: {
             maintainAspectRatio: false,
-            tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+            tooltips: { backgroundColor: "#fff", bodyFontColor: "#555", borderColor: '#edf2f7', borderWidth: 1 },
             legend: { display: false },
             cutoutPercentage: 80,
         },

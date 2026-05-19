@@ -1,7 +1,7 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block title %}Créer un Cours - Enseignant{% endblock %}
+{% block title %}Ajouter un Chapitre - Enseignant{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -56,7 +56,7 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">
-        <i class="fas fa-plus-circle text-primary mr-2"></i>Nouveau Cours
+        <i class="fas fa-plus-circle text-primary mr-2"></i>Ajouter un Chapitre
     </h1>
     <a href="{% url 'dashboard_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
         <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Retour au Dashboard
@@ -81,7 +81,7 @@
 <div class="row">
     <div class="col-lg-8 mx-auto">
         <div class="form-container mb-5">
-            <h5 class="font-weight-bold text-primary mb-4 border-bottom pb-2">Informations du Cours</h5>
+            <h5 class="font-weight-bold text-primary mb-4 border-bottom pb-2">Informations du Chapitre</h5>
             
             <form action="{% url 'creer_cours_enseignant' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -89,9 +89,9 @@
                 <div class="row">
                     <div class="col-md-8">
                         <div class="form-group mb-4">
-                            <label for="titre" class="font-weight-bold">Titre du Cours <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="titre" name="titre" placeholder="Ex: Introduction à l'Intelligence Artificielle" required>
-                            <small class="form-text text-muted">Soyez précis, c'est ce que verront les étudiants.</small>
+                            <label for="titre" class="font-weight-bold">Titre du Chapitre <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="titre" name="titre" placeholder="Ex: Introduction aux variables" required>
+                            <small class="form-text text-muted">Précisez le nom du chapitre que vous ajoutez.</small>
                         </div>
                     </div>
                     
@@ -100,9 +100,6 @@
                             <label for="niveau" class="font-weight-bold">Niveau <span class="text-danger">*</span></label>
                             <select class="form-control" id="niveau" name="niveau" required>
                                 <option value="" disabled selected>Sélectionner...</option>
-                                <option value="Débutant">Débutant</option>
-                                <option value="Intermédiaire">Intermédiaire</option>
-                                <option value="Avancé">Avancé</option>
                                 <option value="Licence">Licence</option>
                                 <option value="Master">Master</option>
                             </select>
@@ -113,29 +110,29 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group mb-4">
-                            <label for="categorie" class="font-weight-bold">Catégorie / Thématique <span class="text-danger">*</span></label>
-                            <select class="form-control" id="categorie" name="categorie" required>
-                                <option value="" disabled selected>Sélectionner la catégorie...</option>
-                                {% for cat in categories %}
-                                    <option value="{{ cat.id }}">{{ cat }}</option>
+                            <label for="cours_id" class="font-weight-bold">Sélectionner le Cours <span class="text-danger">*</span></label>
+                            <select class="form-control" id="cours_id" name="cours_id" required>
+                                <option value="" disabled selected>Sélectionner le cours auquel ajouter ce chapitre...</option>
+                                {% for c in mes_cours %}
+                                    <option value="{{ c.id }}">{{ c.titre }}</option>
                                 {% endfor %}
                             </select>
-                            <small class="form-text text-muted">Aidez les étudiants à trouver votre cours en choisissant la bonne catégorie.</small>
+                            <small class="form-text text-muted">Choisissez le cours parent pour ce chapitre.</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="objectif" class="font-weight-bold">Objectif principal <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="objectif" name="objectif" rows="2" placeholder="Que sauront faire les étudiants à la fin de ce cours ?" required></textarea>
+                    <label for="objectif" class="font-weight-bold">Objectif principal</label>
+                    <textarea class="form-control" id="objectif" name="objectif" rows="2" placeholder="Que sauront faire les étudiants à la fin de ce cours ?"></textarea>
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="description" class="font-weight-bold">Description complète <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="Décrivez le contenu pédagogique, les prérequis et le syllabus global..." required></textarea>
+                    <label for="description" class="font-weight-bold">Description complète</label>
+                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="Décrivez le contenu pédagogique, les prérequis et le syllabus global..."></textarea>
                 </div>
 
-                <div class="form-group mb-5">
+                <div class="form-group mb-4">
                     <label for="ressource" class="font-weight-bold">Fichiers ou Ressources (Syllabus, PDF, etc.)</label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input" id="ressource" name="ressource">
@@ -144,11 +141,41 @@
                     <small class="form-text text-muted mt-1">Sera disponible en téléchargement pour les élèves inscrits.</small>
                 </div>
 
+                <div class="card bg-light border-left-primary mb-5">
+                    <div class="card-body">
+                        <h6 class="font-weight-bold text-primary mb-3">
+                            <i class="fas fa-crown mr-2"></i>Options Premium
+                        </h6>
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="est_premium" name="est_premium">
+                                    <label class="custom-control-label font-weight-bold" for="est_premium">Cours Premium</label>
+                                </div>
+                                <small class="text-muted">Rendre ce cours payant.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="prix" class="small font-weight-bold">Prix (FCFA)</label>
+                                    <input type="number" class="form-control form-control-sm" id="prix" name="prix" value="0" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="lien_youtube" class="small font-weight-bold">Lien Vidéo Premium (YouTube)</label>
+                                    <input type="url" class="form-control form-control-sm" id="lien_youtube" name="lien_youtube" placeholder="https://youtube.com/...">
+                                </div>
+                                <small class="text-muted small">Visible seulement après achat.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <hr class="mb-4">
                 
                 <div class="text-center">
                     <button type="submit" class="btn btn-publish px-5">
-                        <i class="fas fa-paper-plane mr-2"></i> Publier le Cours
+                        <i class="fas fa-paper-plane mr-2"></i> Publier le Chapitre
                     </button>
                     <p class="mt-3 text-muted small">En cliquant sur Publier, le cours sera immédiatement disponible pour les inscriptions.</p>
                 </div>

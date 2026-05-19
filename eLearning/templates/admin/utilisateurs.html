@@ -9,93 +9,77 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Gestion des Utilisateurs</h1>
-        <a href="#" class="btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Ajouter manuellement</a>
+        <button class="btn btn-sm btn-primary shadow-sm rounded-pill px-4" data-toggle="modal" data-target="#modalCreateUser">
+            <i class="fas fa-user-plus fa-sm text-white-50 mr-2"></i> Ajouter un utilisateur
+        </button>
     </div>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Liste des Utilisateurs Inscrits</h6>
-            <div class="dropdown no-arrow">
-                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                    <div class="dropdown-header">Filtres :</div>
-                    <a class="dropdown-item" href="#">Étudiants uniquement</a>
-                    <a class="dropdown-item" href="#">Enseignants uniquement</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Utilisateurs désactivés</a>
-                </div>
-            </div>
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des Utilisateurs</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="bg-gray-100">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="bg-light">
                         <tr>
                             <th>Nom & Prénom</th>
                             <th>Email</th>
                             <th>Rôle</th>
-                            <th>Statut</th>
                             <th>Date d'inscription</th>
+                            <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for u in tous_utilisateurs %}
+                        {% for user in utilisateurs %}
                         <tr>
-                            <td>{{ u.nom }} {{ u.prenom }}</td>
-                            <td>{{ u.email }}</td>
                             <td>
-                                <span class="badge {% if u.is_administrateur %}badge-danger{% elif u.is_enseignant %}badge-success{% else %}badge-info{% endif %} text-uppercase">
-                                    {{ u.role }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge {% if u.is_active %}badge-success{% else %}badge-secondary{% endif %}">
-                                    {% if u.is_active %}Actif{% else %}Désactivé{% endif %}
-                                </span>
-                            </td>
-                            <td>{{ u.date_joined|date:"d/m/Y" }}</td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm" title="Modifier/Rôle"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-outline-warning btn-sm" title="{% if u.is_active %}Désactiver{% else %}Réactiver{% endif %}">
-                                        <i class="fas fa-power-off"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" title="Supprimer"><i class="fas fa-trash"></i></button>
+                                <div class="d-flex align-items-center">
+                                    {% if user.photo_profil %}
+                                        <img src="{{ user.photo_profil.url }}" class="rounded-circle mr-2" style="width: 35px; height: 35px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white mr-2" style="width: 35px; height: 35px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                    {{ user.nom }} {{ user.prenom }}
                                 </div>
                             </td>
-                        </tr>
-                        {% empty %}
-                        <!-- Simulation de données pour la démonstration frontend -->
-                        <tr>
-                            <td>Dupont Jean</td>
-                            <td>jean.dupont@email.com</td>
-                            <td><span class="badge badge-info">Étudiant</span></td>
-                            <td><span class="badge badge-success">Actif</span></td>
-                            <td>10/03/2026</td>
+                            <td>{{ user.email }}</td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-outline-warning btn-sm"><i class="fas fa-power-off"></i></button>
-                                    <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                </div>
+                                {% if user.role == 'administrateur' %}
+                                    <span class="badge badge-danger px-3 py-2 rounded-pill">Administrateur</span>
+                                {% elif user.role == 'enseignant' %}
+                                    <span class="badge badge-primary px-3 py-2 rounded-pill">Enseignant</span>
+                                {% else %}
+                                    <span class="badge badge-info px-3 py-2 rounded-pill">Étudiant</span>
+                                {% endif %}
                             </td>
-                        </tr>
-                        <tr>
-                            <td>Martin Sophie</td>
-                            <td>s.martin@university.fr</td>
-                            <td><span class="badge badge-success">Enseignant</span></td>
-                            <td><span class="badge badge-success">Actif</span></td>
-                            <td>05/01/2026</td>
+                            <td>{{ user.date_joined|date:"d/m/Y" }}</td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-outline-warning btn-sm"><i class="fas fa-power-off"></i></button>
-                                    <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                </div>
+                                {% if user.is_active %}
+                                    <span class="text-success"><i class="fas fa-check-circle mr-1"></i> Actif</span>
+                                {% else %}
+                                    <span class="text-danger"><i class="fas fa-times-circle mr-1"></i> Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#modalEditUser" 
+                                        onclick="fillEditModal('{{ user.id }}', '{{ user.nom }}', '{{ user.prenom }}', '{{ user.email }}', '{{ user.role }}')"
+                                        title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#modalDeleteUser" 
+                                        onclick="setDeleteUser('{{ user.id }}', '{{ user.email }}')"
+                                        title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -106,19 +90,142 @@
     </div>
 
 </div>
+
+<!-- Modal Création -->
+<div class="modal fade" id="modalCreateUser" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nouvel Utilisateur</h5>
+                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="{% url 'liste_utilisateurs' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="small font-weight-bold">Nom</label>
+                            <input type="text" name="nom" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="small font-weight-bold">Prénom</label>
+                            <input type="text" name="prenom" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Rôle</label>
+                        <select name="role" class="form-control" required>
+                            <option value="etudiant">Étudiant</option>
+                            <option value="enseignant">Enseignant</option>
+                            <option value="administrateur">Administrateur</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Mot de passe</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary rounded-pill px-4" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn btn-primary rounded-pill px-4" type="submit">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Édition -->
+<div class="modal fade" id="modalEditUser" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">Modifier l'Utilisateur</h5>
+                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="{% url 'liste_utilisateurs' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="user_id" id="edit_user_id">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="small font-weight-bold">Nom</label>
+                            <input type="text" name="nom" id="edit_nom" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="small font-weight-bold">Prénom</label>
+                            <input type="text" name="prenom" id="edit_prenom" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold text-muted">Changer le mot de passe (laisser vide pour ne pas modifier)</label>
+                        <input type="password" name="password" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary rounded-pill px-4" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn btn-warning rounded-pill px-4" type="submit">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Suppression -->
+<div class="modal fade" id="modalDeleteUser" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="{% url 'liste_utilisateurs' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="user_id" id="delete_user_id">
+                <div class="modal-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <br><strong id="delete_user_email"></strong> ?</p>
+                    <p class="text-danger small">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary rounded-pill px-4" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn btn-danger rounded-pill px-4" type="submit">Supprimer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Intégration de DataTables (SB Admin 2) -->
-<script src="{% static 'admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 <script>
-    $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
-            }
-        });
-    });
+    function fillEditModal(id, nom, prenom, email, role) {
+        document.getElementById('edit_user_id').value = id;
+        document.getElementById('edit_nom').value = nom;
+        document.getElementById('edit_prenom').value = prenom;
+        document.getElementById('edit_email').value = email;
+    }
+
+    function setDeleteUser(id, email) {
+        document.getElementById('delete_user_id').value = id;
+        document.getElementById('delete_user_email').innerText = email;
+    }
 </script>
 {% endblock %}

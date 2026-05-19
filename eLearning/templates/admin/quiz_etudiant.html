@@ -1,0 +1,238 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mes Quiz | eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #4e73df;
+        margin: 0;
+    }
+    
+    .quiz-card {
+        background: #fff;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(78,115,223,0.15);
+    }
+    
+    .quiz-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        padding: 1.25rem;
+        border-radius: 12px 12px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quiz-header::after {
+        content: '\f059';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-size: 6rem;
+        opacity: 0.1;
+    }
+    
+    .quiz-category {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+    }
+    
+    .quiz-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.3;
+    }
+    
+    .quiz-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .quiz-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #5a5c69;
+        font-size: 0.9rem;
+    }
+    
+    .meta-icon {
+        width: 32px;
+        height: 32px;
+        background: #f8f9fc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4e73df;
+    }
+    
+    .quiz-footer {
+        margin-top: auto;
+    }
+    
+    .btn-passer {
+        width: 100%;
+        border-radius: 50px;
+        padding: 0.6rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 2px dashed #eaecf4;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        color: #d1d3e2;
+        margin-bottom: 1.5rem;
+    }
+    .empty-state h3 {
+        color: #5a5c69;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+    .empty-state p {
+        color: #858796;
+        max-width: 500px;
+        margin: 0 auto 2rem auto;
+    }
+    
+    /* Dark mode */
+    body.dark-mode .quiz-card { background: #242632; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    body.dark-mode .meta-icon { background: #2b2e3c; }
+    body.dark-mode .meta-item { color: #d1d3e2; }
+    body.dark-mode .empty-state { background: #242632; border-color: #323545; }
+    body.dark-mode .empty-state h3 { color: #f8f9fc; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-question-circle mr-2"></i>Mes Quiz</h1>
+</div>
+
+{% if quiz_disponibles %}
+<div class="row">
+    {% for quiz in quiz_disponibles %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="quiz-card">
+            <div class="quiz-header">
+                <div class="quiz-category">
+                    <i class="fas fa-tag mr-1"></i> {{ quiz.cours.categorie.nom|default:"Général" }}
+                </div>
+                <h3 class="quiz-title">{{ quiz.titre }}</h3>
+            </div>
+            
+            <div class="quiz-body">
+                <div class="quiz-meta">
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-book"></i></div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Cours associé</small>
+                            <span class="font-weight-bold">{{ quiz.cours.titre }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Durée estimée</small>
+                            <span class="font-weight-bold">{{ quiz.duree }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-star text-warning"></i></div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Note maximale</small>
+                            <span class="font-weight-bold">{{ quiz.note_max }} points</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-file-alt text-info"></i></div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Format</small>
+                            <span class="font-weight-bold">
+                                {% if quiz.fichier_quiz %}
+                                    Document externe
+                                {% else %}
+                                    QCM Interactif
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quiz-footer">
+                    <a href="{% url 'detail_quiz_etudiant' quiz.id %}" class="btn btn-primary btn-passer">
+                        <i class="fas fa-play mr-1"></i> Traiter l'épreuve
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-clipboard-list"></i>
+    <h3>Pas de quiz disponible pour toi</h3>
+    <p>Aucun de tes enseignants n'a encore publié de quiz ou d'évaluation pour les cours auxquels tu es inscrit.</p>
+    <a href="{% url 'mes_courses' %}" class="btn btn-primary px-4 rounded-pill">
+        <i class="fas fa-book-open mr-2"></i>Retourner à mes cours
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

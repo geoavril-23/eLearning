@@ -399,6 +399,14 @@ Plus vous êtes précis, meilleures seront les questions générées."
                             <input type="number" name="duree" value="15" min="5" max="120" id="duree">
                             <small class="text-muted d-block mt-1">Temps alloué</small>
                         </div>
+                        <div class="option-box" style="grid-column: 1 / -1;">
+                            <label><i class="fas fa-robot mr-1 text-success"></i> Type de correction</label>
+                            <select name="type_correction" required>
+                                <option value="manuelle">Correction Manuelle (par l'enseignant)</option>
+                                <option value="auto">Correction Automatique (par l'IA Gemini)</option>
+                            </select>
+                            <small class="text-muted d-block mt-1">Choisissez comment les soumissions des étudiants seront évaluées.</small>
+                        </div>
                     </div>
 
                     <!-- Submit -->

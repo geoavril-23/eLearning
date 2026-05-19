@@ -1,0 +1,210 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Mes Résultats | eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-left: 5px solid #e3e6f0;
+    }
+
+    .result-card.status-corrected {
+        border-left-color: #1cc88a;
+    }
+
+    .result-card.status-pending {
+        border-left-color: #f6c23e;
+    }
+
+    .score-badge {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1cc88a;
+        background: #e8f5e9;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .feedback-box {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #4e73df;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        color: #5a5c69;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800"><i class="fas fa-medal mr-2 text-warning"></i> Mes Résultats</h1>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if soumissions %}
+<div class="row">
+    {% for soumission in soumissions %}
+    <div class="col-md-6 mb-4">
+        <div
+            class="card result-card {% if soumission.est_corrige %}status-corrected{% else %}status-pending{% endif %} h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="font-weight-bold text-gray-800">{{ soumission.quiz.titre }}</h5>
+                    {% if soumission.est_corrige %}
+                    <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Corrigé</span>
+                    {% else %}
+                    <span class="badge badge-warning px-2 py-1"><i class="fas fa-hourglass-half mr-1"></i> En
+                        attente</span>
+                    {% endif %}
+                </div>
+
+                <div class="text-muted small mb-3">
+                    <i class="fas fa-book mr-1"></i> {{ soumission.quiz.cours.titre }} |
+                    <i class="fas fa-calendar mr-1"></i> Soumis le {{ soumission.date_soumission|date:"d M Y à H:i" }}
+                </div>
+
+                {% if soumission.est_corrige %}
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
+                    <div class="d-flex align-items-center">
+                        <div class="score-badge mr-3">
+                            {{ soumission.note_obtenue }} <small class="text-muted" style="font-size: 0.8rem;">/ {{ soumission.quiz.note_max }}</small>
+                        </div>
+
+                    </div>
+                    
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#feedback{{ soumission.id }}">
+                        <i class="fas fa-eye mr-1"></i> Voir la correction et mon travail
+                    </button>
+                </div>
+
+                    <div class="collapse mt-3" id="feedback{{ soumission.id }}">
+                        <!-- Feedback de l'enseignant / IA -->
+                        <h6 class="font-weight-bold text-gray-800 mb-2"><i
+                                class="fas fa-comment-dots text-primary mr-1"></i> Commentaires :</h6>
+                        <div class="feedback-box mb-3">
+                            {{ soumission.commentaires|linebreaksbr }}
+                        </div>
+
+                        <!-- Détail du travail -->
+                        <h6 class="font-weight-bold text-gray-800 mb-2 mt-4"><i
+                                class="fas fa-file-alt text-primary mr-1"></i> Mon Travail :</h6>
+
+                        {% if soumission.fichier_reponse %}
+                        <div class="p-3 bg-light rounded border text-center">
+                            <i class="fas fa-file-word fa-2x text-primary mb-2"></i>
+                            <p class="mb-2"><strong>Fichier soumis :</strong> {{
+                                soumission.fichier_reponse.name|slice:"17:" }}</p>
+                            <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-sm btn-primary rounded-pill"
+                                download target="_blank">
+                                <i class="fas fa-download mr-1"></i> Télécharger mon fichier
+                            </a>
+                        </div>
+                        {% elif soumission.questions_info %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered bg-white">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Ma réponse</th>
+                                        <th>Bonne réponse</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for q in soumission.questions_info %}
+                                    <tr>
+                                        <td>{{ q.question }}</td>
+                                        <td
+                                            class="{% if q.reponse_etudiant == q.bonne_reponse %}text-success font-weight-bold{% elif q.bonne_reponse %}text-danger font-weight-bold{% endif %}">
+                                            {{ q.reponse_etudiant }}
+                                        </td>
+                                        <td class="text-success">{{ q.bonne_reponse|default:"-" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-muted small">Détails non disponibles.</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light border mt-3 mb-3 text-center text-muted">
+                        <i class="fas fa-clock fa-2x mb-2"></i><br>
+                        Votre enseignant n'a pas encore finalisé la correction de cette épreuve.
+                    </div>
+
+                    <button class="btn btn-sm btn-outline-secondary mt-2" type="button" data-toggle="collapse"
+                        data-target="#travail{{ soumission.id }}">
+                        <i class="fas fa-eye mr-1"></i> Voir ce que j'ai soumis
+                    </button>
+
+                    <div class="collapse mt-3" id="travail{{ soumission.id }}">
+                        <!-- Détail du travail -->
+                        <h6 class="font-weight-bold text-gray-800 mb-2 mt-2"><i
+                                class="fas fa-file-alt text-primary mr-1"></i> Mon Travail :</h6>
+
+                        {% if soumission.fichier_reponse %}
+                        <div class="p-3 bg-light rounded border text-center">
+                            <i class="fas fa-file-word fa-2x text-secondary mb-2"></i>
+                            <p class="mb-2"><strong>Fichier soumis :</strong> {{
+                                soumission.fichier_reponse.name|slice:"17:" }}</p>
+                            <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-sm btn-secondary rounded-pill"
+                                download target="_blank">
+                                <i class="fas fa-download mr-1"></i> Télécharger mon fichier
+                            </a>
+                        </div>
+                        {% elif soumission.questions_info %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered bg-white">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Ma réponse</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for q in soumission.questions_info %}
+                                    <tr>
+                                        <td>{{ q.question }}</td>
+                                        <td class="font-weight-bold text-secondary">
+                                            {{ q.reponse_etudiant }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-muted small">Détails non disponibles.</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-clipboard-check fa-4x text-gray-300 mb-3"></i>
+        <h4 class="text-gray-500 font-weight-bold">Aucun résultat pour le moment</h4>
+        <p class="text-muted">Vous n'avez soumis aucun quiz ou épreuve.</p>
+        <a href="{% url 'mes_quiz_etudiant' %}" class="btn btn-primary mt-2 rounded-pill px-4">Aller aux quiz</a>
+    </div>
+    {% endif %}
+    {% endblock %}

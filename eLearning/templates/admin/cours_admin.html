@@ -9,109 +9,235 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Gestion des Cours</h1>
-        <a href="#" class="btn btn-sm btn-success shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Créer un nouveau cours</a>
+        <div class="text-muted small">Les cours sont créés uniquement par les enseignants.</div>
     </div>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Tous les Cours de la Plateforme</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Liste de tous les cours</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered text-center" id="dataTableCours" width="100%" cellspacing="0">
-                    <thead class="bg-gray-100">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="bg-light">
                         <tr>
                             <th>Image</th>
                             <th>Titre</th>
                             <th>Enseignant</th>
-                            <th>Niveau</th>
-                            <th>Inscrits</th>
-                            <th>Mise en avant</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Type</th>
+                            <th>Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for c in tous_les_cours %}
+                        {% for cours in tous_les_cours %}
                         <tr>
-                            <td><img src="{% if c.ressource %}{{ c.ressource.url }}{% else %}{% static 'admin/img/course_placeholder.jpg' %}{% endif %}" style="width: 50px; border-radius: 5px;"></td>
-                            <td>{{ c.titre }}</td>
-                            <td>{{ c.enseignant.nom }}</td>
-                            <td>{{ c.niveau }}</td>
-                            <td>{{ c.inscriptions.count }}</td>
                             <td>
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="switch{{ c.id }}" {% if c.featured %}checked{% endif %}>
-                                    <label class="custom-control-label" for="switch{{ c.id }}"></label>
-                                </div>
+                                {% if cours.image %}
+                                    <img src="{{ cours.image.url }}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 8px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary btn-sm" title="Modifier"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm" title="Supprimer"><i class="fas fa-trash"></i></button>
-                                </div>
+                                <div class="font-weight-bold text-gray-800">{{ cours.titre }}</div>
+                                <div class="small text-muted">{{ cours.description|truncatechars:50 }}</div>
                             </td>
-                        </tr>
-                        {% empty %}
-                        <!-- Simulation -->
-                        <tr>
-                            <td><i class="fas fa-book fa-2x text-primary"></i></td>
-                            <td>Développement Web Complet</td>
-                            <td>Dupont Jean</td>
-                            <td>Intermédiaire</td>
-                            <td>245</td>
+                            <td>{{ cours.enseignant.nom }} {{ cours.enseignant.prenom }}</td>
+                            <td>{{ cours.categorie.nom|default:"-" }}</td>
+                            <td>{{ cours.prix|floatformat:0 }} FCFA</td>
                             <td>
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="switchSim1" checked>
-                                    <label class="custom-control-label" for="switchSim1"></label>
-                                </div>
+                                {% if cours.est_premium %}
+                                    <span class="badge badge-warning px-3 py-1 rounded-pill"><i class="fas fa-crown fa-xs mr-1"></i> Premium</span>
+                                {% else %}
+                                    <span class="badge badge-success px-3 py-1 rounded-pill">Gratuit</span>
+                                {% endif %}
                             </td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-brain fa-2x text-warning"></i></td>
-                            <td>Intelligence Artificielle</td>
-                            <td>Martin Sophie</td>
-                            <td>Avancé</td>
-                            <td>120</td>
-                            <td>
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="switchSim2">
-                                    <label class="custom-control-label" for="switchSim2"></label>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                </div>
+                            <td>{{ cours.date_publication|date:"d/m/Y" }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#modalEditCours" 
+                                        onclick="fillEditModal('{{ cours.id }}', '{{ cours.titre|escapejs }}', '{{ cours.description|escapejs }}', '{{ cours.prix }}', '{{ cours.est_premium|yesno:'on,off' }}', '{{ cours.categorie.id }}', '{% if cours.image %}{{ cours.image.url }}{% endif %}')"
+                                        title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#modalDeleteCours" 
+                                        onclick="setDeleteCours('{{ cours.id }}', '{{ cours.titre|escapejs }}')"
+                                        title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            {% if tous_les_cours.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if tous_les_cours.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ tous_les_cours.previous_page_number }}">Précédent</a></li>
+                    {% endif %}
+
+                    <li class="page-item active"><span class="page-link">Page {{ tous_les_cours.number }} sur {{ tous_les_cours.paginator.num_pages }}</span></li>
+
+                    {% if tous_les_cours.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ tous_les_cours.next_page_number }}">Suivant</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ tous_les_cours.paginator.num_pages }}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </div>
 
 </div>
+
+<!-- Modal Édition -->
+<div class="modal fade" id="modalEditCours" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">Modifier le Cours</h5>
+                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="{% url 'gestion_cours' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="cours_id" id="edit_cours_id">
+                <div class="modal-body">
+                    <div class="text-center mb-4" id="img_preview_container" style="display: none;">
+                        <img id="edit_img_preview" src="" alt="Aperçu" style="max-width: 150px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="custom-control custom-checkbox mt-2">
+                            <input type="checkbox" class="custom-control-input" id="delete_image" name="delete_image">
+                            <label class="custom-control-label text-danger small font-weight-bold" for="delete_image">Supprimer la photo actuelle</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Photo du cours</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image" id="edit_image" accept="image/*">
+                            <label class="custom-file-label" for="edit_image">Choisir une image...</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Titre du cours</label>
+                        <input type="text" name="titre" id="edit_titre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Catégorie</label>
+                        <select name="categorie" id="edit_categorie" class="form-control" required>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small font-weight-bold">Description</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="small font-weight-bold">Prix (FCFA)</label>
+                            <input type="number" name="prix" id="edit_prix" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-end">
+                            <div class="custom-control custom-switch mb-2">
+                                <input type="checkbox" class="custom-control-input" id="edit_est_premium" name="est_premium">
+                                <label class="custom-control-label font-weight-bold" for="edit_est_premium">Cours Premium</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary rounded-pill px-4" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn btn-warning rounded-pill px-4" type="submit">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Suppression -->
+<div class="modal fade" id="modalDeleteCours" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="{% url 'gestion_cours' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="cours_id" id="delete_cours_id">
+                <div class="modal-body text-center">
+                    <i class="fas fa-book-dead fa-3x text-danger mb-3"></i>
+                    <p>Voulez-vous vraiment supprimer le cours : <br><strong id="delete_cours_titre"></strong> ?</p>
+                    <p class="text-danger small">Toutes les inscriptions et données liées seront perdues.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary rounded-pill px-4" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn btn-danger rounded-pill px-4" type="submit">Supprimer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'admin/vendor/datatables/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'admin/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 <script>
-    $(document).ready(function() {
-        $('#dataTableCours').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
-            }
-        });
+    function fillEditModal(id, titre, desc, prix, is_premium, cat_id, img_url) {
+        document.getElementById('edit_cours_id').value = id;
+        document.getElementById('edit_titre').value = titre;
+        document.getElementById('edit_description').value = desc;
+        document.getElementById('edit_prix').value = Math.floor(prix);
+        document.getElementById('edit_est_premium').checked = (is_premium === 'on');
+        document.getElementById('edit_categorie').value = cat_id;
+        
+        // Gestion de l'aperçu de l'image
+        const imgContainer = document.getElementById('img_preview_container');
+        const imgPreview = document.getElementById('edit_img_preview');
+        const deleteCheckbox = document.getElementById('delete_image');
+        
+        deleteCheckbox.checked = false; // Reset checkbox
+        
+        if (img_url && img_url !== '') {
+            imgPreview.src = img_url;
+            imgContainer.style.display = 'block';
+        } else {
+            imgContainer.style.display = 'none';
+        }
+    }
+
+    function setDeleteCours(id, titre) {
+        document.getElementById('delete_cours_id').value = id;
+        document.getElementById('delete_cours_titre').innerText = titre;
+    }
+
+    // Mise à jour automatique du nom du fichier sélectionné
+    document.getElementById('edit_image').addEventListener('change', function(e) {
+        var fileName = e.target.files[0].name;
+        var nextSibling = e.target.nextElementSibling;
+        nextSibling.innerText = fileName;
     });
 </script>
 {% endblock %}

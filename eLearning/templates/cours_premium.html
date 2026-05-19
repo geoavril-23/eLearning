@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cours Premium - eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --premium-gold: #fec913;
+    --premium-dark: #1a1a2e;
+    --premium-gradient: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
+    --premium-shadow: 0 10px 30px rgba(246, 194, 62, 0.2);
+  }
+
+  .premium-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 100px 0;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(254, 201, 19, 0.05) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .premium-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: var(--premium-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .premium-hero p {
+    font-size: 1.25rem;
+    color: #a0aec0;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .course-grid {
+    padding: 80px 0;
+    background: #f7fafc;
+  }
+
+  .premium-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #edf2f7;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .premium-card:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border-color: var(--premium-gold);
+  }
+
+  .card-img-wrapper {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+  }
+
+  .card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .premium-card:hover .card-img-wrapper img {
+    transform: scale(1.1);
+  }
+
+  .premium-badge-overlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--premium-gradient);
+    color: var(--premium-dark);
+    padding: 6px 15px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .card-content {
+    padding: 25px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .course-cat {
+    color: var(--premium-gold);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .course-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 15px;
+    line-height: 1.4;
+  }
+
+  .course-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #718096;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-footer {
+    padding: 20px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .price-tag {
+    color: #2d3748;
+    font-weight: 800;
+    font-size: 1.2rem;
+  }
+
+  .price-tag span {
+    font-size: 0.8rem;
+    color: #718096;
+    font-weight: 500;
+  }
+
+  .btn-unlock {
+    background: var(--premium-dark);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-unlock:hover {
+    background: var(--premium-gold);
+    color: var(--premium-dark);
+    transform: scale(1.05);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="premium-hero">
+  <div class="container">
+    <h1>Cours <span>Premium</span></h1>
+    <div class="description-card" style="max-width: 800px; margin: 25px auto !important;">
+      <p style="color: #ffffff !important;">
+        <i class="fas fa-magic" style="color: #fec913; margin-right: 10px;"></i>
+        Accédez à des contenus exclusifs et spécialisés. Débloquez les chapitres dont vous avez besoin pour propulser votre carrière.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="course-grid">
+  <div class="container">
+    <div class="row">
+      {% for cours in cours_premium %}
+      <div class="col-lg-4 col-md-6 mb-5">
+        <div class="premium-card">
+          <div class="card-img-wrapper">
+            <img
+              src="{% if cours.image %}{{ cours.image.url }}{% else %}{% static 'images/algorithme.jpeg' %}{% endif %}"
+              alt="{{ cours.titre }}">
+            <div class="premium-badge-overlay"
+              style="{% if cours.debloque %}background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); color: white;{% else %}background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%); color: white;{% endif %}">
+              {% if cours.debloque %}
+              <i class="fas fa-unlock"></i> Débloqué
+              {% else %}
+              <i class="fas fa-lock"></i> Bloqué
+              {% endif %}
+            </div>
+
+          </div>
+          <div class="card-content">
+            <div class="course-cat">{{ cours.categorie.nom|default:"Spécialisation" }}</div>
+            <h3 class="course-title">{{ cours.titre }}</h3>
+            <div class="course-meta">
+              <div class="meta-item">
+                <i class="fas fa-user-tie"></i> {{ cours.enseignant.nom }}
+              </div>
+              <div class="meta-item">
+                <i class="fas fa-layer-group"></i> {{ cours.nb_premium }} chapitres premium
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="price-tag">
+              {{ cours.prix_mini|floatformat:0 }} <span>FCFA / chap.</span>
+            </div>
+            <a href="{% url 'detail_cours_premium' cours.id %}" class="btn-unlock"
+              style="{% if cours.debloque %}background: #1cc88a;{% endif %}">
+              {% if cours.debloque %}Accéder{% else %}Explorer{% endif %}
+            </a>
+
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <div class="alert alert-info">
+          Aucun cours premium n'est disponible pour le moment.
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

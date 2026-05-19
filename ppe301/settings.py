@@ -143,5 +143,5 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'index'
 
 # === API Keys ==
-GEMINI_API_KEY    = os.environ.get('GEMINI_API_KEY', 'AIzaSyBuGi57ZhRbNYUkoC9MYu8C02t4DRK8iMU')
+GEMINI_API_KEY    = os.environ.get('GEMINI_API_KEY', 'AIzaSyCNnhGL3VbImD1ICOA_kk-Fa_-3WrCRh74')
 

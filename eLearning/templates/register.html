@@ -1,311 +1,497 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<style>
-  .scrolling-container {
-    background-color: rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 10px 0;
-  }
-
-  .scrolling-text {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 25s linear infinite;
-    color: #fff;
-    font-weight: 600;
-    font-size: 1rem;
-    text-transform: uppercase;
-  }
-
-  .scrolling-text span {
-    margin-right: 50px;
-  }
-
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-
-  .navbar-nav .nav-item .nav-link {
-    color: white !important;
-    font-weight: 600;
-    font-size: 0.85rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 8px 15px !important;
-    transition: all 0.3s;
-    position: relative;
-  }
-
-  .navbar-nav .nav-item .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: #fec913;
-    transition: all 0.3s;
-    transform: translateX(-50%);
-  }
-
-  .navbar-nav .nav-item .nav-link:hover::after {
-    width: 70%;
-  }
-
-  .navbar-nav .nav-item .nav-link:hover {
-    color: #fec913 !important;
-  }
-
-  .navbar-nav .nav-item.active .nav-link {
-    color: #fec913 !important;
-    background: rgba(0, 0, 0, 0.15);
-  }
-
-  /* AUTH */
-  .auth-wrapper {
-    background: #f4f4f4;
-    padding: 60px 0;
-  }
-
-  .auth-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    max-width: 600px;
-    margin: auto;
-  }
-
-  .auth-card-header {
-    background: linear-gradient(135deg, #2bbfbf, #1a9e9e);
-    padding: 30px;
-    text-align: center;
-  }
-
-  .auth-card-header h2 {
-    color: white;
-    font-weight: 700;
-    margin: 0;
-  }
-
-  .auth-card-header h2 span {
-    color: #fec913;
-  }
-
-  .auth-card-header p {
-    color: rgba(255, 255, 255, 0.85);
-    margin: 8px 0 0;
-    font-size: 0.9rem;
-  }
-
-  .auth-card-body {
-    padding: 35px;
-  }
-
-  .form-group {
-    margin-bottom: 18px;
-  }
-
-  .form-group label {
-    font-weight: 600;
-    color: #1a1a2e;
-    font-size: 0.85rem;
-    margin-bottom: 6px;
-    display: block;
-  }
-
-  .form-group input,
-  .form-group select {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #eee;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: border-color 0.3s;
-    outline: none;
-    display: block;
-    background: white;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: #2bbfbf;
-  }
-
-  .btn-register {
-    background: #2bbfbf;
-    color: white;
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  .btn-register:hover {
-    background: #1a9e9e;
-  }
-
-  .auth-footer {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-  }
-
-  .auth-footer a {
-    color: #2bbfbf;
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .auth-footer a:hover {
-    text-decoration: underline;
-  }
-
-  .error-msg {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-  }
-</style>
-{% endblock %}
-
 {% block body_class %}sub_page{% endblock %}
 
 {% block hero_content %}
-<div class="scrolling-container">
-  <div class="scrolling-text">
-    <span>Plateforme d'apprentissage E-learning (OpenEduVerse)</span>
-    <span>Nous formons en Licence & Master</span>
-    <span>Participez aux visioconférences</span>
-    <span>Téléchargez vos ressources</span>
-    <span>Obtenez des Badges et des Certifications</span>
-  </div>
-</div>
-{% endblock %}
+<section class="oo-register-hero" aria-label="Inscription OpenEduVerse">
+  <div class="oo-register-hero__overlay" aria-hidden="true"></div>
 
-{% block content %}
-<!-- FORMULAIRE INSCRIPTION -->
-<section class="auth-wrapper">
-  <div class="container">
-    <div class="auth-card">
-      <div class="auth-card-header">
-        <h2>Créer un <span>Compte</span></h2>
-        <p>Rejoignez OpenEduVerse dès aujourd'hui !</p>
-      </div>
-      <div class="auth-card-body">
+  <div class="oo-register-hero__center">
+    <div class="oo-login-card-wrap" aria-live="polite">
+      <div class="oo-register-card oo-card-tilt" id="ooRegisterCard" tabindex="0" role="group" aria-label="Inscription">
+        <div class="oo-register-card__liquid-border" aria-hidden="true"></div>
 
-        <form method="POST" action="{% url 'register' %}" autocomplete="off">
-          {% csrf_token %}
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Nom</label>
-                <input type="text" name="nom" placeholder="Votre nom" autocomplete="off">
-                {% if form.nom.errors %}<small style="color:red;">{{ form.nom.errors.0 }}</small>{% endif %}
+        <div class="oo-register-card__content">
+          <h5 class="oo-register-card__title">Inscription</h5>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} oo-register-alert">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <form action="{% url 'register' %}" method="POST" class="oo-register-form" autocomplete="on">
+            {% csrf_token %}
+
+            <div class="oo-register-grid">
+              <input type="text" name="nom" placeholder="Nom" class="oo-register-input" required />
+              <input type="text" name="prenom" placeholder="Prénom" class="oo-register-input" required />
+              <input type="email" name="email" placeholder="Email" class="oo-register-input" required />
+              <input type="number" name="age" placeholder="Âge" class="oo-register-input" required />
+              <input type="text" name="addresse" placeholder="Adresse" class="oo-register-input" required />
+
+              <select name="role" class="oo-register-input" required>
+                <option value="etudiant">Étudiant</option>
+                <option value="enseignant">Enseignant</option>
+              </select>
+
+              <input type="password" name="password" placeholder="Mot de passe" class="oo-register-input" required />
+              <input type="password" name="confirm_password" placeholder="Confirmer mot de passe" class="oo-register-input" required />
+            </div>
+
+            <div class="oo-register-matieres">
+              <h6 class="oo-register-section-title">Matières qui vous intéressent</h6>
+
+              <div class="oo-multi-select" id="ooMatiereMultiSelect" aria-label="Sélection des matières" data-max-selected="9999">
+                <div class="oo-multi-select__selected" id="ooMatiereSelected" aria-label="Matières sélectionnées"></div>
+
+                <button
+                  type="button"
+                  class="oo-multi-select__trigger"
+                  id="ooMatiereTrigger"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span>Sélectionnez vos matières</span>
+                  <span class="oo-multi-select__caret" aria-hidden="true">▾</span>
+                </button>
+
+                <div
+                  class="oo-multi-select__panel oo-dropdown-list"
+                  id="ooMatierePanel"
+                  role="listbox"
+                  aria-label="Choix des matières"
+                >
+                  {% for course in cours_disponibles %}
+                    <label class="oo-multi-select__item" role="option" aria-selected="false" tabindex="0">
+                      <input
+                        type="checkbox"
+                        name="courses"
+                        value="{{ course.id }}"
+                        class="oo-multi-select__native"
+                        aria-label="{{ course.titre }}"
+                      />
+                      <span class="oo-multi-select__check" aria-hidden="true"></span>
+                      <span class="oo-multi-select__label">{{ course.titre }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Prénom</label>
-                <input type="text" name="prenom" placeholder="Votre prénom" autocomplete="off">
-                {% if form.prenom.errors %}<small style="color:red;">{{ form.prenom.errors.0 }}</small>{% endif %}
-              </div>
-            </div>
+
+            <button type="submit" class="oo-register-btn">S'inscrire</button>
+          </form>
+
+          <div class="oo-register-footer">
+            <p>
+              Déjà inscrit ?
+              <a href="{% url 'admin_login' %}" class="oo-register-link">Se connecter</a>
+            </p>
           </div>
-
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email" placeholder="votre@email.com" autocomplete="off">
-            {% if form.email.errors %}<small style="color:red;">{{ form.email.errors.0 }}</small>{% endif %}
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Âge</label>
-                <input type="number" name="age" placeholder="Votre âge">
-                {% if form.age.errors %}<small style="color:red;">{{ form.age.errors.0 }}</small>{% endif %}
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Rôle</label>
-                <select name="role">
-                  <option value="etudiant">Étudiant</option>
-                  <option value="enseignant">Enseignant</option>
-                </select>
-                {% if form.role.errors %}<small style="color:red;">{{ form.role.errors.0 }}</small>{% endif %}
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Adresse</label>
-            <input type="text" name="adresse" placeholder="Votre adresse" autocomplete="off">
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Mot de passe</label>
-                <input type="password" name="password1" placeholder="Mot de passe" autocomplete="new-password">
-                {% if form.password1.errors %}<small style="color:red;">{{ form.password1.errors.0 }}</small>{% endif %}
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Confirmer le mot de passe</label>
-                <input type="password" name="password2" placeholder="Confirmer" autocomplete="new-password">
-                {% if form.password2.errors %}<small style="color:red;">{{ form.password2.errors.0 }}</small>{% endif %}
-              </div>
-            </div>
-          </div>
-
-          <!-- SÉLECTION DES MATIÈRES -->
-          <div class="form-group" id="courses-section">
-            <label>Matières à apprendre</label>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
-              {% for course in cours_disponibles %}
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" name="courses" value="{{ course.id }}" style="width: 18px; height: 18px; cursor: pointer;">
-                <span style="font-size: 0.85rem; font-weight: 500; color: #444;">{{ course.titre }}</span>
-              </div>
-              {% empty %}
-              <p style="font-size: 0.85rem; color: #888; margin: 0;">Aucune matière disponible pour le moment.</p>
-              {% endfor %}
-            </div>
-            <small style="color: #666; display: block; margin-top: 5px;">Cochez les matières que vous souhaitez suivre immédiatement.</small>
-          </div>
-
-          <button type="submit" class="btn-register">CRÉER MON COMPTE</button>
-        </form>
-
-        <div class="auth-footer">
-          <p style="color:#666;">
-            Déjà membre ?
-            <a href="{% url 'admin_login' %}">Se connecter</a>
-          </p>
         </div>
       </div>
     </div>
   </div>
+
+  <style>
+    :root {
+      --oo-teal-1: rgba(0, 210, 200, 0.65);
+      --oo-teal-2: rgba(19, 62, 63, 0.75);
+      --oo-gold: #FFC107;
+    }
+
+    .oo-register-hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url({% static 'images/login-bg.jpg' %});
+      background-size: cover;
+      background-position: center;
+      padding: 60px 0;
+      overflow: hidden;
+    }
+
+    .oo-register-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--oo-teal-1), var(--oo-teal-2));
+      z-index: 0;
+    }
+
+    .oo-register-hero__center {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+    }
+
+    .oo-login-card-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .oo-register-card {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      transform-style: preserve-3d;
+      perspective: 900px;
+      border-radius: 28px;
+      animation: oo-float 4.5s ease-in-out infinite;
+      outline: none;
+      user-select: none;
+    }
+
+    @keyframes oo-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .oo-register-card__liquid-border {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(255, 193, 7, 0.55);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 0 rgba(255, 193, 7, 0);
+      transition: box-shadow 0.25s ease, border-color 0.25s ease;
+      animation: oo-liquid-border-idle 5s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    @keyframes oo-liquid-border-idle {
+      0%, 100% { border-radius: 28px; }
+      50% { border-radius: 40px 22px 45px 25px; }
+    }
+
+    .oo-register-card:hover .oo-register-card__liquid-border {
+      border-color: rgba(255, 193, 7, 0.95);
+      box-shadow: 0 18px 60px rgba(255, 193, 7, 0.18);
+      animation: oo-liquid-border-morph 1.2s ease-in-out infinite;
+    }
+
+    @keyframes oo-liquid-border-morph {
+      0% { border-radius: 28px 45px 25px 55px; }
+      25% { border-radius: 45px 28px 55px 25px; }
+      50% { border-radius: 30px 60px 30px 50px; }
+      75% { border-radius: 60px 35px 50px 28px; }
+      100% { border-radius: 28px 45px 25px 55px; }
+    }
+
+    .oo-register-card__content {
+      position: relative;
+      z-index: 1;
+      padding: 34px 34px 26px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 26px;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18), inset 0 0 10px rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      transform: translateZ(30px);
+    }
+
+    .oo-register-card__title {
+      margin: 0 0 22px;
+      font-weight: 700;
+      font-size: 1.65rem;
+      letter-spacing: 0.3px;
+      position: relative;
+    }
+
+    .oo-register-card__title::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -10px;
+      width: 80px;
+      height: 3px;
+      background: rgba(255, 193, 7, 0.95);
+      border-radius: 99px;
+      box-shadow: 0 0 25px rgba(255, 193, 7, 0.35);
+    }
+
+    .oo-register-alert {
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .oo-register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .oo-register-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 576px) {
+      .oo-register-grid { grid-template-columns: 1fr; }
+      .oo-register-card__content { padding: 26px 18px 20px; }
+    }
+
+    .oo-register-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      appearance: none;
+    }
+
+    .oo-register-input::placeholder {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .oo-register-input:focus {
+      border-color: rgba(255, 193, 7, 0.85);
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .oo-register-matieres {
+      margin-top: 6px;
+    }
+
+    .oo-register-section-title {
+      margin: 0 0 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .oo-multi-select {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible; /* était hidden : empêchait le dropdown d'apparaître */
+    }
+
+    .oo-multi-select__selected {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 10px;
+      min-height: 26px;
+    }
+
+    .oo-multi-select__trigger {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      user-select: none;
+    }
+
+    .oo-multi-select__trigger:hover {
+      border-color: rgba(255, 193, 7, 0.55);
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .oo-multi-select__caret {
+      color: rgba(255, 193, 7, 0.95);
+      font-weight: 900;
+      transition: transform 0.2s ease;
+    }
+
+    .oo-multi-select.oo-open .oo-multi-select__caret {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown list behavior */
+    .oo-dropdown-list {
+      display: none;
+    }
+
+    .oo-multi-select.oo-open .oo-dropdown-list {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .oo-multi-select__panel.oo-dropdown-list {
+      position: absolute; /* overlay — ne pousse plus le contenu */
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      z-index: 999;
+      border-radius: 16px;
+      border: 1px solid rgba(19, 62, 63, 0.95);
+      background: rgba(15, 50, 55, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transform-origin: top;
+      pointer-events: auto;
+    }
+
+    .oo-multi-select__item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      user-select: none;
+      color: rgba(255, 255, 255, 0.94);
+      font-weight: 800;
+      font-size: 0.78rem;
+      border-radius: 12px;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .oo-multi-select__item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .oo-multi-select__native {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+    .oo-multi-select__check {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 193, 7, 0.55);
+    }
+
+    .oo-multi-select__native:checked + .oo-multi-select__check {
+      background: rgba(255, 193, 7, 0.25);
+      box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.12) inset;
+      border-color: rgba(255, 193, 7, 0.85);
+    }
+
+    /* ====== Bouton S'inscrire (shimmer identique au login) ====== */
+    .oo-register-btn {
+      width: 100%;
+      margin-top: 6px;
+      padding: 13px 14px;
+      border: 0;
+      border-radius: 14px;
+      background: rgba(19, 62, 63, 0.92);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+
+    .oo-register-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 193, 7, 0.4), transparent);
+      transform: translateX(-120%);
+      transition: transform 0.6s ease;
+      pointer-events: none;
+    }
+
+    .oo-register-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.25);
+      background: rgba(19, 62, 63, 0.98);
+    }
+
+    .oo-register-btn:hover::after {
+      transform: translateX(120%);
+    }
+
+    .oo-register-btn:active {
+      transform: scale(0.97);
+    }
+
+    .oo-register-footer {
+      margin-top: 18px;
+      text-align: center;
+      opacity: 0.95;
+    }
+
+    .oo-register-link {
+      color: rgba(255, 193, 7, 1);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .oo-register-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const trigger = document.getElementById('ooMatiereTrigger');
+      const container = document.getElementById('ooMatiereMultiSelect');
+      const dropdown = document.getElementById('ooMatierePanel');
+
+      if (!trigger || !container || !dropdown) return;
+
+      const setOpen = (isOpen) => {
+        container.classList.toggle('oo-open', isOpen);
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      };
+
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        const isOpen = container.classList.contains('oo-open');
+        setOpen(!isOpen);
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!container.contains(e.target)) {
+          setOpen(false);
+        }
+      });
+    })();
+  </script>
 </section>
 {% endblock %}
+
+{% block content %}{% endblock %}

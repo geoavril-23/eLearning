@@ -1,4 +1,7 @@
-- [x] Modifier `eLearning/models.py` : changer `Inscription.date_inscription` de `DateField` vers `DateTimeField` (auto_now_add).
-- [x] Modifier `eLearning/templates/admin/mes_formations.html` : supprimer badge `ins.get_statut_display` (Validé) et supprimer ligne “Enseignant”. Afficher seulement date + heure d’inscription.
-- [x] Migration Django appliquée (`0009_user_theme_alter_inscription_date_inscription.py`).
-- [ ] Tester : s’inscrire à un cours et vérifier que sur “Mes Formations” on voit uniquement date/heure d’inscription (pas “Validé”, pas “Enseignant”).
+## Tâches (BlackboxAI)
+
+- [x] Modifier l’interface frontend de `eLearning/templates/admin/mes_formations.html` pour améliorer le design (sans toucher à la logique backend/progression).
+- [ ] Mettre à jour `eLearning/templates/contact.html` avec un bas/section style “liquid glass” + formulaire joli.
+
+
+
