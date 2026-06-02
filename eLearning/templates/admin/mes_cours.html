@@ -22,7 +22,7 @@
     <h1 class="h3 mb-0 text-gray-800">
         <i class="fas fa-book text-primary mr-2"></i>Mes Cours
     </h1>
-    <a href="{% url 'creer_cours_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+    <a href="{% url 'creer_cours_complet' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
         <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Créer un nouveau cours
     </a>
 </div>
@@ -73,8 +73,8 @@
                         <td><small>{{ cours.date_publication|date:"d/m/Y" }}</small></td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'modifier_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                    <i class="fas fa-edit"></i>
+                                <a href="{% url 'gerer_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-primary" title="Gérer (Chapitres, Ressources)">
+                                    <i class="fas fa-cog"></i> Gérer
                                 </a>
                                 <a href="{% url 'supprimer_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')">
                                     <i class="fas fa-trash"></i>
@@ -87,7 +87,7 @@
                         <td colspan="5" class="text-center py-4 text-muted">
                             <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
                             Vous n'avez pas encore créé de cours. 
-                            <a href="{% url 'creer_cours_enseignant' %}">Cliquez ici pour commencer.</a>
+                            <a href="{% url 'creer_cours_complet' %}">Cliquez ici pour commencer.</a>
                         </td>
                     </tr>
                     {% endfor %}

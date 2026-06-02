@@ -187,11 +187,52 @@ class Cours(models.Model):
         else:
             return 'fa-file-download text-primary'
 
+class RessourceCours(models.Model):
+    cours = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='ressources_annexes')
+    titre = models.CharField(max_length=200)
+    fichier = models.FileField(upload_to='ressources_cours/')
+    date_ajout = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Ressource du Cours"
+        verbose_name_plural = "Ressources du Cours"
+
+    def __str__(self):
+        return f"{self.cours.titre} - {self.titre}"
+
+
+class Module(models.Model):
+    cours = models.ForeignKey(
+        Cours,
+        on_delete=models.CASCADE,
+        related_name='modules'
+    )
+    titre = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    ordre = models.PositiveIntegerField(default=0)
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['ordre']
+        verbose_name = "Module"
+        verbose_name_plural = "Modules"
+
+    def __str__(self):
+        return f"{self.cours.titre} — Module {self.ordre}: {self.titre}"
+
 
 class Chapitre(models.Model):
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='chapitres')
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.CASCADE,
+        related_name='chapitres',
+        null=True,
+        blank=True
+    )
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    contenu = models.TextField(blank=True, null=True)
     est_premium = models.BooleanField(default=False)
     prix = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     ressource = models.FileField(upload_to='chapitres_ressources/', null=True, blank=True)
@@ -205,6 +246,54 @@ class Chapitre(models.Model):
 
     def __str__(self):
         return f"{self.cours.titre} - {self.titre}"
+
+
+class RessourceChapitre(models.Model):
+    chapitre = models.ForeignKey(
+        Chapitre,
+        on_delete=models.CASCADE,
+        related_name='ressources'
+    )
+    titre = models.CharField(max_length=200)
+    fichier = models.FileField(upload_to='ressources_chapitres/')
+    date_ajout = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Ressource du Chapitre"
+        verbose_name_plural = "Ressources du Chapitre"
+
+    def __str__(self):
+        return f"{self.chapitre.titre} - {self.titre}"
+
+    @property
+    def get_extension(self):
+        if self.fichier:
+            return os.path.splitext(self.fichier.name)[1].lower().replace('.', '')
+        return ""
+
+    @property
+    def get_file_icon(self):
+        ext = self.get_extension
+        if ext == 'pdf':
+            return 'fa-file-pdf text-danger'
+        elif ext in ['doc', 'docx']:
+            return 'fa-file-word text-primary'
+        elif ext in ['xls', 'xlsx']:
+            return 'fa-file-excel text-success'
+        elif ext in ['ppt', 'pptx']:
+            return 'fa-file-powerpoint text-warning'
+        elif ext in ['jpg', 'jpeg', 'png', 'gif']:
+            return 'fa-file-image text-info'
+        elif ext in ['mp4', 'avi', 'mov', 'mkv']:
+            return 'fa-file-video text-secondary'
+        elif ext in ['zip', 'rar', '7z']:
+            return 'fa-file-archive text-muted'
+        elif ext == 'txt':
+            return 'fa-file-text text-dark'
+        else:
+            return 'fa-file-download text-primary'
+
+
 
 
 class ChapitreDebloque(models.Model):
@@ -365,6 +454,7 @@ class Message(models.Model):
 
 
 class Notification(models.Model):
+
     TYPE_CHOICES = [
         ('nouveau_cours', 'Nouveau cours dans votre domaine'),
         ('nouvelle_ressource', 'Nouvelle ressource sur votre cours'),

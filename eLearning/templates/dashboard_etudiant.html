@@ -1,0 +1,755 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Dashboard Étudiant{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --oe-teal: #133e3f;
+        --oe-gold: #FFC107;
+        --oe-teal-2: #1a5556;
+        --oe-bg: #f6f7fb;
+        --oe-card: #ffffff;
+        --oe-text: #1f2937;
+        --oe-muted: #6b7280;
+        --oe-border: rgba(19, 62, 63, 0.12);
+        --oe-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+        --oe-shadow-2: 0 12px 30px rgba(255, 193, 7, 0.08);
+        --oe-focus: rgba(255, 193, 7, 0.35);
+        --oe-radius: 24px;
+    }
+
+    body {
+        background: var(--oe-bg);
+        color: var(--oe-text);
+    }
+
+    body.dark-mode {
+        background: #1a1c23 !important;
+        color: #d1d1d1 !important;
+    }
+
+    .oe-wrap {
+        padding: 18px 0 30px;
+    }
+
+    .oe-page-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .oe-title {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 260px;
+    }
+
+    .oe-title h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--oe-teal);
+    }
+
+    body.dark-mode .oe-title h1 {
+        color: var(--oe-gold) !important;
+    }
+
+    .oe-subtitle {
+        margin: 0;
+        color: var(--oe-muted);
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    body.dark-mode .oe-subtitle {
+        color: #ffffff !important;
+    }
+
+    .oe-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+.oe-btn {
+        border-radius: 24px;
+
+        border: 1px solid rgba(255, 193, 7, 0.45);
+        background: rgba(255, 193, 7, 0.08);
+        color: var(--oe-teal);
+        font-weight: 800;
+        padding: 10px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--oe-shadow-2);
+        transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+        text-decoration: none !important;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .oe-btn:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 193, 7, 0.16);
+        box-shadow: 0 14px 36px rgba(255, 193, 7, 0.14);
+    }
+
+    .oe-btn-primary {
+        border: 1px solid var(--oe-teal);
+        background: linear-gradient(135deg, var(--oe-teal) 0%, #0f2f30 100%);
+        color: #ffffff;
+        box-shadow: 0 12px 26px rgba(19, 62, 63, 0.18);
+    }
+
+    .oe-btn-primary:hover {
+        background: linear-gradient(135deg, var(--oe-teal) 0%, var(--oe-gold) 200%);
+        box-shadow: 0 16px 34px rgba(19, 62, 63, 0.22);
+    }
+
+    body.dark-mode .oe-btn-primary {
+        box-shadow: 0 16px 34px rgba(255, 193, 7, 0.10);
+    }
+
+    .oe-grid-2 {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 16px;
+    }
+
+    @media (max-width: 992px) {
+        .oe-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .oe-card {
+        background: var(--oe-card);
+        border-radius: var(--oe-radius);
+        border: 1px solid var(--oe-border);
+        box-shadow: var(--oe-shadow);
+        overflow: hidden;
+    }
+
+    body.dark-mode .oe-card {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .oe-card-head {
+        padding: 16px 18px;
+        background: linear-gradient(135deg, rgba(19, 62, 63, 0.08) 0%, rgba(255, 193, 7, 0.08) 100%);
+        border-bottom: 1px solid rgba(19, 62, 63, 0.10);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    body.dark-mode .oe-card-head {
+        border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .oe-card-head h2 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 900;
+        letter-spacing: -0.01em;
+        color: var(--oe-teal);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    body.dark-mode .oe-card-head h2 {
+        color: var(--oe-gold) !important;
+    }
+
+    .oe-badge {
+        border-radius: 50px;
+        background: rgba(255, 193, 7, 0.12);
+        border: 1px solid rgba(255, 193, 7, 0.35);
+        padding: 7px 12px;
+        font-weight: 900;
+        font-size: 0.82rem;
+        color: var(--oe-teal);
+        white-space: nowrap;
+    }
+
+    body.dark-mode .oe-badge {
+        background: rgba(255, 193, 7, 0.10) !important;
+        color: #ffffff !important;
+    }
+
+    .oe-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 1200px) {
+        .oe-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 576px) {
+        .oe-stats { grid-template-columns: 1fr; }
+    }
+
+    .oe-stat {
+        border-radius: var(--oe-radius);
+        border: 1px solid rgba(19, 62, 63, 0.10);
+        background: rgba(19, 62, 63, 0.03);
+        padding: 14px 14px;
+        box-shadow: 0 10px 24px rgba(19, 62, 63, 0.05);
+        min-height: 92px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    body.dark-mode .oe-stat {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .oe-stat .oe-ico {
+        width: 48px;
+        height: 48px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(19, 62, 63, 0.16) 0%, rgba(255, 193, 7, 0.22) 100%);
+        border: 1px solid rgba(255, 193, 7, 0.35);
+        color: var(--oe-teal);
+        flex-shrink: 0;
+    }
+
+    body.dark-mode .oe-stat .oe-ico {
+        color: var(--oe-gold) !important;
+    }
+
+    .oe-stat .oe-k {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .oe-stat .oe-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: var(--oe-muted);
+        letter-spacing: 0.01em;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    body.dark-mode .oe-stat .oe-label {
+        color: rgba(255,255,255,0.9) !important;
+    }
+
+    .oe-stat .oe-value {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 1000;
+        color: var(--oe-teal);
+        letter-spacing: -0.02em;
+    }
+
+    body.dark-mode .oe-stat .oe-value {
+        color: var(--oe-gold) !important;
+    }
+
+    .oe-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .oe-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(19, 62, 63, 0.10);
+    }
+
+    body.dark-mode .oe-row {
+        border-bottom-color: rgba(255,255,255,0.12) !important;
+    }
+
+    .oe-row:last-child { border-bottom: none; }
+
+    .oe-row-left {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .oe-course-title {
+        font-weight: 1000;
+        color: var(--oe-teal);
+        margin: 0;
+        font-size: 0.98rem;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    body.dark-mode .oe-course-title { color: var(--oe-gold) !important; }
+
+    .oe-course-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--oe-muted);
+        font-size: 0.83rem;
+        margin: 0;
+    }
+
+    body.dark-mode .oe-course-meta { color: rgba(255,255,255,0.9) !important; }
+
+    .oe-pill {
+        border-radius: 999px;
+        padding: 6px 10px;
+        border: 1px solid rgba(19, 62, 63, 0.12);
+        background: rgba(19, 62, 63, 0.05);
+        font-weight: 900;
+        color: var(--oe-teal);
+        white-space: nowrap;
+    }
+
+    body.dark-mode .oe-pill {
+        border-color: rgba(255,255,255,0.14) !important;
+        color: #ffffff !important;
+        background: rgba(255,255,255,0.06) !important;
+    }
+
+    .oe-progress {
+        width: 220px;
+        max-width: 40vw;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    @media (max-width: 768px) {
+        .oe-row { flex-direction: column; }
+        .oe-progress { width: 100%; align-items: stretch; max-width: none; }
+    }
+
+    .oe-progress .oe-bar {
+        height: 10px;
+        width: 100%;
+        border-radius: 999px;
+        background: rgba(19, 62, 63, 0.12);
+        overflow: hidden;
+        border: 1px solid rgba(19, 62, 63, 0.10);
+    }
+
+    .oe-progress .oe-bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--oe-teal) 0%, #0f2f30 40%, var(--oe-gold) 100%);
+        box-shadow: 0 10px 26px rgba(255, 193, 7, 0.18);
+        transition: width .6s ease;
+    }
+
+    .oe-progress .oe-percent {
+        font-weight: 1000;
+        color: var(--oe-teal);
+        font-size: 0.92rem;
+    }
+
+    body.dark-mode .oe-progress .oe-percent {
+        color: var(--oe-gold) !important;
+    }
+
+    .oe-cta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .oe-cta { justify-content: flex-start; }
+    }
+
+    .oe-link {
+        border-radius: 16px;
+        padding: 9px 12px;
+        background: rgba(19, 62, 63, 0.05);
+        border: 1px solid rgba(19, 62, 63, 0.12);
+        color: var(--oe-teal);
+        text-decoration: none;
+        font-weight: 1000;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: transform .15s ease, background .15s ease;
+    }
+
+    .oe-link:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 193, 7, 0.10);
+    }
+
+    body.dark-mode .oe-link {
+        background: rgba(255,255,255,0.06) !important;
+        border-color: rgba(255,255,255,0.14) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .oe-link:hover {
+        background: rgba(255, 193, 7, 0.10) !important;
+        color: #ffffff !important;
+    }
+
+    .oe-empty {
+        padding: 28px 18px;
+        text-align: center;
+    }
+
+    .oe-empty .oe-empty-ico {
+        font-size: 3.2rem;
+        color: rgba(255, 193, 7, 0.8);
+        margin-bottom: 10px;
+    }
+
+    .oe-empty h3 {
+        font-weight: 1000;
+        margin: 0 0 8px;
+        color: var(--oe-teal);
+    }
+
+    body.dark-mode .oe-empty h3 { color: var(--oe-gold) !important; }
+
+    .oe-empty p {
+        margin: 0 auto;
+        max-width: 560px;
+        color: var(--oe-muted);
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    body.dark-mode .oe-empty p { color: rgba(255,255,255,0.9) !important; }
+
+    .oe-hist-row {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(19, 62, 63, 0.10);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    body.dark-mode .oe-hist-row {
+        border-bottom-color: rgba(255,255,255,0.12) !important;
+    }
+
+    .oe-hist-row:last-child { border-bottom: none; }
+
+    .oe-hist-left {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .oe-hist-title {
+        margin: 0;
+        font-weight: 1000;
+        color: var(--oe-teal);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    body.dark-mode .oe-hist-title { color: var(--oe-gold) !important; }
+
+    .oe-hist-meta {
+        margin: 0;
+        color: var(--oe-muted);
+        font-size: 0.84rem;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    body.dark-mode .oe-hist-meta { color: rgba(255,255,255,0.9) !important; }
+
+    .oe-score {
+        width: 160px;
+        max-width: 40vw;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .oe-score { align-items: flex-start; width: auto; max-width: none; }
+        .oe-hist-row { flex-direction: column; }
+    }
+
+    .oe-score .oe-score-val {
+        font-weight: 1000;
+        color: var(--oe-teal);
+        font-size: 1.15rem;
+    }
+
+    body.dark-mode .oe-score .oe-score-val { color: var(--oe-gold) !important; }
+
+    .oe-tag {
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-weight: 1000;
+        border: 1px solid rgba(19, 62, 63, 0.12);
+        background: rgba(19, 62, 63, 0.05);
+        color: var(--oe-teal);
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    body.dark-mode .oe-tag {
+        border-color: rgba(255,255,255,0.14) !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: #ffffff !important;
+    }
+
+    .oe-tag.ok { border-color: rgba(22, 163, 74, 0.35); background: rgba(22, 163, 74, 0.10); color: #1f7a3a; }
+    .oe-tag.warn { border-color: rgba(255, 193, 7, 0.40); background: rgba(255, 193, 7, 0.12); color: #856404; }
+    .oe-tag.bad { border-color: rgba(220, 38, 38, 0.35); background: rgba(220, 38, 38, 0.10); color: #991b1b; }
+
+    body.dark-mode .oe-tag.ok { color: #bbf7d0 !important; }
+    body.dark-mode .oe-tag.warn { color: #fde68a !important; }
+    body.dark-mode .oe-tag.bad { color: #fecaca !important; }
+
+    .oe-small {
+        font-size: 0.85rem;
+        color: var(--oe-muted);
+        font-weight: 700;
+    }
+
+    body.dark-mode .oe-small { color: rgba(255,255,255,0.9) !important; }
+
+    /* border-radius strict 24px on major containers */
+    .oe-card, .oe-stat, .oe-page-head, .oe-btn, .oe-link, .oe-badge {
+        border-radius: 24px !important;
+    }
+
+    /* Inputs (not used but keep consistent) */
+    .oe-input {
+        border-radius: 24px !important;
+        border: 1px solid rgba(19, 62, 63, 0.14) !important;
+        background: rgba(19, 62, 63, 0.04) !important;
+        color: var(--oe-teal) !important;
+        padding: 10px 14px;
+        font-weight: 800;
+    }
+
+    body.dark-mode .oe-input {
+        background: rgba(255,255,255,0.06) !important;
+        color: #ffffff !important;
+        border-color: rgba(255,255,255,0.14) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="oe-wrap">
+    <div class="oe-page-head">
+        <div class="oe-title">
+            <h1><i class="fas fa-chart-line"></i> Tableau de bord Étudiant</h1>
+            <p class="oe-subtitle">Stats, progression premium et dernier parcours de lecture — conçus pour un suivi premium, Teal & Gold.</p>
+        </div>
+        <div class="oe-actions">
+            <a class="oe-btn oe-btn-primary" href="{% url 'mes_courses' %}"><i class="fas fa-book-open"></i> Mes cours</a>
+            <a class="oe-btn" href="{% url 'mes_resultats_etudiant' %}"><i class="fas fa-award"></i> Mes résultats</a>
+        </div>
+    </div>
+
+    <div class="oe-stats">
+        <div class="oe-stat">
+            <div class="oe-ico"><i class="fas fa-hourglass-half"></i></div>
+            <div class="oe-k">
+                <p class="oe-label">Temps total d'étude</p>
+                <p class="oe-value">{{ stats.temps_total|default:'0h' }}</p>
+            </div>
+        </div>
+        <div class="oe-stat">
+            <div class="oe-ico"><i class="fas fa-poll"></i></div>
+            <div class="oe-k">
+                <p class="oe-label">Moyenne générale quiz</p>
+                <p class="oe-value">{{ stats.moyenne_quiz|default:'0.0' }}</p>
+            </div>
+        </div>
+        <div class="oe-stat">
+            <div class="oe-ico"><i class="fas fa-certificate"></i></div>
+            <div class="oe-k">
+                <p class="oe-label">Certificats / Attestations</p>
+                <p class="oe-value">{{ stats.nb_certificats|default:'0' }}</p>
+            </div>
+        </div>
+        <div class="oe-stat">
+            <div class="oe-ico"><i class="fas fa-layer-group"></i></div>
+            <div class="oe-k">
+                <p class="oe-label">Cours actifs</p>
+                <p class="oe-value">{{ stats.nb_cours_actifs|default:'0' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="oe-grid-2">
+        <div class="oe-card">
+            <div class="oe-card-head">
+                <h2><i class="fas fa-graduation-cap"></i> Progression premium</h2>
+                <div class="oe-badge">{{ cours_progressions|length|default:'0' }} cours</div>
+            </div>
+
+            {% if cours_progressions and cours_progressions|length > 0 %}
+                {% for cp in cours_progressions %}
+                    <div class="oe-row">
+                        <div class="oe-row-left">
+                            <p class="oe-course-title">{{ cp.cours.titre }}</p>
+                            <p class="oe-course-meta">
+                                {% if cp.cours.categorie %}
+                                    <span class="oe-pill"><i class="fas fa-tag"></i> {{ cp.cours.categorie.nom }}</span>
+                                {% endif %}
+                                <span class="oe-pill"><i class="fas fa-layer-group"></i> {{ cp.cours.niveau }}</span>
+                                <span class="oe-pill"><i class="fas fa-check"></i> {{ cp.chapitres_debloques }} / {{ cp.chapitres_total }} chapitres</span>
+                            </p>
+
+                            {% if cp.dernier_chapitre %}
+                                <p class="oe-small">Dernier chapitre consulté : <strong style="color:#133e3f">{{ cp.dernier_chapitre.titre }}</strong></p>
+                            {% else %}
+                                <p class="oe-small">Dernier chapitre consulté : <strong style="color:#133e3f">Non disponible</strong></p>
+                            {% endif %}
+                        </div>
+
+                        <div class="oe-progress">
+                            <div class="oe-bar" aria-label="Progression">
+                                <span style="width: {{ cp.progression }}%;"></span>
+                            </div>
+                            <div class="oe-percent">{{ cp.progression }}%</div>
+
+                            <div class="oe-cta">
+                                {% if cp.dernier_chapitre and cp.dernier_chapitre.id %}
+                                    <a class="oe-link" href="{% url 'detail_cours_premium' cp.cours.id %}?chapitre={{ cp.dernier_chapitre.id }}">
+                                        <i class="fas fa-play"></i> Reprendre
+                                    </a>
+                                {% else %}
+                                    <a class="oe-link" href="{% url 'detail_cours_premium' cp.cours.id %}">
+                                        <i class="fas fa-play"></i> Démarrer
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="oe-empty">
+                    <div class="oe-empty-ico"><i class="fas fa-book-open"></i></div>
+                    <h3>Aucune progression premium disponible</h3>
+                    <p>Vous n’avez pas encore débloqué de chapitres ou vos cours ne sont pas pris en compte. Consultez le catalogue et commencez à apprendre.</p>
+                    <a class="oe-btn oe-btn-primary mt-3" href="{% url 'course' %}"><i class="fas fa-search"></i> Explorer le catalogue</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="oe-card">
+            <div class="oe-card-head">
+                <h2><i class="fas fa-certificate"></i> Certificats</h2>
+                <div class="oe-badge">{{ stats.nb_certificats|default:'0' }}</div>
+            </div>
+
+            {% if certificats and certificats|length > 0 %}
+                {% for c in certificats %}
+                    <div class="oe-row" style="border-bottom: 1px solid rgba(19,62,63,0.10);">
+                        <div class="oe-row-left">
+                            <p class="oe-course-title">{{ c.cours.titre }}</p>
+                            <p class="oe-course-meta">
+                                <span class="oe-pill"><i class="fas fa-badge-check"></i> {{ c.type_certificat }}</span>
+                                <span class="oe-pill"><i class="fas fa-calendar-alt"></i> {{ c.date_obtention|date:"d/m/Y" }}</span>
+                            </p>
+                        </div>
+                        <div class="oe-progress" style="width: 160px;">
+                            <div class="oe-cta">
+                                <a class="oe-link" href="#"><i class="fas fa-download"></i> Télécharger</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="oe-empty">
+                    <div class="oe-empty-ico"><i class="fas fa-certificate"></i></div>
+                    <h3>Aucun certificat pour l’instant</h3>
+                    <p>Les certificats se débloquent automatiquement lorsque votre progression atteint 100% sur un cours.</p>
+                    <div style="margin-top: 14px; display:flex; justify-content:center; gap: 10px; flex-wrap: wrap;">
+                        <a class="oe-btn" href="{% url 'mes_courses' %}"><i class="fas fa-layer-group"></i> Voir mes cours</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="oe-card mt-4">
+        <div class="oe-card-head">
+            <h2><i class="fas fa-history"></i> Historique récent des quiz</h2>
+            <div class="oe-badge">{{ quiz_recent|length|default:'0' }} résultats</div>
+        </div>
+
+        {% if quiz_recent and quiz_recent|length > 0 %}
+            {% for r in quiz_recent %}
+                <div class="oe-hist-row">
+                    <div class="oe-hist-left">
+                        <p class="oe-hist-title">{{ r.quiz.titre }}</p>
+                        <p class="oe-hist-meta">
+                            <span><i class="fas fa-book"></i> {{ r.quiz.cours.titre }}</span>
+                            <span><i class="far fa-calendar-alt"></i> {{ r.date_soumission|date:"d/m/Y" }}</span>
+                            <span><i class="fas fa-check-double"></i> Statut : {{ r.statut_affiche }}</span>
+                        </p>
+                    </div>
+                    <div class="oe-score">
+                        <div class="oe-score-val">{{ r.note_affiche }} / {{ r.note_max_affiche }}</div>
+                        <div class="oe-tag {% if r.statut_tag == 'ok' %}ok{% elif r.statut_tag == 'warn' %}warn{% else %}bad{% endif %}">
+                            {{ r.tag_label }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="oe-empty">
+                <div class="oe-empty-ico"><i class="fas fa-poll"></i></div>
+                <h3>Pas encore de quiz validés</h3>
+                <p>Quand vous soumettez un quiz et qu’il est corrigé, ses résultats apparaissent ici. Lancez un quiz depuis “Mes cours”.</p>
+                <a class="oe-btn oe-btn-primary mt-3" href="{% url 'mes_quiz_etudiant' %}"><i class="fas fa-play"></i> Lancer un quiz</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

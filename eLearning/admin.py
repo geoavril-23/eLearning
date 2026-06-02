@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Etudiant, Administrateur, Enseignant, Inscription, Cours, Quiz, Paiement, Chapitre, ChapitreDebloque, TransactionSimulee
+from .models import User, Etudiant, Administrateur, Enseignant, Inscription, Cours, Quiz, Paiement, Chapitre, ChapitreDebloque, TransactionSimulee, Module, RessourceChapitre
 
 
 class CustomUserAdmin(UserAdmin):
@@ -75,6 +75,11 @@ class QuizInline(admin.TabularInline):
     extra = 0
 
 
+class ModuleInline(admin.TabularInline):
+    model = Module
+    extra = 1
+
+
 class ChapitreInline(admin.TabularInline):
     model = Chapitre
     extra = 1
@@ -85,7 +90,19 @@ class CoursAdmin(admin.ModelAdmin):
     list_filter = ['niveau', 'date_publication']
     search_fields = ['titre', 'description', 'objectif']
     readonly_fields = ['date_publication']
-    inlines = [QuizInline, ChapitreInline]
+    inlines = [QuizInline, ModuleInline, ChapitreInline]
+
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ['titre', 'cours', 'ordre']
+    list_filter = ['cours']
+
+
+@admin.register(RessourceChapitre)
+class RessourceChapitreAdmin(admin.ModelAdmin):
+    list_display = ['titre', 'chapitre', 'date_ajout']
+
 
 
 @admin.register(Quiz)
@@ -115,7 +132,21 @@ class PaiementAdmin(admin.ModelAdmin):
 class ChapitreAdmin(admin.ModelAdmin):
     list_display = ['titre', 'cours', 'est_premium', 'prix', 'ordre']
     list_filter = ['cours', 'est_premium']
-    search_fields = ['titre', 'description']
+    search_fields = ['titre', 'description', 'contenu']
+    
+    fieldsets = (
+        ('Identité du chapitre', {
+            'fields': ('cours', 'module', 'titre', 'ordre'),
+        }),
+        ('Contenu', {
+            'fields': ('description', 'contenu'),
+            'description': "Contenu riche (HTML issu de Quill.js).",
+        }),
+        ('Accès & média', {
+            'fields': ('est_premium', 'prix', 'ressource', 'lien_youtube'),
+        }),
+    )
+
 
 @admin.register(ChapitreDebloque)
 class ChapitreDebloqueAdmin(admin.ModelAdmin):

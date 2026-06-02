@@ -1,0 +1,655 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cours.titre }} - eLearning{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --teal: #133e3f;
+        --gold: #FFC107;
+        --text: #1f2937;
+        --border: rgba(19, 62, 63, 0.12);
+        --bg-light: #f6f7fb;
+    }
+
+    body {
+        background: var(--bg-light);
+        color: var(--text);
+    }
+
+    body.dark-mode {
+        background: #1a1c23;
+        color: #d1d1d1;
+    }
+
+    .cours-header {
+        background: white;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    body.dark-mode .cours-header {
+        background: #121f20;
+        border-bottom-color: rgba(255,255,255,0.12);
+    }
+
+    .cours-header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .btn-retour {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all .2s ease;
+    }
+
+    body.dark-mode .btn-retour {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+        color: white;
+    }
+
+    .btn-retour:hover {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: white;
+    }
+
+    .titre-cours {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .titre-cours h1 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--teal);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    body.dark-mode .titre-cours h1 {
+        color: var(--gold);
+    }
+
+    .btn-toggle-sidebar {
+        display: none;
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    body.dark-mode .btn-toggle-sidebar {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+        color: white;
+    }
+
+    .btn-toggle-sidebar:hover {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: white;
+    }
+
+    .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        min-height: calc(100vh - 200px);
+    }
+
+    .sidebar {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 1.5rem 0;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
+    }
+
+    body.dark-mode .sidebar {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    body.dark-mode .sidebar-header {
+        border-bottom-color: rgba(255,255,255,0.12);
+    }
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--teal);
+    }
+
+    body.dark-mode .sidebar-header h3 {
+        color: var(--gold);
+    }
+
+    .btn-close-sidebar {
+        display: none;
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: none;
+        color: var(--text);
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    body.dark-mode .btn-close-sidebar {
+        color: white;
+    }
+
+    .toc-section {
+        padding: 0;
+    }
+
+    .toc-module {
+        border-bottom: 1px solid var(--border);
+    }
+
+    body.dark-mode .toc-module {
+        border-bottom-color: rgba(255,255,255,0.12);
+    }
+
+    .toc-module:last-child {
+        border-bottom: none;
+    }
+
+    .module-title {
+        padding: 1rem 1.5rem;
+        margin: 0;
+        font-size: 0.85rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--teal);
+        background: rgba(19, 62, 63, 0.04);
+    }
+
+    body.dark-mode .module-title {
+        color: var(--gold);
+        background: rgba(255,193,7,0.06);
+    }
+
+    .chapitre-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .chapitre-item {
+        margin: 0;
+        padding: 0;
+    }
+
+    .chapitre-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all .15s ease;
+        border-left: 3px solid transparent;
+        position: relative;
+    }
+
+    body.dark-mode .chapitre-link {
+        color: rgba(255,255,255,0.85);
+    }
+
+    .chapitre-link:hover {
+        background: rgba(19, 62, 63, 0.05);
+        border-left-color: var(--gold);
+    }
+
+    body.dark-mode .chapitre-link:hover {
+        background: rgba(255,193,7,0.08);
+    }
+
+    .chapitre-link.active {
+        background: rgba(19, 62, 63, 0.08);
+        border-left-color: var(--gold);
+        color: var(--teal);
+        font-weight: 700;
+    }
+
+    body.dark-mode .chapitre-link.active {
+        background: rgba(255,193,7,0.10);
+        color: var(--gold);
+    }
+
+    .chapitre-number {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(19, 62, 63, 0.12);
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--teal);
+    }
+
+    .chapitre-link.active .chapitre-number {
+        background: var(--gold);
+        color: var(--teal);
+    }
+
+    .content-area {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 2.5rem;
+        min-height: 600px;
+    }
+
+    body.dark-mode .content-area {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+    }
+
+    .chapitre-title {
+        margin: 0 0 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--teal);
+        letter-spacing: -0.01em;
+    }
+
+    body.dark-mode .chapitre-title {
+        color: var(--gold);
+    }
+
+    .chapitre-content {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #4a5568;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    body.dark-mode .chapitre-content {
+        color: rgba(255,255,255,0.85);
+    }
+
+    .chapitre-content h1, .chapitre-content h2, .chapitre-content h3, .chapitre-content h4, .chapitre-content h5, .chapitre-content h6 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 800;
+        color: var(--teal);
+    }
+
+    body.dark-mode .chapitre-content h1,
+    body.dark-mode .chapitre-content h2,
+    body.dark-mode .chapitre-content h3,
+    body.dark-mode .chapitre-content h4,
+    body.dark-mode .chapitre-content h5,
+    body.dark-mode .chapitre-content h6 {
+        color: var(--gold);
+    }
+
+    .chapitre-content p {
+        margin: 1rem 0;
+    }
+
+    .chapitre-content ul, .chapitre-content ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+
+    .chapitre-content li {
+        margin: 0.5rem 0;
+    }
+
+    .chapitre-content code {
+        background: rgba(19, 62, 63, 0.08);
+        color: var(--teal);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+
+    body.dark-mode .chapitre-content code {
+        background: rgba(255,193,7,0.12);
+        color: var(--gold);
+    }
+
+    .chapitre-content pre {
+        background: rgba(19, 62, 63, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+
+    body.dark-mode .chapitre-content pre {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.12);
+    }
+
+    .chapitre-content blockquote {
+        border-left: 4px solid var(--gold);
+        background: rgba(19, 62, 63, 0.04);
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+
+    body.dark-mode .chapitre-content blockquote {
+        background: rgba(255,193,7,0.08);
+    }
+
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    body.dark-mode .navigation {
+        border-top-color: rgba(255,255,255,0.12);
+    }
+
+    .nav-btn {
+        flex: 1;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: rgba(19, 62, 63, 0.04);
+        color: var(--teal);
+        text-decoration: none;
+        font-weight: 700;
+        text-align: center;
+        transition: all .2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    body.dark-mode .nav-btn {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+        color: var(--gold);
+    }
+
+    .nav-btn:hover {
+        background: var(--teal);
+        color: white;
+        border-color: var(--teal);
+        text-decoration: none;
+    }
+
+    .nav-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .nav-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.85;
+    }
+
+    @media (max-width: 1024px) {
+        .main-container {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 100px;
+            left: -350px;
+            width: 300px;
+            height: calc(100vh - 100px);
+            border-radius: 0;
+            z-index: 1000;
+            transition: left .3s ease;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .btn-toggle-sidebar {
+            display: flex;
+        }
+
+        .btn-close-sidebar {
+            display: block;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cours-header {
+            padding: 1rem 0;
+        }
+
+        .cours-header-content {
+            padding: 0 1rem;
+            gap: 1rem;
+        }
+
+        .titre-cours h1 {
+            font-size: 1.1rem;
+        }
+
+        .main-container {
+            padding: 0 1rem;
+            gap: 1rem;
+        }
+
+        .content-area {
+            padding: 1.5rem;
+        }
+
+        .chapitre-title {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="cours-header">
+    <div class="cours-header-content">
+        <a href="{% url 'mes_courses' %}" class="btn-retour" title="Retour">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="titre-cours">
+            <h1>{{ cours.titre }}</h1>
+        </div>
+        <button class="btn-toggle-sidebar" id="btn-toggle-sidebar" type="button" title="Afficher la table des matières">
+            <i class="fas fa-list"></i>
+        </button>
+    </div>
+</div>
+
+<div class="main-container">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-book"></i> Table des matières</h3>
+            <button class="btn-close-sidebar" id="btn-close-sidebar" type="button" title="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        {% if modules or chapitres_sans_module %}
+        <nav class="toc-section">
+            {% if chapitres_sans_module %}
+            <div class="toc-module">
+                <ol class="chapitre-list">
+                    {% for chap in chapitres_sans_module %}
+                    <li class="chapitre-item">
+                        <a href="{% url 'voir_cours' cours.id %}?chapitre={{ chap.id }}"
+                           class="chapitre-link {% if chapitre_actif.id == chap.id %}active{% endif %}">
+                            <span class="chapitre-number">{{ forloop.counter }}</span>
+                            <span>{{ chap.titre|truncatewords:8 }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+            {% endif %}
+
+            {% for module in modules %}
+            <div class="toc-module">
+                <h3 class="module-title">{{ module.titre }}</h3>
+                <ol class="chapitre-list">
+                    {% for chap in module.chapitres.all %}
+                    <li class="chapitre-item">
+                        <a href="{% url 'voir_cours' cours.id %}?chapitre={{ chap.id }}"
+                           class="chapitre-link {% if chapitre_actif.id == chap.id %}active{% endif %}">
+                            <span class="chapitre-number">{{ forloop.counter }}</span>
+                            <span>{{ chap.titre|truncatewords:8 }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+            {% endfor %}
+        </nav>
+        {% else %}
+        <div style="padding: 1.5rem; text-align: center; color: #999;">
+            <p><i class="fas fa-inbox"></i> Aucun chapitre disponible</p>
+        </div>
+        {% endif %}
+    </aside>
+
+    <main class="content-area">
+        {% if chapitre_actif %}
+        <h1 class="chapitre-title">{{ chapitre_actif.titre }}</h1>
+        <div class="chapitre-content">
+            {{ chapitre_actif.contenu|safe }}
+        </div>
+
+        <div class="navigation">
+            {% if chapitre_precedent %}
+            <a href="{% url 'voir_cours' cours.id %}?chapitre={{ chapitre_precedent.id }}" class="nav-btn">
+                <span class="nav-label">← Précédent</span>
+                <span>{{ chapitre_precedent.titre|truncatewords:4 }}</span>
+            </a>
+            {% else %}
+            <div class="nav-btn disabled">
+                <span class="nav-label">← Précédent</span>
+            </div>
+            {% endif %}
+
+            {% if chapitre_suivant %}
+            <a href="{% url 'voir_cours' cours.id %}?chapitre={{ chapitre_suivant.id }}" class="nav-btn">
+                <span class="nav-label">Suivant →</span>
+                <span>{{ chapitre_suivant.titre|truncatewords:4 }}</span>
+            </a>
+            {% else %}
+            <div class="nav-btn disabled">
+                <span class="nav-label">Suivant →</span>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 0; color: #999;">
+            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+            <h2>Aucun chapitre disponible</h2>
+            <p>L'enseignant n'a pas encore ajouté de contenu à ce cours.</p>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('btn-toggle-sidebar');
+    const closeBtn = document.getElementById('btn-close-sidebar');
+    const sidebar = document.getElementById('sidebar');
+
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.add('active');
+    });
+
+    closeBtn.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+    });
+
+    // Fermer la sidebar en cliquant sur un lien
+    const sidebarLinks = sidebar.querySelectorAll('.chapitre-link');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('active');
+            }
+        });
+    });
+
+    // Fermer la sidebar en cliquant en dehors
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 1024) {
+            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

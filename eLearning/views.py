@@ -1,9 +1,10 @@
+
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import F
+from django.db.models import F, Min, Prefetch
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import User, Etudiant, Enseignant, Cours, Inscription, Categorie, Quiz, Question, Choix, SessionVisio, Conversation, Message, Notification, SoumissionQuiz, Paiement, Livre, AchatLivre, TransactionSimulee, Chapitre, ChapitreDebloque, LogActivite
+from .models import User, Etudiant, Enseignant, Cours, Inscription, Categorie, Quiz, Question, Choix, SessionVisio, Conversation, Message, Notification, SoumissionQuiz, Paiement, Livre, AchatLivre, TransactionSimulee, Chapitre, ChapitreDebloque, LogActivite, RessourceCours, Module, RessourceChapitre
 import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -131,7 +132,8 @@ def dashboard(request):
 
 # Dashboards (Version "Nue" sans contextes)
 @login_required
-def dashboard_etudiant(request):
+def dashboard_etudiant_view(request):
+
     if not request.user.is_etudiant:
         messages.error(request, 'Accès refusé. Réservé aux étudiants.')
         return redirect('index')
@@ -845,51 +847,90 @@ def get_dashboard_redirect(user):
         return redirect('dashboard_etudiant')
 
 
-def creer_cours_enseignant(request):
+@login_required
+def creer_cours_complet(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé. Réservé aux enseignants.')
         return redirect('index')
 
     if request.method == 'POST':
-        titre_chapitre = request.POST.get('titre')
-        niveau = request.POST.get('niveau') # Bien que lié au chapitre, le niveau peut être hérité ou spécifique
-        objectif = request.POST.get('objectif')
-        description = request.POST.get('description')
-        ressource = request.FILES.get('ressource')
-        cours_id = request.POST.get('cours_id')
-
         try:
-            cours_obj = get_object_or_404(Cours, id=cours_id)
+            titre = request.POST.get('titre')
+            cours_id = request.POST.get('cours_id')
+            niveau = request.POST.get('niveau')
+            objectif = request.POST.get('objectif')
 
+            # `creer_cours_complet` ne reçoit pas forcément `niveau` depuis le formulaire (template).
+            # Pour éviter l'insertion NULL (NOT NULL en DB), on prend le niveau du cours lié si disponible.
+            if not niveau and request.POST.get('cours_id'):
+                try:
+                    cours_obj_lie_tmp = Cours.objects.get(id=cours_id)
+                    niveau = cours_obj_lie_tmp.niveau
+                except Cours.DoesNotExist:
+                    niveau = None
+
+            if not niveau:
+                niveau = 'Intermédiaire'
+            description = request.POST.get('description') or ""
+            categorie_id = request.POST.get('categorie')
+
+            # Ton template n’envoie pas 'description' au POST.
+            # Fallback sur le contenu Quill (contenu-hidden) pour éviter NULL.
+            if not description:
+                description = request.POST.get('contenu') or ""
             est_premium = request.POST.get('est_premium') == 'on'
             prix = request.POST.get('prix', 0)
-            lien_youtube = request.POST.get('lien_youtube')
+            image = request.FILES.get('image')
+            
+            categorie = None
+            if categorie_id:
+                try:
+                    categorie = Categorie.objects.get(id=categorie_id)
+                except Categorie.DoesNotExist:
+                    pass
 
-            # Créer le chapitre lié au cours sélectionné
-            nouveau_chapitre = Chapitre.objects.create(
-                cours=cours_obj,
-                titre=titre_chapitre,
+            nouveau_cours = Cours.objects.create(
+                titre=titre,
+                niveau=niveau,
+                objectif=objectif,
                 description=description,
+            categorie=categorie,
+                enseignant=request.user.enseignant,
                 est_premium=est_premium,
                 prix=prix,
-                ressource=ressource,
-                lien_youtube=lien_youtube,
-                ordre=cours_obj.chapitres.count() + 1
+                image=image,
+                date_publication=timezone.now().date()
             )
 
-            # Optionnel : mettre à jour le niveau du cours si nécessaire
-            if niveau:
-                cours_obj.niveau = niveau
-                cours_obj.save()
+            # Si l'enseignant a sélectionné un cours existant, on associe le contenu créé (chapitre)
+            # à ce cours existant.
+            cours_obj_lie = None
+            if cours_id:
+                try:
+                    cours_obj_lie = Cours.objects.get(id=cours_id)
+                except Cours.DoesNotExist:
+                    cours_obj_lie = None
 
-            messages.success(request, f'Le chapitre "{titre_chapitre}" a été ajouté avec succès au cours "{cours_obj.titre}".')
-            return redirect('dashboard_enseignant')
+            if cours_obj_lie:
+                # On redirige vers la gestion du cours lié (et non le cours fraîchement créé)
+                messages.success(
+                    request,
+                    f'Contenu créé et lié au cours "{cours_obj_lie.titre}".'
+                )
+                return redirect('gerer_cours_enseignant', cours_id=cours_obj_lie.id)
+
+            messages.success(request, f'Le cours "{titre}" a été créé. Vous pouvez maintenant ajouter des chapitres et des ressources.')
+            return redirect('gerer_cours_enseignant', cours_id=nouveau_cours.id)
+            
         except Exception as e:
-            messages.error(request, f'Erreur lors de l\'ajout du chapitre : {e}')
+            messages.error(request, f'Erreur lors de la création du cours : {e}')
 
-    # Récupérer TOUS les cours de la base (ceux visibles sur cours.html)
     tous_les_cours = Cours.objects.all().order_by('titre')
-    return render(request, 'admin/creer_cours.html', {'mes_cours': tous_les_cours})
+    categories = Categorie.objects.all()
+    return render(request, 'admin/creer_cours.html', {
+        'categories': categories,
+        'tous_les_cours': tous_les_cours,
+    })
 
 @login_required
 def mes_cours_enseignant(request):
@@ -901,6 +942,315 @@ def mes_cours_enseignant(request):
     mes_cours = Cours.objects.filter(enseignant=request.user.enseignant).select_related('categorie')
     
     return render(request, 'admin/mes_cours.html', {'mes_cours': mes_cours})
+@login_required
+def gerer_cours_enseignant(request, cours_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+
+    enseignant = request.user.enseignant
+
+    # Ne pas laisser un 404 "no course matches" si le cours existe mais n'est pas
+    # visible pour l'enseignant courant : on redirige proprement.
+    try:
+        cours = Cours.objects.select_related('enseignant').get(id=cours_id, enseignant=enseignant)
+    except Cours.DoesNotExist:
+        messages.error(
+            request,
+            "Le cours demandé est introuvable ou ne vous appartient pas."
+        )
+        return redirect('mes_cours_enseignant')
+
+    modules = Module.objects.filter(cours=cours).prefetch_related(
+        'chapitres',
+        'chapitres__ressources'
+    ).order_by('ordre')
+    ressources_cours = cours.ressources_annexes.all()
+    quiz_list = cours.quiz.all()
+
+    context = {
+        'cours': cours,
+        'modules': modules,
+        'ressources_cours': ressources_cours,
+        'quiz_list': quiz_list,
+    }
+    return render(request, 'admin/gerer_cours.html', context)
+
+
+@login_required
+def ajouter_module(request, cours_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+    
+    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    if request.method == 'POST':
+        titre = request.POST.get('titre')
+        description = request.POST.get('description', '')
+        ordre = request.POST.get('ordre', 0)
+        
+        try:
+            nouveau_module = Module.objects.create(
+                cours=cours,
+                titre=titre,
+                description=description,
+                ordre=int(ordre) if ordre else 0
+            )
+            
+            # Optional resource file upload
+            ressource = request.FILES.get('ressource')
+            if ressource:
+                ext = os.path.splitext(ressource.name)[1].lower()
+                allowed_extensions = ['.pdf', '.txt', '.doc', '.docx', '.ppt', '.pptx']
+                if ext in allowed_extensions:
+                    RessourceCours.objects.create(
+                        cours=cours,
+                        titre=f"Ressource Module: {titre}",
+                        fichier=ressource
+                    )
+                    messages.success(request, 'Module créé avec sa ressource.')
+                else:
+                    messages.warning(request, 'Module créé, mais le format de fichier de la ressource n\'est pas supporté (seuls .pdf, .txt, .doc, .docx, .ppt, .pptx sont acceptés).')
+            else:
+                messages.success(request, 'Module créé avec succès.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la création du module : {e}")
+            
+    return redirect('gerer_cours_enseignant', cours_id=cours.id)
+
+@login_required
+def supprimer_module(request, module_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    module = get_object_or_404(Module, id=module_id, cours__enseignant=request.user.enseignant)
+    cours_id = module.cours.id
+    try:
+        module.delete()
+        messages.success(request, 'Module supprimé avec succès.')
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression du module : {e}")
+        
+    return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
+@login_required
+def ajouter_chapitre_cours(request, cours_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    
+    if request.method == 'POST':
+        titre = request.POST.get('titre')
+        description = request.POST.get('description', '')
+        contenu = request.POST.get('contenu', '')
+        est_premium = request.POST.get('est_premium') == 'on'
+        prix = request.POST.get('prix', 0)
+        lien_youtube = request.POST.get('lien_youtube', '')
+        ordre = request.POST.get('ordre', cours.chapitres.count() + 1)
+        ressource = request.FILES.get('ressource')
+        module_id = request.POST.get('module_id')
+        
+        module = None
+        if module_id:
+            try:
+                module = Module.objects.get(id=module_id, cours=cours)
+            except Module.DoesNotExist:
+                pass
+        
+        try:
+            chapitre_obj = Chapitre.objects.create(
+                cours=cours,
+                module=module,
+                titre=titre,
+                description=description,
+                contenu=contenu,
+                est_premium=est_premium,
+                prix=prix,
+                lien_youtube=lien_youtube,
+                ordre=ordre,
+                ressource=ressource
+            )
+            
+            # Optional resource file upload
+            if ressource:
+                ext = os.path.splitext(ressource.name)[1].lower()
+                allowed_extensions = ['.pdf', '.txt', '.doc', '.docx', '.ppt', '.pptx']
+                if ext in allowed_extensions:
+                    RessourceChapitre.objects.create(
+                        chapitre=chapitre_obj,
+                        titre=f"Ressource: {ressource.name}",
+                        fichier=ressource
+                    )
+                    messages.success(request, 'Le chapitre et sa ressource ont été ajoutés avec succès.')
+                else:
+                    messages.warning(request, 'Le chapitre a été ajouté, mais le format de la ressource n\'est pas supporté (seuls .pdf, .txt, .doc, .docx, .ppt, .pptx sont acceptés).')
+            else:
+                messages.success(request, 'Le chapitre a été ajouté avec succès.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'ajout du chapitre: {e}")
+            
+    return redirect('gerer_cours_enseignant', cours_id=cours.id)
+
+@login_required
+def modifier_chapitre_cours(request, chapitre_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    cours_id = chapitre.cours.id
+    
+    if request.method == 'POST':
+        chapitre.titre = request.POST.get('titre')
+        chapitre.description = request.POST.get('description', '')
+        chapitre.contenu = request.POST.get('contenu', '')
+        chapitre.est_premium = request.POST.get('est_premium') == 'on'
+        chapitre.prix = request.POST.get('prix', 0)
+        chapitre.lien_youtube = request.POST.get('lien_youtube', '')
+        chapitre.ordre = request.POST.get('ordre', chapitre.ordre)
+        
+        module_id = request.POST.get('module_id')
+        if module_id:
+            try:
+                chapitre.module = Module.objects.get(id=module_id, cours=chapitre.cours)
+            except Module.DoesNotExist:
+                pass
+        
+        nouvelle_ressource = request.FILES.get('ressource')
+        if nouvelle_ressource:
+            chapitre.ressource = nouvelle_ressource
+            
+        try:
+            chapitre.save()
+            
+            # Optional resource file upload
+            if nouvelle_ressource:
+                ext = os.path.splitext(nouvelle_ressource.name)[1].lower()
+                allowed_extensions = ['.pdf', '.txt', '.doc', '.docx', '.ppt', '.pptx']
+                if ext in allowed_extensions:
+                    RessourceChapitre.objects.create(
+                        chapitre=chapitre,
+                        titre=f"Ressource: {nouvelle_ressource.name}",
+                        fichier=nouvelle_ressource
+                    )
+            
+            messages.success(request, 'Le chapitre a été modifié avec succès.')
+        except Exception as e:
+            messages.error(request, f'Erreur lors de la modification du chapitre: {e}')
+            
+    return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
+@login_required
+def supprimer_chapitre_cours(request, chapitre_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    cours_id = chapitre.cours.id
+    
+    try:
+        chapitre.delete()
+        messages.success(request, 'Le chapitre a été supprimé.')
+    except Exception as e:
+        messages.error(request, f'Erreur lors de la suppression du chapitre: {e}')
+        
+    return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
+@login_required
+def ajouter_ressource_cours(request, cours_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    
+    if request.method == 'POST':
+        titre = request.POST.get('titre')
+        fichier = request.FILES.get('fichier')
+        
+        if titre and fichier:
+            try:
+                RessourceCours.objects.create(
+                    cours=cours,
+                    titre=titre,
+                    fichier=fichier
+                )
+                messages.success(request, 'La ressource a été ajoutée avec succès.')
+            except Exception as e:
+                messages.error(request, f"Erreur lors de l'ajout de la ressource: {e}")
+        else:
+            messages.error(request, 'Le titre et le fichier sont obligatoires.')
+            
+    return redirect('gerer_cours_enseignant', cours_id=cours.id)
+
+@login_required
+def supprimer_ressource_cours(request, ressource_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    ressource = get_object_or_404(RessourceCours, id=ressource_id, cours__enseignant=request.user.enseignant)
+    cours_id = ressource.cours.id
+    
+    try:
+        ressource.delete()
+        messages.success(request, 'La ressource a été supprimée.')
+    except Exception as e:
+        messages.error(request, f'Erreur lors de la suppression de la ressource: {e}')
+        
+    return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
+@login_required
+def ajouter_ressource_chapitre(request, chapitre_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    if request.method == 'POST':
+        titre = request.POST.get('titre')
+        fichier = request.FILES.get('fichier')
+        
+        if titre and fichier:
+            ext = os.path.splitext(fichier.name)[1].lower()
+            allowed_extensions = ['.pdf', '.txt', '.doc', '.docx', '.ppt', '.pptx']
+            if ext in allowed_extensions:
+                try:
+                    RessourceChapitre.objects.create(
+                        chapitre=chapitre,
+                        titre=titre,
+                        fichier=fichier
+                    )
+                    messages.success(request, 'Ressource ajoutée au chapitre.')
+                except Exception as e:
+                    messages.error(request, f"Erreur lors de l'ajout de la ressource : {e}")
+            else:
+                messages.error(request, "Format de fichier non accepté (seuls .pdf, .txt, .doc, .docx, .ppt, .pptx sont acceptés).")
+        else:
+            messages.error(request, 'Le titre et le fichier sont obligatoires.')
+            
+    return redirect('gerer_cours_enseignant', cours_id=chapitre.cours.id)
+
+@login_required
+def supprimer_ressource_chapitre(request, ressource_id):
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+        
+    ressource = get_object_or_404(RessourceChapitre, id=ressource_id, chapitre__cours__enseignant=request.user.enseignant)
+    cours_id = ressource.chapitre.cours.id
+    try:
+        ressource.delete()
+        messages.success(request, 'Ressource du chapitre supprimée.')
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression de la ressource : {e}")
+        
+    return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
 
 @login_required
 def modifier_cours_enseignant(request, id):
@@ -1496,6 +1846,7 @@ def mes_courses(request):
         messages.error(request, 'Accès réservé aux étudiants.')
         return redirect('dashboard')
 
+
     inscriptions = Inscription.objects.filter(
         etudiant=request.user.etudiant
     ).select_related('cours', 'cours__categorie').prefetch_related('cours__chapitres')
@@ -1543,6 +1894,60 @@ def mes_courses(request):
             'nb_termines': nb_termines,
         }
     })
+
+
+@login_required
+def voir_cours(request, cours_id):
+    if not request.user.is_etudiant:
+        messages.error(request, 'Accès réservé aux étudiants.')
+        return redirect('index')
+
+    cours = get_object_or_404(Cours, id=cours_id)
+    try:
+        inscription = Inscription.objects.get(cours=cours, etudiant=request.user.etudiant)
+    except Inscription.DoesNotExist:
+        messages.error(request, "Vous n'êtes pas inscrit à ce cours.")
+        return redirect('mes_courses')
+
+    modules = Module.objects.filter(cours=cours).prefetch_related(
+        Prefetch('chapitres', queryset=Chapitre.objects.order_by('ordre'))
+    ).order_by('ordre')
+
+    chapitres_sans_module = Chapitre.objects.filter(cours=cours, module=None).order_by('ordre')
+
+    chapitre_id = request.GET.get('chapitre')
+    chapitre_actif = None
+    tous_chapitres = list(Chapitre.objects.filter(cours=cours).order_by('module__ordre', 'ordre'))
+
+    if chapitre_id:
+        try:
+            chapitre_actif = Chapitre.objects.get(id=chapitre_id, cours=cours)
+        except Chapitre.DoesNotExist:
+            pass
+
+    if not chapitre_actif and tous_chapitres:
+        chapitre_actif = tous_chapitres[0]
+
+    chapitre_precedent = None
+    chapitre_suivant = None
+    if chapitre_actif and tous_chapitres:
+        idx = next((i for i, c in enumerate(tous_chapitres) if c.id == chapitre_actif.id), None)
+        if idx is not None:
+            if idx > 0:
+                chapitre_precedent = tous_chapitres[idx - 1]
+            if idx < len(tous_chapitres) - 1:
+                chapitre_suivant = tous_chapitres[idx + 1]
+
+    context = {
+        'cours': cours,
+        'modules': modules,
+        'chapitres_sans_module': chapitres_sans_module,
+        'chapitre_actif': chapitre_actif,
+        'chapitre_precedent': chapitre_precedent,
+        'chapitre_suivant': chapitre_suivant,
+        'inscription': inscription,
+    }
+    return render(request, 'voir_cours.html', context)
 
 
 
@@ -1869,7 +2274,7 @@ def liste_cours_premium(request):
             cours.nb_premium = 1
             cours.prix_mini = cours.prix
         else:
-            cours.prix_mini = premium_chapitres.aggregate(models.Min('prix'))['prix__min'] or 0
+            cours.prix_mini = premium_chapitres.aggregate(Min('prix'))['prix__min'] or 0
         
         # Vérification si débloqué
         cours.debloque = False
@@ -1886,10 +2291,21 @@ def liste_cours_premium(request):
 @login_required
 def detail_cours_premium(request, cours_id):
     cours = get_object_or_404(Cours, id=cours_id)
-    chapitres = cours.chapitres.all().order_by('ordre')
-    
-    # Correction pour les cours existants sans chapitres
-    if not chapitres.exists() and (cours.ressource or cours.lien_youtube):
+
+    est_inscrit = Inscription.objects.filter(
+        etudiant=request.user.etudiant,
+        cours=cours,
+        statut='validee'
+    ).exists()
+
+    if not est_inscrit and not request.user.is_staff:
+        messages.error(request, 'Vous devez être inscrit à ce cours.')
+        return redirect('mes_courses')
+
+
+    # --- Correction legacy : cours sans chapitres ---
+    chapitres_qs = cours.chapitres.all().order_by('ordre')
+    if not chapitres_qs.exists() and (cours.ressource or cours.lien_youtube):
         legacy_chapitre = Chapitre.objects.create(
             cours=cours,
             titre="Contenu complet du cours",
@@ -1900,30 +2316,81 @@ def detail_cours_premium(request, cours_id):
             lien_youtube=cours.lien_youtube,
             ordre=1
         )
-        chapitres = [legacy_chapitre]
+        chapitres_qs = Chapitre.objects.filter(id=legacy_chapitre.id).order_by('ordre')
 
-    chapitres_debloques_ids = []
-    est_inscrit = False
-    if request.user.is_etudiant:
-        # Vérifier si l'étudiant est déjà inscrit au cours complet (achat legacy)
-        est_inscrit = Inscription.objects.filter(
-            etudiant=request.user.etudiant, 
-            cours=cours, 
-            statut='validee'
-        ).exists()
-        
-        # Récupérer les chapitres achetés individuellement
-        chapitres_debloques_ids = list(ChapitreDebloque.objects.filter(
-            etudiant=request.user.etudiant, 
-            chapitre__cours=cours
-        ).values_list('chapitre_id', flat=True))
-        
+    # --- Modules + chapitres ordonnés (prefetch + ordre) ---
+    # IMPORTANT: certains projets ajoutent des chapitres directement à Chapitre(cours=...) sans les relier à un Module.
+    # On gère donc un fallback pour que la Table des matières s'affiche toujours.
+    modules = (
+        Module.objects.filter(cours=cours)
+        .prefetch_related('chapitres')
+        .order_by('ordre')
+    )
+
+    # Flat list de tous les chapitres, dans l'ordre global (module.ordre puis chapitre.ordre)
+    tous_chapitres_ordonnes = []
+    for m in modules:
+        tous_chapitres_ordonnes.extend(
+            list(m.chapitres.all().order_by('ordre'))
+        )
+
+    # Fallback: s'il n'y a aucun module/aucun chapitre via modules, on récupère les chapitres liés directement au cours.
+    if not tous_chapitres_ordonnes:
+        chapitres_sans_module = list(cours.chapitres.all().order_by('ordre'))
+        tous_chapitres_ordonnes = chapitres_sans_module
+
+        # Pour que la sidebar (modules -> chapitres) fonctionne sans casser le template,
+        # on crée une structure de module virtuel uniquement en mémoire via l'injection de `chapitres`.
+        class _ModuleVirtuel:
+            def __init__(self, chapitres):
+                self._chapitres = chapitres
+            @property
+            def chapitres(self):
+                return self._chapitres
+
+        modules = [_ModuleVirtuel(chapitres_sans_module)]
+
+
+
+    if not tous_chapitres_ordonnes:
+        # fallback : au cas où un cours existe sans module/chapitres (rare)
+        tous_chapitres_ordonnes = list(cours.chapitres.all().order_by('ordre'))
+
+    contenu_vide = len(tous_chapitres_ordonnes) == 0
+
+    chapitre_actuel = None
+    chapitre_precedent = None
+    chapitre_suivant = None
+
+    chapitre_id_param = request.GET.get('chapitre_id')
+    if chapitre_id_param is None:
+        chapitre_id_param = request.GET.get('chapitre')
+
+    if not contenu_vide:
+        if chapitre_id_param:
+            try:
+                chapitre_id_val = int(chapitre_id_param)
+                chapitre_actuel = next((c for c in tous_chapitres_ordonnes if c.id == chapitre_id_val), None)
+            except (TypeError, ValueError):
+                chapitre_actuel = None
+
+        if chapitre_actuel is None:
+            chapitre_actuel = tous_chapitres_ordonnes[0]
+
+        idx = tous_chapitres_ordonnes.index(chapitre_actuel)
+        chapitre_precedent = tous_chapitres_ordonnes[idx - 1] if idx > 0 else None
+        chapitre_suivant = tous_chapitres_ordonnes[idx + 1] if idx < len(tous_chapitres_ordonnes) - 1 else None
+
     return render(request, 'detail_cours_premium.html', {
         'cours': cours,
-        'chapitres': chapitres,
-        'chapitres_debloques_ids': chapitres_debloques_ids,
-        'est_inscrit': est_inscrit
+        'modules': modules,
+        'contenu_vide': contenu_vide,
+        'chapitre_actuel': chapitre_actuel,
+        'chapitre_precedent': chapitre_precedent,
+        'chapitre_suivant': chapitre_suivant,
     })
+
+
 
 @login_required
 def acheter_chapitre(request, chapitre_id):

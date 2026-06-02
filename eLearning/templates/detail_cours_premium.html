@@ -1,304 +1,569 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ cours.titre }} - Chapitres Premium{% endblock %}
+{% block title %}{{ cours.titre }} - Lecteur premium{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
-  .course-detail-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    padding: 60px 0;
-    color: white;
+  :root{
+    --teal:#133e3f;
+    --gold:#FFC107;
+    --radius:24px;
   }
 
-  .chapter-list {
-    padding: 50px 0;
-    background: #f8fafc;
+  body{
+    background:#f6f7fb;
   }
 
-  .chapter-card {
-    background: white;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    padding: 20px;
-    border: 1px solid #edf2f7;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  body.dark-mode{
+    background:#0f1416;
+    color:#e7eef0;
   }
 
-  .chapter-card:hover {
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
-    border-color: #cbd5e0;
+  .reader-page{
+    min-height:100vh;
+    padding:22px 18px;
   }
 
-  .chapter-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  .reader-shell{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:18px;
+    align-items:start;
   }
 
-  .chapter-number {
-    width: 40px;
-    height: 40px;
-    background: #edf2f7;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #4a5568;
-    flex-shrink: 0;
+  .reader-sidebar{
+    background:#ffffff;
+    border:1px solid rgba(0,0,0,0.06);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    position:sticky;
+    top:18px;
+    height:calc(100vh - 36px);
+    overflow:auto;
   }
 
-  .chapter-details h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #2d3748;
+  body.dark-mode .reader-sidebar{
+    background:#121a1c;
+    border-color:rgba(255,255,255,0.08);
   }
 
-  .chapter-details p {
-    margin: 5px 0 0;
-    font-size: 0.9rem;
-    color: #718096;
+  .sidebar-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
   }
 
-  .chapter-status {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  .sidebar-title h2{
+    font-size:1rem;
+    font-weight:900;
+    color:var(--teal);
+    margin:0;
   }
 
-  .badge-premium {
-    background: #fff5f5;
-    color: #e53e3e;
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
+  body.dark-mode .sidebar-title h2{
+    color:#b7d8d1;
   }
 
-  .badge-unlocked {
-    background: #f0fff4;
-    color: #38a169;
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  .btn-close-toc{
+    border:0;
+    background:transparent;
+    color:rgba(0,0,0,0.7);
+    font-weight:900;
+    padding:6px 10px;
+    border-radius:var(--radius);
   }
 
-  .locked-overlay {
-    filter: blur(2px);
-    pointer-events: none;
-    opacity: 0.6;
+  body.dark-mode .btn-close-toc{
+    color:rgba(255,255,255,0.85);
   }
 
-  .btn-pay {
-    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
-    color: #1a1a2e;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px rgba(246, 194, 62, 0.2);
+  .toc-partie-label{
+    font-size:0.75rem;
+    font-weight:900;
+    color:#94a3b8;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin:18px 0 8px;
   }
 
-  .btn-pay:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(246, 194, 62, 0.3);
+  body.dark-mode .toc-partie-label{
+    color:rgba(255,255,255,0.45);
   }
 
-  .btn-view {
-    background: #2d3748;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.85rem;
+  .toc-module-title{
+    font-weight:900;
+    color:var(--teal);
+    font-size:0.98rem;
+    margin-bottom:10px;
   }
 
-  .btn-view:hover {
-    background: #1a202c;
-    color: white;
+  body.dark-mode .toc-module-title{
+    color:#b7d8d1;
   }
 
-  .icon-lock {
-    font-size: 1.5rem;
-    color: #cbd5e0;
+  .toc-chapitre-link{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 12px;
+    border-radius:var(--radius);
+    text-decoration:none;
+    color:#0f172a;
+    background:transparent;
+    border:1px solid transparent;
+    margin-bottom:8px;
+  }
+
+  body.dark-mode .toc-chapitre-link{
+    color:rgba(255,255,255,0.9);
+  }
+
+  .toc-chapitre-link:hover{
+    border-color:rgba(19,62,63,0.18);
+    background:rgba(19,62,63,0.05);
+  }
+
+  body.dark-mode .toc-chapitre-link:hover{
+    border-color:rgba(255,255,255,0.10);
+    background:rgba(255,255,255,0.06);
+  }
+
+  .toc-chapitre-link.active{
+    background:rgba(19,62,63,0.09);
+    border-color:rgba(19,62,63,0.25);
+    font-weight:900;
+  }
+
+  body.dark-mode .toc-chapitre-link.active{
+    background:rgba(255,193,7,0.10);
+    border-color:rgba(255,193,7,0.22);
+  }
+
+  .toc-num{
+    width:38px;
+    height:38px;
+    border-radius:calc(var(--radius) - 14px);
+    border:2px solid rgba(15,23,42,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-weight:900;
+    font-size:0.85rem;
+  }
+
+  body.dark-mode .toc-num{
+    border-color:rgba(255,255,255,0.18);
+  }
+
+  .toc-chapitre-link.active .toc-num{
+    border-color:var(--teal);
+    background:var(--teal);
+    color:#fff;
+  }
+
+  body.dark-mode .toc-chapitre-link.active .toc-num{
+    border-color:var(--gold);
+    background:var(--gold);
+    color:#111;
+  }
+
+  .reader-main{
+    border-radius:var(--radius);
+    background:#ffffff;
+    border:1px solid rgba(0,0,0,0.06);
+    padding:20px 20px;
+    min-height: calc(100vh - 36px);
+    overflow:hidden;
+  }
+
+  body.dark-mode .reader-main{
+    background:#121a1c;
+    border-color:rgba(255,255,255,0.08);
+  }
+
+  .reader-main-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom:16px;
+  }
+
+  .reader-course-title{
+    font-weight:1000;
+    color:var(--teal);
+    margin:0;
+    font-size:1.2rem;
+  }
+
+  body.dark-mode .reader-course-title{
+    color:#b7d8d1;
+  }
+
+  .reader-course-badge{
+    background:rgba(255,193,7,0.15);
+    color:var(--gold);
+    border:1px solid rgba(255,193,7,0.35);
+    padding:8px 14px;
+    border-radius:var(--radius);
+    font-weight:1000;
+    white-space:nowrap;
+  }
+
+  .chapter-content{
+    padding:4px 0;
+  }
+
+  .chapter-content h1,
+  .chapter-content h2,
+  .chapter-content h3{
+    border-radius:var(--radius);
+  }
+
+  .chapter-content h1{font-size:1.8rem;color:var(--teal);margin:0.2rem 0 0.9rem;font-weight:1000;}
+  .chapter-content h2{font-size:1.45rem;color:var(--teal);margin:1.1rem 0 0.7rem;font-weight:1000;}
+  .chapter-content h3{font-size:1.2rem;color:var(--gold);margin:1rem 0 0.6rem;font-weight:1000;}
+
+  .chapter-content p{font-size:1.05rem;line-height:1.85;}
+  .chapter-content strong{color:var(--teal);}
+
+  .chapter-content pre,
+  .chapter-content code{
+    background:rgba(19,62,63,0.06);
+    border-left:4px solid var(--gold);
+    padding:12px 14px;
+    border-radius:var(--radius);
+    font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    display:block;
+    overflow-x:auto;
+  }
+
+  .chapter-content blockquote{
+    border-left:6px solid var(--gold);
+    padding:14px 16px;
+    border-radius:var(--radius);
+    background:rgba(255,193,7,0.08);
+    color:rgba(15,23,42,0.85);
+    font-style:italic;
+  }
+
+  body.dark-mode .chapter-content blockquote{color:rgba(255,255,255,0.82);}
+
+  .chapter-resources{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid rgba(148,163,184,0.35);
+  }
+
+  .resource-card{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(19,62,63,0.05);
+    border:1px solid rgba(19,62,63,0.15);
+    color:var(--teal);
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:var(--radius);
+    font-weight:900;
+    margin:6px 8px 6px 0;
+  }
+
+  .resource-card:hover{
+    background:rgba(255,193,7,0.12);
+    border-color:rgba(255,193,7,0.28);
+  }
+
+  body.dark-mode .resource-card{
+    background:rgba(255,255,255,0.05);
+    border-color:rgba(255,255,255,0.10);
+    color:#cfe7e2;
+  }
+
+  body.dark-mode .resource-card:hover{
+    background:rgba(255,193,7,0.10);
+    border-color:rgba(255,193,7,0.22);
+  }
+
+  .bottom-navigation{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin-top:22px;
+  }
+
+  .nav-link{
+    text-decoration:none;
+    font-weight:1000;
+    color:var(--teal);
+    padding:12px 16px;
+    border-radius:var(--radius);
+    border:1px solid rgba(19,62,63,0.18);
+    background:rgba(19,62,63,0.05);
+  }
+
+  .nav-link:hover{
+    background:rgba(255,193,7,0.12);
+    border-color:rgba(255,193,7,0.28);
+  }
+
+  .nav-link[aria-disabled="true"]{
+    opacity:0.55;
+    pointer-events:none;
+  }
+
+  body.dark-mode .nav-link{
+    color:#b7d8d1;
+    background:rgba(255,255,255,0.05);
+    border-color:rgba(255,255,255,0.10);
+  }
+
+  .nav-next{
+    background:var(--teal);
+    border-color:rgba(0,0,0,0);
+    color:#fff;
+  }
+
+  body.dark-mode .nav-next{
+    background:var(--gold);
+    color:#111;
+  }
+
+  .empty-state-wrap{
+    height:100%;
+    min-height: calc(100vh - 36px - 110px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .empty-state-card{
+    width:min(640px, 100%);
+    border-radius:var(--radius);
+    background:rgba(19,62,63,0.06);
+    border:1px solid rgba(19,62,63,0.18);
+    padding:22px 18px;
+    text-align:center;
+  }
+
+  body.dark-mode .empty-state-card{
+    background:rgba(255,193,7,0.08);
+    border-color:rgba(255,193,7,0.22);
+  }
+
+  .empty-state-icon{
+    width:78px;
+    height:78px;
+    border-radius:var(--radius);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 12px auto;
+    background:rgba(255,193,7,0.18);
+    border:1px solid rgba(255,193,7,0.35);
+    color:var(--gold);
+    font-size:1.8rem;
+  }
+
+  body.dark-mode .empty-state-icon{
+    background:rgba(255,193,7,0.18);
+    border-color:rgba(255,193,7,0.35);
+  }
+
+  .empty-state-title{
+    font-weight:1000;
+    color:var(--teal);
+    margin:0 0 10px 0;
+    font-size:1.25rem;
+  }
+
+  body.dark-mode .empty-state-title{color:#b7d8d1;}
+
+  .empty-state-desc{
+    margin:0 0 16px 0;
+    color:rgba(15,23,42,0.75);
+    font-weight:700;
+  }
+
+  body.dark-mode .empty-state-desc{color:rgba(255,255,255,0.72);}
+
+  .btn-teal-gold{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-decoration:none;
+    font-weight:1000;
+    border-radius:var(--radius);
+    padding:12px 18px;
+    border:1px solid rgba(19,62,63,0.18);
+    background:var(--teal);
+    color:#fff;
+  }
+
+  body.dark-mode .btn-teal-gold{
+    background:var(--gold);
+    color:#111;
+    border-color:rgba(255,193,7,0.25);
+  }
+
+  .btn-teal-gold:hover{
+    filter:brightness(1.05);
+  }
+
+  @media (max-width: 991px){
+    .reader-shell{grid-template-columns:1fr;}
+    .reader-sidebar{
+      position:fixed;
+      left:-420px;
+      top:14px;
+      z-index:1050;
+      width: 92vw;
+      max-width:420px;
+      height: calc(100vh - 28px);
+      transition:left 0.2s ease;
+    }
+    .reader-sidebar.open{left:14px;}
+    .reader-main{min-height:auto;}
+    .reader-page{padding:14px 12px;}
+    .reader-main{padding:16px 14px;}
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="course-detail-header">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-8">
-        <h1 class="mb-3 font-weight-bold">{{ cours.titre }}</h1>
-        <p class="lead text-gray-400">{{ cours.description|truncatewords:30 }}</p>
-        <div class="mt-4 d-flex align-items-center gap-4">
-          <div class="d-flex align-items-center gap-2">
-            <i class="fas fa-user-circle fa-2x text-warning"></i>
-            <div>
-              <div class="small text-uppercase font-weight-bold" style="color: #a0aec0; letter-spacing: 1px;">Enseignant
-              </div>
-              <div class="font-weight-bold">{{ cours.enseignant.nom }} {{ cours.enseignant.prenom }}</div>
-            </div>
-          </div>
-          <div class="divider mx-3" style="width: 1px; height: 30px; background: rgba(255,255,255,0.2);"></div>
-          <div>
-            <div class="small text-uppercase font-weight-bold" style="color: #a0aec0; letter-spacing: 1px;">Catégorie
-            </div>
-            <div class="font-weight-bold">{{ cours.categorie.nom|default:"Général" }}</div>
-          </div>
-        </div>
+<div class="reader-page">
+  <div class="reader-shell">
+    <aside class="reader-sidebar" id="readerSidebar">
+      <div class="sidebar-title">
+        <h2>Table des matières</h2>
+        <button class="btn-close-toc" id="tocClose" type="button" aria-label="Fermer">✕</button>
       </div>
-      <div class="col-md-4 text-center d-none d-md-block">
-        <img src="{% if cours.image %}{{ cours.image.url }}{% else %}{% static 'images/algorithme.jpeg' %}{% endif %}"
-          class="img-fluid rounded-lg shadow-2xl" style="max-height: 250px; border: 4px solid rgba(255,255,255,0.1);">
-      </div>
-    </div>
-  </div>
-</section>
 
-<section class="chapter-list">
-  <div class="container">
-    <h2 class="mb-5 font-weight-bold text-gray-800">Contenu de la formation</h2>
+      {% for module in modules %}
+        <div class="toc-partie-label">PARTIE {{ forloop.counter }}</div>
+        <div class="toc-module-title">{{ module.titre }}</div>
 
-    <div class="row">
-      <div class="col-lg-9 mx-auto">
-        {% for chapitre in chapitres %}
-        <div class="chapter-card" id="chapter-{{ chapitre.id }}">
-          <div class="chapter-info">
-            <div class="chapter-number">{{ forloop.counter }}</div>
-            <div class="chapter-details">
-              <h4>{{ chapitre.titre }}</h4>
-              <p>{{ chapitre.description|truncatechars:100 }}</p>
-            </div>
-          </div>
-
-          <div class="chapter-status">
-            {% if chapitre.est_premium %}
-            {% if chapitre.id in chapitres_debloques_ids or est_inscrit %}
-            <span class="badge-unlocked"><i class="fas fa-check-circle"></i> Débloqué</span>
-            {% if chapitre.ressource %}
-            <a href="{{ chapitre.ressource.url }}" class="btn-view" target="_blank"><i
-                class="fas fa-file-download mr-1"></i> Consulter</a>
-            {% endif %}
-            {% if chapitre.lien_youtube %}
-            <a href="{{ chapitre.lien_youtube }}" class="btn-view bg-danger" target="_blank"><i
-                class="fab fa-youtube mr-1"></i> Vidéo</a>
-            {% endif %}
-            {% else %}
-            <div class="text-right">
-              <span class="badge-premium mb-2 d-inline-block"><i class="fas fa-crown"></i> Premium</span>
-              <div class="d-flex align-items-center gap-3">
-                <span class="font-weight-bold text-dark">{{ chapitre.prix|floatformat:0 }} FCFA</span>
-                <button class="btn-pay"
-                  onclick="unlockChapter('{{ chapitre.id }}', '{{ chapitre.titre }}', '{{ chapitre.prix|floatformat:0 }}')">
-                  <i class="fas fa-unlock mr-1"></i> Débloquer
-                </button>
-              </div>
-            </div>
-            {% endif %}
-            {% else %}
-            <span class="badge badge-light p-2 px-3 rounded-pill text-muted font-weight-bold">Gratuit</span>
-            {% if chapitre.ressource %}
-            <a href="{{ chapitre.ressource.url }}" class="btn-view" target="_blank"><i
-                class="fas fa-file-download mr-1"></i> Consulter</a>
-            {% endif %}
-            {% if chapitre.lien_youtube %}
-            <a href="{{ chapitre.lien_youtube }}" class="btn-view bg-danger" target="_blank"><i
-                class="fab fa-youtube mr-1"></i> Vidéo</a>
-            {% endif %}
-            {% endif %}
-          </div>
-        </div>
+        {% for chapitre in module.chapitres.all|dictsort:"ordre" %}
+          <a class="toc-chapitre-link {% if chapitre_actuel and chapitre.id == chapitre_actuel.id %}active{% endif %}" href="?chapitre_id={{ chapitre.id }}">
+            <span class="toc-num">{{ forloop.counter }}</span>
+            <span style="font-weight:900">{{ chapitre.titre }}</span>
+          </a>
         {% empty %}
-        <div class="text-center py-5">
-          <i class="fas fa-folder-open fa-3x text-gray-300 mb-3"></i>
-          <p class="text-gray-500">Aucun chapitre n'a encore été ajouté à ce cours.</p>
-        </div>
+          <div style="font-weight:800;color:rgba(148,163,184,0.85);margin:10px 0 0;">Aucun chapitre pour le moment</div>
         {% endfor %}
+      {% empty %}
+        <div class="toc-partie-label">Aucune partie</div>
+      {% endfor %}
+    </aside>
+
+    <main class="reader-main">
+      <div class="reader-main-header">
+        <div>
+          <p class="reader-course-title">{{ cours.titre }}</p>
+        </div>
+        <div class="reader-course-badge">Teal & Gold Premium</div>
       </div>
-    </div>
+
+      {% if contenu_vide %}
+        <div class="empty-state-wrap">
+          <div class="empty-state-card">
+            <div class="empty-state-icon"><i class="fa-solid fa-folder-open"></i></div>
+            <div class="empty-state-title">Aucun contenu pour l'instant</div>
+            <div class="empty-state-desc">Ce cours n'a pas encore de modules ou de chapitres enregistrés.</div>
+            <a href="{% url 'mes_courses' %}" class="btn-teal-gold"><i class="fa-solid fa-arrow-left"></i> Retour aux formations</a>
+          </div>
+        </div>
+      {% else %}
+        <section class="chapter-content">
+          {% if chapitre_actuel %}
+            {{ chapitre_actuel.contenu|safe }}
+            {% if chapitre_actuel.ressources.exists %}
+              <div class="chapter-resources">
+                {% for r in chapitre_actuel.ressources.all %}
+                  {% if r.fichier %}
+                    <a href="{{ r.fichier.url }}" download class="resource-card">
+                      <i class="fas {{ r.get_file_icon }}"></i>
+                      <span>{{ r.titre }}</span>
+                    </a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="bottom-navigation">
+              {% if chapitre_precedent %}
+                <a class="nav-link" href="?chapitre_id={{ chapitre_precedent.id }}">← Chapitre précédent</a>
+              {% else %}
+                <a class="nav-link" aria-disabled="true" tabindex="-1">Chapitre précédent</a>
+              {% endif %}
+
+              {% if chapitre_suivant %}
+                <a class="nav-link nav-next" href="?chapitre_id={{ chapitre_suivant.id }}">Chapitre suivant →</a>
+              {% else %}
+                <a class="nav-link nav-next" aria-disabled="true" tabindex="-1">Chapitre suivant</a>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="empty-state-wrap">
+              <div class="empty-state-card">
+                <div class="empty-state-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <div class="empty-state-title">Aucun contenu pour l'instant</div>
+                <div class="empty-state-desc">Ce cours n'est pas encore prêt.</div>
+                <a href="{% url 'mes_courses' %}" class="btn-teal-gold"><i class="fa-solid fa-arrow-left"></i> Retour aux formations</a>
+              </div>
+            </div>
+          {% endif %}
+        </section>
+      {% endif %}
+    </main>
   </div>
-</section>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function unlockChapter(chapterId, title, price) {
-    Swal.fire({
-      title: 'Débloquer ce chapitre ?',
-      text: `Souhaitez-vous acheter le chapitre "${title}" pour ${price} FCFA ?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#1cc88a',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Oui, débloquer !',
-      cancelButtonText: 'Annuler',
-      background: document.body.classList.contains('dark-mode') ? '#242632' : '#fff',
-      color: document.body.classList.contains('dark-mode') ? '#fff' : '#545454'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Afficher loader
-        Swal.fire({
-          title: 'Traitement du paiement...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
+  (function(){
+    const sidebar = document.getElementById('readerSidebar');
+    const tocClose = document.getElementById('tocClose');
 
-        // Requête AJAX
-        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
+    function closeSidebar(){
+      if(sidebar) sidebar.classList.remove('open');
+    }
 
-        $.ajax({
-          url: `/api/chapitre/${chapterId}/acheter/`,
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-          success: function (response) {
-            Swal.fire({
-              title: 'Succès !',
-              text: response.message,
-              icon: 'success',
-              confirmButtonColor: '#1cc88a'
-            }).then(() => {
-              // Mettre à jour le solde dans le topbar si présent
-              const soldeDisplay = document.getElementById('user-solde-display');
-              if (soldeDisplay) {
-                soldeDisplay.innerText = response.nouveau_solde.toLocaleString();
-              }
-              // Recharger la page pour voir le contenu
-              location.reload();
-            });
-          },
-          error: function (xhr) {
-            const error = xhr.responseJSON ? xhr.responseJSON.message : "Une erreur est survenue.";
-            Swal.fire({
-              title: 'Erreur',
-              text: error,
-              icon: 'error',
-              confirmButtonColor: '#4e73df'
-            });
-          }
-        });
-      }
+    function openSidebar(){
+      if(sidebar && window.innerWidth <= 991) sidebar.classList.add('open');
+    }
+
+    if(tocClose){
+      tocClose.addEventListener('click', closeSidebar);
+    }
+
+    window.addEventListener('resize', function(){
+      if(window.innerWidth > 991) closeSidebar();
     });
-  }
+
+    document.querySelectorAll('.toc-chapitre-link').forEach(function(link){
+      link.addEventListener('click', function(){
+        if(window.innerWidth <= 991) closeSidebar();
+      });
+    });
+
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closeSidebar();
+    });
+
+    // Optionnel : ouverture si l'utilisateur a une petite largeur et que la sidebar n'est pas affichée
+    // (aucune ouverture automatique pour respecter l'UX existante)
+  })();
 </script>
 {% endblock %}
+

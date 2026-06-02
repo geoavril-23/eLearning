@@ -1,0 +1,28 @@
+warning: in the working copy of 'eLearning/models.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/static/admin/css/sb-admin-2.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/static/css/style.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/a_propos.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/admin/base_admin.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/admin/mes_cours.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/admin/partials/sidebar.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/admin/profil.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/base.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/detail_cours_premium.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/templates/partials/nav.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/urls.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eLearning/views.py', LF will be replaced by CRLF the next time Git touches it
+eLearning/admin.py
+eLearning/models.py
+eLearning/static/admin/css/sb-admin-2.css
+eLearning/static/css/style.css
+eLearning/templates/a_propos.html
+eLearning/templates/admin/base_admin.html
+eLearning/templates/admin/creer_cours.html
+eLearning/templates/admin/mes_cours.html
+eLearning/templates/admin/partials/sidebar.html
+eLearning/templates/admin/profil.html
+eLearning/templates/base.html
+eLearning/templates/detail_cours_premium.html
+eLearning/templates/partials/nav.html
+eLearning/urls.py
+eLearning/views.py

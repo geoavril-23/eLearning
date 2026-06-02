@@ -309,9 +309,10 @@ body {
 
 /* Ticker Section */
 .scrolling-container {
-  background-color: #133e3f;
-  color: #ffffff;
+  background-color: rgba(0, 210, 195, 0.85);
+  color: #133e3f;
   padding: 10px 0;
+  margin-top: 0;
   overflow: hidden;
   white-space: nowrap;
 }

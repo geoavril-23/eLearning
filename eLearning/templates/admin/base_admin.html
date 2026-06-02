@@ -240,12 +240,7 @@
     <!-- Inline script to apply theme early and prevent flash -->
     <script>
         (function () {
-            {% if request.user.is_authenticated %}
-            const theme = "{{ request.user.theme }}";
-            {% else %}
-            const theme = localStorage.getItem('theme');
-            {% endif %}
-
+            const theme = ("{{ request.user.theme|default:'light' }}" || localStorage.getItem('theme') || 'light');
             if (theme === 'dark') {
                 document.body.classList.add('dark-mode');
             } else {
@@ -304,9 +299,10 @@
     <!-- Notification Toast Container - Positionné en HAUT (Style WhatsApp/Système) -->
     <div aria-live="polite" aria-atomic="true"
         style="position: fixed; top: 10px; right: 10px; left: 10px; display: flex; justify-content: center; align-items: flex-start; pointer-events: none; z-index: 10000;">
+
         <div id="messageToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true"
             data-delay="15000"
-            style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none;">
+            style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none; z-index: 10000; pointer-events: auto;">
             <div class="toast-header bg-primary text-white" style="border-radius: 12px 12px 0 0;">
                 <i class="fas fa-envelope mr-2"></i>
                 <strong class="mr-auto" id="toastSender">Nouveau message</strong>
@@ -508,14 +504,14 @@
         }
 
         // Fonction globale pour changer le thème
-        function setTheme(theme) {
+        function setThemeToggle(themeValue) {
             fetch("{% url 'toggle_theme' %}", {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'theme=' + theme
+                body: 'theme=' + themeValue
             })
             .then(response => response.json())
             .then(data => {
@@ -528,7 +524,7 @@
         function toggleTheme() {
             const currentTheme = "{{ request.user.theme|default:'light' }}";
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
+            setThemeToggle(newTheme);
         }
 
         $(document).ready(function() {
@@ -554,6 +550,8 @@
             });
         }
     </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

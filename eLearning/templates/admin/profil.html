@@ -10,7 +10,7 @@
         border-radius: 24px !important;
         border: 3px solid transparent !important;
         background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)) padding-box,
-                    linear-gradient(135deg, #133e3f 0%, #fec913 100%) border-box !important;
+            linear-gradient(135deg, #133e3f 0%, #fec913 100%) border-box !important;
         backdrop-filter: blur(24px) saturate(150%);
         -webkit-backdrop-filter: blur(24px) saturate(150%);
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08) !important;
@@ -28,7 +28,8 @@
     .card::after {
         content: '';
         position: absolute;
-        top: 0; left: -100%;
+        top: 0;
+        left: -100%;
         width: 50%;
         height: 100%;
         background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
@@ -42,7 +43,8 @@
     }
 
     /* Replace sky blue (text-primary) with Deep Green */
-    .text-primary, .text-info {
+    .text-primary,
+    .text-info {
         color: #133e3f !important;
     }
 
@@ -74,6 +76,7 @@
         height: 12px !important;
         background-color: #edf2f7 !important;
     }
+
     .progress-bar {
         background: linear-gradient(90deg, #133e3f 0%, #fec913 100%) !important;
         border-radius: 12px !important;
@@ -86,6 +89,7 @@
         background: #fff;
         transition: transform 0.4s ease;
     }
+
     .img-profile:hover {
         transform: scale(1.05) rotate(3deg);
     }
@@ -99,54 +103,114 @@
         margin-bottom: 10px !important;
         transition: all 0.3s ease;
     }
+
     .timeline .mb-2:hover {
         background: rgba(19, 62, 63, 0.08);
         transform: translateX(5px);
     }
 
     /* Dark Mode Overrides */
-    body.dark-mode .card, [data-theme="dark"] .card, .dark-theme .card {
+    body.dark-mode .card,
+    [data-theme="dark"] .card,
+    .dark-theme .card {
         background: rgba(255, 255, 255, 0.06) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         backdrop-filter: blur(24px) saturate(150%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
     }
-    body.dark-mode .card-header, [data-theme="dark"] .card-header, .dark-theme .card-header {
+
+    body.dark-mode .card-header,
+    [data-theme="dark"] .card-header,
+    .dark-theme .card-header {
         background: rgba(255, 255, 255, 0.02) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-    body.dark-mode .timeline .mb-2, [data-theme="dark"] .timeline .mb-2, .dark-theme .timeline .mb-2 {
+
+    body.dark-mode .timeline .mb-2,
+    [data-theme="dark"] .timeline .mb-2,
+    .dark-theme .timeline .mb-2 {
         background: rgba(255, 255, 255, 0.03) !important;
     }
-    body.dark-mode .img-profile, [data-theme="dark"] .img-profile, .dark-theme .img-profile {
+
+    body.dark-mode .img-profile,
+    [data-theme="dark"] .img-profile,
+    .dark-theme .img-profile {
         background: rgba(255, 255, 255, 0.08) !important;
         border-color: #FFC107 !important;
     }
 
     /* General dark mode rules */
-    body.dark-mode .text-muted, [data-theme="dark"] .text-muted, .dark-theme .text-muted { color: #ffffff !important; }
-    body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6,
-    [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
-    .dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6 { color: #FFC107 !important; }
-    body.dark-mode p, body.dark-mode span, body.dark-mode li, body.dark-mode td, body.dark-mode th,
-    [data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] li, [data-theme="dark"] td, [data-theme="dark"] th,
-    .dark-theme p, .dark-theme span, .dark-theme li, .dark-theme td, .dark-theme th { color: #ffffff !important; }
+    body.dark-mode .text-muted,
+    [data-theme="dark"] .text-muted,
+    .dark-theme .text-muted {
+        color: #ffffff !important;
+    }
+
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode h6,
+    [data-theme="dark"] h1,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4,
+    [data-theme="dark"] h5,
+    [data-theme="dark"] h6,
+    .dark-theme h1,
+    .dark-theme h2,
+    .dark-theme h3,
+    .dark-theme h4,
+    .dark-theme h5,
+    .dark-theme h6 {
+        color: #FFC107 !important;
+    }
+
+    body.dark-mode p,
+    body.dark-mode span,
+    body.dark-mode li,
+    body.dark-mode td,
+    body.dark-mode th,
+    [data-theme="dark"] p,
+    [data-theme="dark"] span,
+    [data-theme="dark"] li,
+    [data-theme="dark"] td,
+    [data-theme="dark"] th,
+    .dark-theme p,
+    .dark-theme span,
+    .dark-theme li,
+    .dark-theme td,
+    .dark-theme th {
+        color: #ffffff !important;
+    }
 
     /* Rules:
        1. All text that is currently green (#133e3f or similar dark teal) in dark mode: color: #FFC107 !important;
        2. All text that is currently gray (#6c757d, #999, #aaa, .text-muted, secondary text): color: #ffffff !important;
     */
-    body.dark-mode [style*="color:#133e3f"], body.dark-mode [style*="color: #133e3f"],
-    [data-theme="dark"] [style*="color:#133e3f"], [data-theme="dark"] [style*="color: #133e3f"],
-    .dark-theme [style*="color:#133e3f"], .dark-theme [style*="color: #133e3f"],
-    body.dark-mode .text-primary, [data-theme="dark"] .text-primary, .dark-theme .text-primary {
+    body.dark-mode [style*="color:#133e3f"],
+    body.dark-mode [style*="color: #133e3f"],
+    [data-theme="dark"] [style*="color:#133e3f"],
+    [data-theme="dark"] [style*="color: #133e3f"],
+    .dark-theme [style*="color:#133e3f"],
+    .dark-theme [style*="color: #133e3f"],
+    body.dark-mode .text-primary,
+    [data-theme="dark"] .text-primary,
+    .dark-theme .text-primary {
         color: #FFC107 !important;
     }
 
-    body.dark-mode .text-secondary, [data-theme="dark"] .text-secondary, .dark-theme .text-secondary,
-    body.dark-mode .text-gray-600, [data-theme="dark"] .text-gray-600, .dark-theme .text-gray-600,
-    body.dark-mode .text-gray-700, [data-theme="dark"] .text-gray-700, .dark-theme .text-gray-700 {
+    body.dark-mode .text-secondary,
+    [data-theme="dark"] .text-secondary,
+    .dark-theme .text-secondary,
+    body.dark-mode .text-gray-600,
+    [data-theme="dark"] .text-gray-600,
+    .dark-theme .text-gray-600,
+    body.dark-mode .text-gray-700,
+    [data-theme="dark"] .text-gray-700,
+    .dark-theme .text-gray-700 {
         color: #ffffff !important;
     }
 
@@ -160,26 +224,42 @@
        - Input placeholders:
            color: rgba(255,255,255,0.5);
     */
-    body.dark-mode strong, [data-theme="dark"] strong, .dark-theme strong,
-    body.dark-mode .font-weight-bold, [data-theme="dark"] .font-weight-bold, .dark-theme .font-weight-bold,
-    body.dark-mode label, [data-theme="dark"] label, .dark-theme label {
+    body.dark-mode strong,
+    [data-theme="dark"] strong,
+    .dark-theme strong,
+    body.dark-mode .font-weight-bold,
+    [data-theme="dark"] .font-weight-bold,
+    .dark-theme .font-weight-bold,
+    body.dark-mode label,
+    [data-theme="dark"] label,
+    .dark-theme label {
         color: #FFC107 !important;
     }
 
-    body.dark-mode input.form-control, [data-theme="dark"] input.form-control, .dark-theme input.form-control,
-    body.dark-mode select.form-control, [data-theme="dark"] select.form-control, .dark-theme select.form-control,
-    body.dark-mode textarea.form-control, [data-theme="dark"] textarea.form-control, .dark-theme textarea.form-control {
+    body.dark-mode input.form-control,
+    [data-theme="dark"] input.form-control,
+    .dark-theme input.form-control,
+    body.dark-mode select.form-control,
+    [data-theme="dark"] select.form-control,
+    .dark-theme select.form-control,
+    body.dark-mode textarea.form-control,
+    [data-theme="dark"] textarea.form-control,
+    .dark-theme textarea.form-control {
         background: rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
         border-color: rgba(255, 255, 255, 0.2) !important;
     }
 
-    body.dark-mode input.form-control::placeholder, [data-theme="dark"] input.form-control::placeholder, .dark-theme input.form-control::placeholder {
+    body.dark-mode input.form-control::placeholder,
+    [data-theme="dark"] input.form-control::placeholder,
+    .dark-theme input.form-control::placeholder {
         color: rgba(255, 255, 255, 0.5) !important;
     }
 
     /* Modals background in dark mode */
-    body.dark-mode .modal-content, [data-theme="dark"] .modal-content, .dark-theme .modal-content {
+    body.dark-mode .modal-content,
+    [data-theme="dark"] .modal-content,
+    .dark-theme .modal-content {
         background: #242632 !important;
         border-color: rgba(255, 255, 255, 0.1) !important;
     }
@@ -204,19 +284,24 @@
                 <div class="card-body text-center">
                     <div class="position-relative d-inline-block mb-3">
                         {% if request.user.photo_profil %}
-                            <img class="img-profile rounded-circle border shadow" src="{{ request.user.photo_profil.url }}" style="width: 150px; height: 150px; object-fit: cover;">
+                        <img class="img-profile rounded-circle border shadow" src="{{ request.user.photo_profil.url }}"
+                            style="width: 150px; height: 150px; object-fit: cover;">
                         {% else %}
-                            <img class="img-profile rounded-circle border shadow" src="{% static 'admin/img/undraw_profile.svg' %}" style="width: 150px; height: 150px; object-fit: cover;">
+                        <img class="img-profile rounded-circle border shadow"
+                            src="{% static 'admin/img/undraw_profile.svg' %}"
+                            style="width: 150px; height: 150px; object-fit: cover;">
                         {% endif %}
                         <div class="mt-2">
-                            <button class="btn btn-sm btn-circle btn-primary shadow" data-toggle="modal" data-target="#modalPhoto" title="Changer la photo">
+                            <button class="btn btn-sm btn-circle btn-primary shadow" data-toggle="modal"
+                                data-target="#modalPhoto" title="Changer la photo">
                                 <i class="fas fa-camera"></i>
                             </button>
                             {% if request.user.photo_profil %}
                             <form action="{% url 'profil' %}" method="POST" class="d-inline">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete_photo">
-                                <button type="submit" class="btn btn-sm btn-circle btn-danger shadow" onclick="return confirm('Supprimer la photo ?')" title="Supprimer la photo">
+                                <button type="submit" class="btn btn-sm btn-circle btn-danger shadow"
+                                    onclick="return confirm('Supprimer la photo ?')" title="Supprimer la photo">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -227,11 +312,15 @@
                     <p class="text-muted text-uppercase small">{{ request.user.role }}</p>
                     <hr>
                     <div class="text-left px-3">
-                        <p><i class="fas fa-envelope text-primary mr-2"></i><strong>Email :</strong> {{ request.user.email }}</p>
-                        <p><i class="fas fa-user-clock text-primary mr-2"></i><strong>Âge :</strong> {{ request.user.age|default:"Non renseigné" }}</p>
-                        <p><i class="fas fa-map-marker-alt text-primary mr-2"></i><strong>Adresse :</strong> {{ request.user.adresse|default:"Non renseignée" }}</p>
+                        <p><i class="fas fa-envelope text-primary mr-2"></i><strong>Email :</strong> {{
+                            request.user.email }}</p>
+                        <p><i class="fas fa-user-clock text-primary mr-2"></i><strong>Âge :</strong> {{
+                            request.user.age|default:"Non renseigné" }}</p>
+                        <p><i class="fas fa-map-marker-alt text-primary mr-2"></i><strong>Adresse :</strong> {{
+                            request.user.adresse|default:"Non renseignée" }}</p>
                     </div>
-                    <button class="btn btn-primary btn-sm btn-block mt-3 rounded-pill" data-toggle="modal" data-target="#modalInfo">
+                    <button class="btn btn-primary btn-sm btn-block mt-3 rounded-pill" data-toggle="modal"
+                        data-target="#modalInfo">
                         <i class="fas fa-edit mr-1"></i> Modifier mes infos
                     </button>
                 </div>
@@ -251,7 +340,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-4 text-center">
-                            <div class="h3 mb-0 font-weight-bold text-primary">{{ stats.temps_passe|default:"0h" }}</div>
+                            <div class="h3 mb-0 font-weight-bold text-primary">{{ stats.temps_passe|default:"0h" }}
+                            </div>
                             <div class="text-xs font-weight-bold text-uppercase text-muted">Temps d'apprentissage</div>
                         </div>
                         <div class="col-md-6 mb-4 text-center">
@@ -259,12 +349,15 @@
                             <div class="text-xs font-weight-bold text-uppercase text-muted">Cours Terminés</div>
                         </div>
                     </div>
-                    
+
                     <h6 class="mt-2 font-weight-bold">Progression des cours en cours</h6>
                     {% for p in progression %}
-                    <h4 class="small font-weight-bold">{{ p.cours.titre }} <span class="float-right">{{ p.pourcentage }}%</span></h4>
+                    <h4 class="small font-weight-bold">{{ p.cours.titre }} <span class="float-right">{{ p.pourcentage
+                            }}%</span></h4>
                     <div class="progress mb-4">
-                        <div class="progress-bar {{ p.css_class }}" role="progressbar" style="width: {{ p.pourcentage }}%" aria-valuenow="{{ p.pourcentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar {{ p.css_class }}" role="progressbar"
+                            style="width: {{ p.pourcentage }}%" aria-valuenow="{{ p.pourcentage }}" aria-valuemin="0"
+                            aria-valuemax="100"></div>
                     </div>
                     {% empty %}
                     <p class="text-muted italic small text-center my-4">Aucun cours en cours de progression.</p>
@@ -272,175 +365,188 @@
 
                 </div>
             </div>
-        {% else %}
-        <div class="col-xl-8 col-lg-7 d-flex flex-column">
+            {% else %}
+            <div class="col-xl-8 col-lg-7 d-flex flex-column">
 
-        {% endif %}
+                {% endif %}
 
-            <!-- Historique d'activités -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Historique d'Activités</h6>
-                </div>
-                <div class="card-body">
-                    <div class="timeline small">
-                        {% for item in historique %}
-                        <div class="mb-2">
-                            <span class="text-muted mr-2">{{ item.date|date:"d/m/Y H:i" }}</span>
-                            <span class="font-weight-bold">{{ item.action }}</span>
-                        </div>
-                        {% empty %}
-                        <div class="mb-2">
-                            <span class="text-muted mr-2">Aucune activité pour le moment.</span>
-                        </div>
-                        {% endfor %}
+                <!-- Historique d'activités -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Historique d'Activités</h6>
                     </div>
-                    
-                    <!-- Pagination Historique -->
-                    {% if historique.has_other_pages %}
-                    <nav aria-label="Page navigation" class="mt-4">
-                      <ul class="pagination pagination-sm justify-content-center">
-                        {% if historique.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ historique.previous_page_number }}">&laquo;</a></li>
-                        {% else %}
-                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                    <div class="card-body">
+                        <div class="timeline small">
+                            {% for item in historique %}
+                            <div class="mb-2">
+                                <span class="text-muted mr-2">{{ item.date|date:"d/m/Y H:i" }}</span>
+                                <span class="font-weight-bold">{{ item.action }}</span>
+                            </div>
+                            {% empty %}
+                            <div class="mb-2">
+                                <span class="text-muted mr-2">Aucune activité pour le moment.</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pagination Historique -->
+                        {% if historique.has_other_pages %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination pagination-sm justify-content-center">
+                                {% if historique.has_previous %}
+                                <li class="page-item"><a class="page-link"
+                                        href="?page={{ historique.previous_page_number }}">&laquo;</a></li>
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                {% endif %}
+
+                                {% for i in historique.paginator.page_range %}
+                                {% if historique.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if historique.has_next %}
+                                <li class="page-item"><a class="page-link"
+                                        href="?page={{ historique.next_page_number }}">&raquo;</a></li>
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
                         {% endif %}
-                        
-                        {% for i in historique.paginator.page_range %}
-                          {% if historique.number == i %}
-                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
-                          {% else %}
-                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                          {% endif %}
-                        {% endfor %}
-                        
-                        {% if historique.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ historique.next_page_number }}">&raquo;</a></li>
-                        {% else %}
-                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-                        {% endif %}
-                      </ul>
-                    </nav>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Paramètres d'Affichage -->
-            <div class="card shadow mb-4 mt-auto">
 
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Paramètres d'Affichage</h6>
-                </div>
-                <div class="card-body">
-                    <p class="small text-muted">Personnalisez votre expérience en choisissant le thème de votre interface.</p>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <button onclick="setTheme('light')" class="btn btn-block {% if request.user.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill shadow-sm">
-                                <i class="fas fa-sun mr-2"></i> Thème Clair
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button onclick="setTheme('dark')" class="btn btn-block {% if request.user.theme == 'dark' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill shadow-sm">
-                                <i class="fas fa-moon mr-2"></i> Thème Sombre
-                            </button>
+                <!-- Paramètres d'Affichage -->
+                <div class="card shadow mb-4 mt-auto">
+
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Paramètres d'Affichage</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted">Personnalisez votre expérience en choisissant le thème de votre
+                            interface.</p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <button onclick="setTheme('light')"
+                                    class="btn btn-block {% if request.user.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill shadow-sm">
+                                    <i class="fas fa-sun mr-2"></i> Thème Clair
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button onclick="setTheme('dark')"
+                                    class="btn btn-block {% if request.user.theme == 'dark' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill shadow-sm">
+                                    <i class="fas fa-moon mr-2"></i> Thème Sombre
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
         </div>
 
     </div>
+    {% endblock %}
 
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<!-- Modals -->
-<!-- Modal Info -->
-<div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form action="{% url 'profil' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update_info">
-                <div class="modal-header">
-                    <h5 class="modal-title text-primary font-weight-bold">Modifier mes informations</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label class="small font-weight-bold">Nom</label>
-                            <input type="text" name="nom" class="form-control" value="{{ request.user.nom }}" required>
+    {% block extra_js %}
+    <!-- Modals -->
+    <!-- Modal Info -->
+    <div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="{% url 'profil' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_info">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-primary font-weight-bold">Modifier mes informations</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="small font-weight-bold">Nom</label>
+                                <input type="text" name="nom" class="form-control" value="{{ request.user.nom }}"
+                                    required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="small font-weight-bold">Prénom</label>
+                                <input type="text" name="prenom" class="form-control" value="{{ request.user.prenom }}"
+                                    required>
+                            </div>
                         </div>
-                        <div class="col-md-6 form-group">
-                            <label class="small font-weight-bold">Prénom</label>
-                            <input type="text" name="prenom" class="form-control" value="{{ request.user.prenom }}" required>
+                        <div class="form-group">
+                            <label class="small font-weight-bold">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ request.user.email }}"
+                                required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label class="small font-weight-bold">Âge</label>
+                                <input type="number" name="age" class="form-control"
+                                    value="{{ request.user.age|default_if_none:'' }}">
+                            </div>
+                            <div class="col-md-8 form-group">
+                                <label class="small font-weight-bold">Adresse</label>
+                                <input type="text" name="adresse" class="form-control"
+                                    value="{{ request.user.adresse|default_if_none:'' }}">
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="small font-weight-bold">Email</label>
-                        <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button"
+                            data-dismiss="modal">Annuler</button>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Enregistrer</button>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label class="small font-weight-bold">Âge</label>
-                            <input type="number" name="age" class="form-control" value="{{ request.user.age|default_if_none:'' }}">
-                        </div>
-                        <div class="col-md-8 form-group">
-                            <label class="small font-weight-bold">Adresse</label>
-                            <input type="text" name="adresse" class="form-control" value="{{ request.user.adresse|default_if_none:'' }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button" data-dismiss="modal">Annuler</button>
-                    <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Enregistrer</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Photo -->
-<div class="modal fade" id="modalPhoto" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form action="{% url 'profil' %}" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update_photo">
-                <div class="modal-header">
-                    <h5 class="modal-title text-primary font-weight-bold">Changer la photo de profil</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <p class="small text-muted mb-3">Choisissez une image carrée pour un meilleur rendu.</p>
-                    <div class="custom-file mb-3">
-                        <input type="file" name="photo" class="custom-file-input" id="customFile" accept="image/*" required>
-                        <label class="custom-file-label" for="customFile">Choisir un fichier...</label>
+    <!-- Modal Photo -->
+    <div class="modal fade" id="modalPhoto" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="{% url 'profil' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_photo">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-primary font-weight-bold">Changer la photo de profil</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button" data-dismiss="modal">Annuler</button>
-                    <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Télécharger</button>
-                </div>
-            </form>
+                    <div class="modal-body text-center">
+                        <p class="small text-muted mb-3">Choisissez une image carrée pour un meilleur rendu.</p>
+                        <div class="custom-file mb-3">
+                            <input type="file" name="photo" class="custom-file-input" id="customFile" accept="image/*"
+                                required>
+                            <label class="custom-file-label" for="customFile">Choisir un fichier...</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button"
+                            data-dismiss="modal">Annuler</button>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Télécharger</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Affichage du nom du fichier dans le label bootstrap
+    <script>
+        // Affichage du nom du fichier dans le label bootstrap
 
-    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
-        var fileName = document.getElementById("customFile").files[0].name;
-        var nextSibling = e.target.nextElementSibling;
-        nextSibling.innerText = fileName;
-    });
-</script>
-{% endblock %}
+        document.querySelector('.custom-file-input').addEventListener('change', function (e) {
+            var fileName = document.getElementById("customFile").files[0].name;
+            var nextSibling = e.target.nextElementSibling;
+            nextSibling.innerText = fileName;
+        });
+    </script>
+    {% endblock %}

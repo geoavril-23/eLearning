@@ -13,8 +13,9 @@ urlpatterns = [
 
     path('dashboard/admin/login/', views.admin_login, name='admin_login'),
     path('dashboard/admin/logout/', views.admin_logout, name='admin_logout'),
-    path('dashboard/etudiant/', views.dashboard_etudiant, name='dashboard_etudiant'),
+    path('dashboard/etudiant/', views.dashboard_etudiant_view, name='dashboard_etudiant'),
     path('dashboard/etudiant/mes-courses/', views.mes_courses, name='mes_courses'),
+    path('dashboard/etudiant/cours/<int:cours_id>/voir/', views.voir_cours, name='voir_cours'),
     path('dashboard/etudiant/inscription/<int:cours_id>/', views.inscription_cours, name='inscription_cours'),
     path('dashboard/enseignant/', views.dashboard_enseignant, name='dashboard_enseignant'),
     path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
@@ -28,9 +29,19 @@ urlpatterns = [
     path('dashboard/bibliotheque/', views.liste_livres, name='liste_livres'),
     path('dashboard/etudiant/acheter-livre/<int:livre_id>/', views.acheter_livre, name='acheter_livre'),
     path('dashboard/admin/activite/', views.suivi_activite, name='suivi_activite'),
-    path('dashboard/enseignant/cours/nouveau/', views.creer_cours_enseignant, name='creer_cours_enseignant'),
+    path('dashboard/enseignant/cours/nouveau-complet/', views.creer_cours_complet, name='creer_cours_complet'),
     path('dashboard/enseignant/mes-cours/', views.mes_cours_enseignant, name='mes_cours_enseignant'),
-    path('dashboard/enseignant/cours/modifier/<int:id>/', views.modifier_cours_enseignant, name='modifier_cours_enseignant'),
+    path('dashboard/enseignant/cours/<int:cours_id>/gerer/', views.gerer_cours_enseignant, name='gerer_cours_enseignant'),
+    path('dashboard/enseignant/cours/<int:cours_id>/chapitre/ajouter/', views.ajouter_chapitre_cours, name='ajouter_chapitre_cours'),
+    path('dashboard/enseignant/chapitre/<int:chapitre_id>/modifier/', views.modifier_chapitre_cours, name='modifier_chapitre_cours'),
+    path('dashboard/enseignant/chapitre/<int:chapitre_id>/supprimer/', views.supprimer_chapitre_cours, name='supprimer_chapitre_cours'),
+    path('dashboard/enseignant/cours/<int:cours_id>/ressource/ajouter/', views.ajouter_ressource_cours, name='ajouter_ressource_cours'),
+    path('dashboard/enseignant/ressource/<int:ressource_id>/supprimer/', views.supprimer_ressource_cours, name='supprimer_ressource_cours'),
+    path('dashboard/enseignant/cours/<int:cours_id>/module/ajouter/', views.ajouter_module, name='ajouter_module'),
+    path('dashboard/enseignant/module/<int:module_id>/supprimer/', views.supprimer_module, name='supprimer_module'),
+    path('dashboard/enseignant/chapitre/<int:chapitre_id>/ressource/ajouter/', views.ajouter_ressource_chapitre, name='ajouter_ressource_chapitre'),
+    path('dashboard/enseignant/ressource-chapitre/<int:ressource_id>/supprimer/', views.supprimer_ressource_chapitre, name='supprimer_ressource_chapitre'),
+    # Legacy routes (if needed, but replaced by the unified view)
     path('dashboard/enseignant/cours/supprimer/<int:id>/', views.supprimer_cours_enseignant, name='supprimer_cours_enseignant'),
 
     # Quiz (Génération IA et Manuel)
@@ -70,7 +81,8 @@ urlpatterns = [
 
     # Cours et Chapitres Premium
     path('premium-courses/', views.liste_cours_premium, name='liste_cours_premium'),
-    path('premium-courses/<int:cours_id>/', views.detail_cours_premium, name='detail_cours_premium'),
+    path('cours/<int:cours_id>/', views.detail_cours_premium, name='detail_cours_premium'),
+
     path('api/chapitre/<int:chapitre_id>/acheter/', views.acheter_chapitre, name='acheter_chapitre'),
     path('dashboard/etudiant/mes-chapitres/', views.mes_chapitres_debloques, name='mes_chapitres_debloques'),
     path('api/notifications/fetch/', views.fetch_notifications, name='fetch_notifications'),
