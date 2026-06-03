@@ -86,6 +86,102 @@
         background: linear-gradient(135deg, #1e7e34 0%, #117a65 100%);
         box-shadow: 0 4px 15px rgba(30, 126, 52, 0.3);
     }
+
+    .table-matiere-section {
+        background-color: #f8f9fa;
+        border-left: 4px solid #4e73df;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .table-matiere-section {
+        background-color: #2a2d36;
+        border-left-color: #6c8cff;
+    }
+
+    .entree-matiere {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    body.dark-mode .entree-matiere {
+        background-color: #1a1c23;
+        border-color: #323545;
+    }
+
+    .btn-remove-entree {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .btn-remove-entree:hover {
+        background-color: #c82333;
+    }
+
+    .btn-add-entree {
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-add-entree:hover {
+        background-color: #224abe;
+    }
+
+    .entree-number {
+        background-color: #4e73df;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    body.dark-mode .entree-number {
+        background-color: #6c8cff;
+    }
+
+    .ql-container {
+        font-size: 14px;
+    }
+
+    body.dark-mode .ql-container {
+        background-color: #1a1c23;
+        border-color: #323545;
+    }
+
+    body.dark-mode .ql-toolbar {
+        background-color: #242632;
+        border-color: #323545;
+    }
 </style>
 {% endblock %}
 
@@ -132,14 +228,13 @@
             <form action="{% url 'creer_cours_complet' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
-                <!-- 1) Titre -->
+                <!-- 1) Titre du Cours -->
                 <div class="form-group mb-4">
-                    <label for="titre" class="font-weight-bold">Titre du Chapitre <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="titre" name="titre" placeholder="Ex: Introduction à l'algorithme" required>
+                    <label for="titre_cours" class="font-weight-bold">Titre du Cours <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titre_cours" name="titre_cours" placeholder="Ex: Introduction à l'Algorithmique" required>
                 </div>
 
                 <!-- 2) Lier à un Cours existant (required) -->
-
                 <div class="form-group mb-4">
                     <label for="cours_id" class="font-weight-bold">Lier à un Cours existant <span class="text-danger">*</span></label>
                     <select name="cours_id" id="cours_id" class="form-control" required>
@@ -150,43 +245,50 @@
                     </select>
                 </div>
 
-                <!-- 3) Objectif (optional) -->
+                <hr class="mb-4">
+
+                <!-- TABLE DES MATIÈRES SECTION -->
+                <div class="table-matiere-section">
+                    <h5 class="font-weight-bold text-primary mb-4">
+                        <i class="fas fa-book mr-2"></i>Table des Matières <span class="text-danger">*</span>
+                    </h5>
+                    <p class="text-muted small mb-4">Ajoutez les sections/chapitres de votre cours. Chaque entrée comprend un titre et un contenu détaillé.</p>
+
+                    <div id="entrees-container">
+                        <!-- Les entrées seront ajoutées ici dynamiquement -->
+                        <div class="entree-matiere" data-entree="0">
+                            <div class="entree-number">1</div>
+                            <button type="button" class="btn-remove-entree" onclick="removeEntree(0)">×</button>
+
+                            <div class="form-group mb-3">
+                                <label class="font-weight-bold">Titre de la Section <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control entree-titre" name="entree_titres" placeholder="Ex: Notions de base" required>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
+                                <div class="editor-wrapper" data-editor="0">
+                                    <div class="entree-editor"></div>
+                                </div>
+                                <input type="hidden" class="entree-contenu" name="entree_contenus">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-add-entree" onclick="addEntree()">
+                        <i class="fas fa-plus mr-2"></i> Ajouter une Section
+                    </button>
+                </div>
+
+                <hr class="mb-4">
+
+                <!-- Options additionnelles -->
                 <div class="form-group mb-4">
-                    <label class="font-weight-bold">Objectif</label>
+                    <label class="font-weight-bold">Objectif du Cours (optionnel)</label>
                     <textarea class="form-control" name="objectif" placeholder="Que sauront faire les étudiants ?" rows="3" style="resize: vertical;"></textarea>
                 </div>
 
-
-                <!-- 3) Titre du Module (required) -->
-                <div class="form-group mb-4">
-                    <label for="titre_module" class="font-weight-bold">Titre du Module <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="titre_module" name="titre_module" placeholder="Ex: Notions de base" required>
-                </div>
-
-                <!-- 4) Contenu du Module (Quill editor) -->
-                <div class="form-group mb-4">
-                    <label class="font-weight-bold">Contenu du Chapitre<span class="text-danger">*</span></label>
-                    <div id="editor" style="min-height: 400px;"></div>
-                    <input type="hidden" name="contenu" id="contenu-hidden">
-                </div>
-
-                <!-- 5) YouTube URL (optional) -->
-                <div class="form-group mb-4">
-                    <label for="lien_youtube" class="font-weight-bold">YouTube URL</label>
-                    <input type="url" class="form-control" id="lien_youtube" name="lien_youtube" placeholder="https://youtube.com/...">
-                </div>
-
-                <!-- 6) File upload (optional) -->
-                <div class="form-group mb-4">
-                    <label for="ressource" class="font-weight-bold">Fichier (optionnel)</label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="ressource" name="ressource" accept=".pdf,.doc,.docx,.ppt,.pptx">
-                        <label class="custom-file-label" for="ressource">Choisir un fichier...</label>
-                    </div>
-                    <small class="form-text text-muted mt-1">PDF / DOC / PPT (optionnel)</small>
-                </div>
-
-                <!-- 7) Premium toggle + prix input -->
+                <!-- Premium toggle + prix input -->
                 <div class="card bg-light border-left-primary mb-5">
                     <div class="card-body">
                         <h6 class="font-weight-bold text-primary mb-3">
@@ -196,7 +298,7 @@
                             <div class="col-md-6">
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox" class="custom-control-input" id="est_premium" name="est_premium">
-                                    <label class="custom-control-label font-weight-bold" for="est_premium">Premium</label>
+                                    <label class="custom-control-label font-weight-bold" for="est_premium">Cours Premium</label>
                                 </div>
                                 <small class="text-muted">Rendre ce cours payant.</small>
                             </div>
@@ -212,10 +314,10 @@
 
                 <hr class="mb-4">
 
-                <!-- 8) Submit button -->
+                <!-- Submit button -->
                 <div class="text-center">
                     <button type="submit" class="btn btn-publish px-5">
-                        <i class="fas fa-paper-plane mr-2"></i> Soumettre
+                        <i class="fas fa-paper-plane mr-2"></i> Publier le Cours
                     </button>
                 </div>
             </form>
@@ -225,29 +327,119 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Afficher le nom du fichier sélectionné dynamiquement
-    $('.custom-file-input').on('change', function() {
-        let fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').addClass("selected").html(fileName);
-    });
-</script>
-
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <script>
-var quill = new Quill('#editor', {
-  theme: 'snow',
-  modules: { toolbar: [
-    [{'header':[1,2,3,false]}],
-    ['bold','italic','underline'],
-    [{'list':'ordered'},{'list':'bullet'}],
-    ['code-block','blockquote'],
-    ['clean']
-  ]}
-});
-document.querySelector('form').addEventListener('submit', function(){
-  document.getElementById('contenu-hidden').value = quill.root.innerHTML;
-});
+    let entreeCount = 0;
+    const quillInstances = {};
+
+    function initQuillEditor(editorIndex) {
+        const selector = `.editor-wrapper[data-editor="${editorIndex}"] .entree-editor`;
+        const quill = new Quill(selector, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{'header': [1, 2, 3, false]}],
+                    ['bold', 'italic', 'underline'],
+                    [{'list': 'ordered'}, {'list': 'bullet'}],
+                    ['code-block', 'blockquote'],
+                    ['clean']
+                ]
+            }
+        });
+        quillInstances[editorIndex] = quill;
+        return quill;
+    }
+
+    function addEntree() {
+        entreeCount++;
+        const container = document.getElementById('entrees-container');
+        const entreeHTML = `
+            <div class="entree-matiere" data-entree="${entreeCount}">
+                <div class="entree-number">${entreeCount + 1}</div>
+                <button type="button" class="btn-remove-entree" onclick="removeEntree(${entreeCount})">×</button>
+
+                <div class="form-group mb-3">
+                    <label class="font-weight-bold">Titre de la Section <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control entree-titre" name="entree_titres" placeholder="Ex: Notions avancées" required>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
+                    <div class="editor-wrapper" data-editor="${entreeCount}">
+                        <div class="entree-editor"></div>
+                    </div>
+                    <input type="hidden" class="entree-contenu" name="entree_contenus">
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', entreeHTML);
+        initQuillEditor(entreeCount);
+        updateEntreeNumbers();
+    }
+
+    function removeEntree(index) {
+        const entree = document.querySelector(`[data-entree="${index}"]`);
+        if (entree) {
+            entree.remove();
+            delete quillInstances[index];
+            updateEntreeNumbers();
+        }
+    }
+
+    function updateEntreeNumbers() {
+        const entrees = document.querySelectorAll('.entree-matiere');
+        entrees.forEach((entree, idx) => {
+            const numberDiv = entree.querySelector('.entree-number');
+            if (numberDiv) {
+                numberDiv.textContent = idx + 1;
+            }
+        });
+    }
+
+    // Initialiser le premier éditeur
+    document.addEventListener('DOMContentLoaded', function() {
+        initQuillEditor(0);
+
+        // Avant de soumettre le formulaire, sauvegarder tous les contenus
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const entrees = document.querySelectorAll('.entree-matiere');
+            const titres = [];
+            const contenus = [];
+
+            entrees.forEach((entree, idx) => {
+                const titre = entree.querySelector('.entree-titre').value;
+                const editorIndex = entree.querySelector('.editor-wrapper').getAttribute('data-editor');
+                const contenu = quillInstances[editorIndex] ? quillInstances[editorIndex].root.innerHTML : '';
+
+                titres.push(titre);
+                contenus.push(contenu);
+            });
+
+            // Créer les champs cachés pour soumettre les données
+            const form = this;
+
+            // Supprimer les anciens champs cachés
+            form.querySelectorAll('input[name="entree_titre_final"]').forEach(el => el.remove());
+            form.querySelectorAll('input[name="entree_contenu_final"]').forEach(el => el.remove());
+
+            // Ajouter les nouveaux champs cachés
+            titres.forEach((titre, idx) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'entree_titre_final';
+                input.value = titre;
+                form.appendChild(input);
+            });
+
+            contenus.forEach((contenu, idx) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'entree_contenu_final';
+                input.value = contenu;
+                form.appendChild(input);
+            });
+        });
+    });
 </script>
 {% endblock %}
 
