@@ -1868,6 +1868,10 @@ def mes_courses(request):
     inscriptions_gratuites = [ins for ins in inscriptions if not ins.cours.est_premium]
     inscriptions_premium = [ins for ins in inscriptions if ins.cours.est_premium]
 
+    # Pagination des cours gratuits
+    paginator = Paginator(inscriptions_gratuites, 6)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     nb_en_cours = inscriptions.filter(statut='validee').count()
     nb_termines = inscriptions.filter(statut='terminee').count()
 
@@ -1890,7 +1894,7 @@ def mes_courses(request):
     ).select_related('categorie', 'enseignant').order_by('-date_publication')[:6]
 
     return render(request, 'admin/mes_formations.html', {
-        'inscriptions': inscriptions_gratuites,
+        'inscriptions': page_obj,
         'inscriptions_premium': inscriptions_premium,
         'notifs': notifs,
         'nouveaux_cours': nouveaux_cours,

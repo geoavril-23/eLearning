@@ -776,6 +776,29 @@
         </div>
         {% endfor %}
     </div>
+    {% if inscriptions.has_other_pages %}
+    <div class="d-flex justify-content-center mt-3">
+      <nav>
+        <ul class="pagination pagination-sm">
+          {% if inscriptions.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ inscriptions.previous_page_number }}">«</a>
+          </li>
+          {% endif %}
+          {% for i in inscriptions.paginator.page_range %}
+          <li class="page-item {% if inscriptions.number == i %}active{% endif %}">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+          </li>
+          {% endfor %}
+          {% if inscriptions.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ inscriptions.next_page_number }}">»</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
     {% else %}
     <div class="empty-state">
         <i class="fas fa-book-open"></i>

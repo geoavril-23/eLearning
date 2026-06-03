@@ -71,10 +71,10 @@
     }
     .message-sent {
         align-self: flex-end;
-        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #1a5556 100%);
         color: white;
         border-bottom-right-radius: 4px;
-        box-shadow: 0 2px 5px rgba(26, 115, 232, 0.3);
+        box-shadow: 0 2px 5px rgba(19,62,63,0.3);
     }
     .message-meta {
         font-size: 0.7rem;
@@ -109,7 +109,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #1a5556 100%);
         color: white;
         display: flex;
         align-items: center;
@@ -129,9 +129,15 @@
                     <a href="{% url 'messagerie_index' %}" class="btn btn-sm btn-light mr-3 rounded-circle">
                         <i class="fas fa-arrow-left"></i>
                     </a>
+                    {% if autre_participant.photo_profil %}
+                    <img src="{{ autre_participant.photo_profil.url }}"
+                      style="width:40px;height:40px;border-radius:50%;
+                             object-fit:cover;margin-right:12px;">
+                    {% else %}
                     <div class="avatar-small mr-3">
-                        <i class="fas fa-user"></i>
+                      {{ autre_participant.nom|first|upper }}{{ autre_participant.prenom|first|upper }}
                     </div>
+                    {% endif %}
                     <div>
                         <h5 class="mb-0 font-weight-bold text-gray-800">
                             {% if autre_participant %}

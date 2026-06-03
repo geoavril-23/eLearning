@@ -345,6 +345,17 @@
     <!-- Custom scripts for all pages-->
     <script src="{% static 'admin/js/sb-admin-2.min.js' %}"></script>
 
+    <!-- Auto-dismiss Django alerts after 5 seconds -->
+    <script>
+        setTimeout(()=>{
+          document.querySelectorAll('.alert').forEach(a=>{
+            a.style.transition='opacity 0.5s';
+            a.style.opacity='0';
+            setTimeout(()=>a.remove(),500);
+          });
+        },5000);
+    </script>
+
     <!-- Notification system -->
     <script>
         let currentConvId = null;
@@ -412,44 +423,33 @@
             });
 
             function checkNewMessages() {
-                $.ajax({
-                    url: "{% url 'api_unread_messages' %}",
-                    method: 'GET',
-                    success: function (data) {
-                        if (data.count > 0) {
-                            $('#notification-badge').text(data.count > 9 ? '9+' : data.count).show();
-
-                            let html = '<h6 class="dropdown-header">Centre de Notifications</h6>';
-                            data.notifications.forEach(function (n) {
-                                html += `
-                                    <a class="dropdown-item d-flex align-items-center" href="${n.url}">
-                                        <div class="mr-3">
-                                            <div class="icon-circle bg-primary"><i class="fas fa-envelope text-white"></i></div>
-                                        </div>
-                                        <div>
-                                            <div class="small text-gray-500">${n.date} - ${n.sender}</div>
-                                            <span class="font-weight-bold">${n.content}</span>
-                                        </div>
-                                    </a>
-                                `;
-                            });
-                            html += '<a class="dropdown-item text-center small text-gray-500" href="{% url "messagerie_index" %}">Afficher tous les messages</a>';
-                            $('#notifications-list').html(html);
-                        } else {
-                            $('#notification-badge').hide();
-                        }
-
-                        if (data.has_new && data.count > lastMessageCount) {
-                            if (lastMessageCount > 0 || data.count === 1) {
-                                playNotificationSound();
-                                $('#toastSender').text("De : " + data.latest_sender);
-                                $('#toastContent').text(data.latest_content);
-                                currentConvId = data.latest_conversation_id; // On stocke l'ID pour la réponse
-                                $('#messageToast').toast('show');
-                            }
-                        }
-                        lastMessageCount = data.count;
-                    }
+                Promise.all([
+                  fetch("{% url 'api_unread_messages' %}").then(r=>r.json()),
+                  fetch("{% url 'fetch_notifications' %}").then(r=>r.json())
+                ]).then(([msgData, notifData])=>{
+                  let total = msgData.count + notifData.count;
+                  if(total>0){
+                    $('#notification-badge').text(total>9?'9+':total).show();
+                  } else {
+                    $('#notification-badge').hide();
+                  }
+                  let html='<h6 class="dropdown-header">Messages & Notifications</h6>';
+                  msgData.notifications.forEach(n=>{
+                    html+=`<a class="dropdown-item d-flex align-items-center" href="${n.url}">
+                      <div class="mr-3"><div class="icon-circle bg-primary">
+                        <i class="fas fa-envelope text-white"></i></div></div>
+                      <div><div class="small text-gray-500">${n.date} — ${n.sender}</div>
+                        <span class="font-weight-bold">${n.content}</span></div></a>`;
+                  });
+                  notifData.notifications.forEach(n=>{
+                    html+=`<a class="dropdown-item d-flex align-items-center" href="#">
+                      <div class="mr-3"><div class="icon-circle" style="background:#133e3f">
+                        <i class="fas ${n.icon} text-white"></i></div></div>
+                      <div><div class="small text-gray-500">${n.date}</div>
+                        <span class="font-weight-bold">${n.message}</span></div></a>`;
+                  });
+                  html+='<a class="dropdown-item text-center small" href="{% url "messagerie_index" %}">Tout voir</a>';
+                  $('#notifications-list').html(html);
                 });
             }
 

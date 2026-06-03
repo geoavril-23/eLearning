@@ -8,7 +8,7 @@
     /* PREMIUM PROFIL DESIGN */
     .card {
         border-radius: 24px !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border: 1px solid rgba(255,255,255,0.18) !important;
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
         backdrop-filter: blur(12px) saturate(150%) !important;
         -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
@@ -283,7 +283,7 @@
                 <div class="card-body text-center">
                     <div class="position-relative d-inline-block mb-3">
                         {% if request.user.photo_profil %}
-                        <img class="img-profile rounded-circle border shadow" src="{{ request.user.photo_profil.url }}"
+                        <img class="img-profile rounded-circle border shadow" src="{{ user.photo_profil.url }}"
                             style="width: 150px; height: 150px; object-fit: cover;">
                         {% else %}
                         <img class="img-profile rounded-circle border shadow"
@@ -307,8 +307,8 @@
                             {% endif %}
                         </div>
                     </div>
-                    <h5 class="font-weight-bold text-gray-800">{{ request.user.nom }} {{ request.user.prenom }}</h5>
-                    <p class="text-muted text-uppercase small">{{ request.user.role }}</p>
+                    <h5 class="font-weight-bold text-gray-800">{{ user.nom }} {{ user.prenom }}</h5>
+                    <p class="text-muted text-uppercase small">{{ user.role }}</p>
                     <hr>
                     <div class="text-left px-3">
                         <p><i class="fas fa-envelope text-primary mr-2"></i><strong>Email :</strong> {{
@@ -431,13 +431,13 @@
                         <div class="row text-center">
                             <div class="col-6">
                                 <button onclick="setTheme('light')"
-                                    class="btn btn-block {% if request.user.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill shadow-sm">
+                                    class="btn btn-block {% if user.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill shadow-sm">
                                     <i class="fas fa-sun mr-2"></i> Thème Clair
                                 </button>
                             </div>
                             <div class="col-6">
                                 <button onclick="setTheme('dark')"
-                                    class="btn btn-block {% if request.user.theme == 'dark' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill shadow-sm">
+                                    class="btn btn-block {% if user.theme == 'dark' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill shadow-sm">
                                     <i class="fas fa-moon mr-2"></i> Thème Sombre
                                 </button>
                             </div>
@@ -471,30 +471,30 @@
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label class="small font-weight-bold">Nom</label>
-                                <input type="text" name="nom" class="form-control" value="{{ request.user.nom }}"
+                                <input type="text" name="nom" class="form-control" value="{{ user.nom }}"
                                     required>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label class="small font-weight-bold">Prénom</label>
-                                <input type="text" name="prenom" class="form-control" value="{{ request.user.prenom }}"
+                                <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}"
                                     required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="small font-weight-bold">Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ request.user.email }}"
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}"
                                 required>
                         </div>
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label class="small font-weight-bold">Âge</label>
                                 <input type="number" name="age" class="form-control"
-                                    value="{{ request.user.age|default_if_none:'' }}">
+                                    value="{{ user.age|default_if_none:'' }}">
                             </div>
                             <div class="col-md-8 form-group">
                                 <label class="small font-weight-bold">Adresse</label>
                                 <input type="text" name="adresse" class="form-control"
-                                    value="{{ request.user.adresse|default_if_none:'' }}">
+                                    value="{{ user.adresse|default_if_none:'' }}">
                             </div>
                         </div>
                     </div>
