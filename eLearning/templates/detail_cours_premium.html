@@ -419,6 +419,109 @@
     filter:brightness(1.05);
   }
 
+  /* ====== Learning Timer Clock ====== */
+  .learning-timer-widget {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: linear-gradient(135deg, rgba(19, 62, 63, 0.95) 0%, rgba(19, 62, 63, 0.88) 100%);
+    border: 2px solid rgba(255, 193, 7, 0.35);
+    border-radius: 28px;
+    padding: 18px 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 0 20px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 200px;
+    animation: timer-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes timer-pulse {
+    0%, 100% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 0 20px rgba(255, 255, 255, 0.06); }
+    50% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), inset 0 0 25px rgba(255, 193, 7, 0.08); }
+  }
+
+  .timer-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.25) 0%, rgba(255, 193, 7, 0.12) 100%);
+    border: 2px solid rgba(255, 193, 7, 0.45);
+    color: var(--gold);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    animation: timer-spin 6s linear infinite;
+  }
+
+  @keyframes timer-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .timer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .timer-label {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: rgba(255, 193, 7, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+  }
+
+  .timer-display {
+    font-size: 1.35rem;
+    font-weight: 1000;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+  }
+
+  body.dark-mode .learning-timer-widget {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.12) 0%, rgba(255, 193, 7, 0.08) 100%);
+    border-color: rgba(255, 193, 7, 0.45);
+  }
+
+  @media (max-width: 768px) {
+    .learning-timer-widget {
+      bottom: 14px;
+      right: 14px;
+      padding: 14px 18px;
+      min-width: auto;
+    }
+    .timer-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+    .timer-display {
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .learning-timer-widget {
+      bottom: 10px;
+      right: 10px;
+      padding: 12px 14px;
+      gap: 10px;
+    }
+    .timer-content {
+      display: none;
+    }
+  }
+
   @media (max-width: 991px){
     .reader-shell{grid-template-columns:1fr;}
     .reader-sidebar{
@@ -441,6 +544,17 @@
 
 {% block content %}
 <div class="reader-page">
+  <!-- Learning Timer Widget -->
+  <div class="learning-timer-widget" id="learningTimer">
+    <div class="timer-icon">
+      <i class="fas fa-hourglass-half"></i>
+    </div>
+    <div class="timer-content">
+      <p class="timer-label">Temps d'apprentissage</p>
+      <p class="timer-display" id="timerDisplay">00:00:00</p>
+    </div>
+  </div>
+
   <div class="reader-shell">
     <aside class="reader-sidebar" id="readerSidebar">
       <div class="sidebar-title">
@@ -532,6 +646,7 @@
 {% block extra_js %}
 <script>
   (function(){
+    /* ====== Sidebar Management ====== */
     const sidebar = document.getElementById('readerSidebar');
     const tocClose = document.getElementById('tocClose');
 
@@ -561,8 +676,83 @@
       if(e.key === 'Escape') closeSidebar();
     });
 
-    // Optionnel : ouverture si l'utilisateur a une petite largeur et que la sidebar n'est pas affichée
-    // (aucune ouverture automatique pour respecter l'UX existante)
+    /* ====== Learning Timer Clock ====== */
+    (function() {
+      const timerDisplay = document.getElementById('timerDisplay');
+      const learningTimer = document.getElementById('learningTimer');
+
+      let totalSeconds = 0;
+      let timerInterval = null;
+      let isActive = true;
+
+      function formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function updateDisplay() {
+        if(timerDisplay) {
+          timerDisplay.textContent = formatTime(totalSeconds);
+        }
+      }
+
+      function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(function() {
+          if(isActive) {
+            totalSeconds++;
+            updateDisplay();
+          }
+        }, 1000);
+      }
+
+      // Pause timer when window loses focus
+      window.addEventListener('blur', function() {
+        isActive = false;
+        if(learningTimer) learningTimer.style.opacity = '0.6';
+      });
+
+      // Resume timer when window regains focus
+      window.addEventListener('focus', function() {
+        isActive = true;
+        if(learningTimer) learningTimer.style.opacity = '1';
+      });
+
+      // Check if page is visible
+      document.addEventListener('visibilitychange', function() {
+        if(document.hidden) {
+          isActive = false;
+          if(learningTimer) learningTimer.style.opacity = '0.6';
+        } else {
+          isActive = true;
+          if(learningTimer) learningTimer.style.opacity = '1';
+        }
+      });
+
+      // Save and restore timer on page reload
+      window.addEventListener('beforeunload', function() {
+        sessionStorage.setItem('learningTime_{{ cours.id }}', totalSeconds);
+      });
+
+      // Restore timer from previous session (same tab)
+      const savedTime = sessionStorage.getItem('learningTime_{{ cours.id }}');
+      if(savedTime) {
+        totalSeconds = parseInt(savedTime);
+        updateDisplay();
+      }
+
+      // Start the timer
+      startTimer();
+
+      // Pause on page unload
+      window.addEventListener('unload', function() {
+        if(timerInterval) clearInterval(timerInterval);
+      });
+    })();
   })();
 </script>
 {% endblock %}
