@@ -5,95 +5,275 @@
 
 {% block extra_css %}
 <style>
-    /* Style pour indiquer que le texte est survolable */
-    .table td[title] {
-        cursor: help;
+    :root {
+        --oo-teal: #133e3f;
+        --oo-gold: #FFC107;
     }
-    .table td[title] small {
-        border-bottom: 1px dotted #4e73df;
-        display: inline-block;
+
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .course-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.15);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: liquid-shimmer 6s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes liquid-shimmer {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    .course-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 193, 7, 0.35);
+    }
+
+    .course-card__header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1rem;
+    }
+
+    .course-card__title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 0.5rem;
+        line-height: 1.3;
+    }
+
+    .course-card__category {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--oo-gold);
+        letter-spacing: 0.05em;
+    }
+
+    .course-card__meta {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .course-card__meta i {
+        margin-right: 0.4rem;
+        color: var(--oo-gold);
+    }
+
+    .course-card__actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: space-between;
+    }
+
+    .course-card__btn {
+        flex: 1;
+        padding: 0.6rem 0.8rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+    }
+
+    .course-card__btn--manage {
+        background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
+    }
+
+    .course-card__btn--delete {
+        background: rgba(220, 38, 38, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(220, 38, 38, 0.25);
+    }
+
+    .course-card__btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(19, 62, 63, 0.3);
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .page-link {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.2s ease;
+    }
+
+    .page-link:hover {
+        background: rgba(255, 193, 7, 0.12) !important;
+        border-color: rgba(255, 193, 7, 0.35) !important;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%) !important;
+        border-color: var(--oo-teal) !important;
+    }
+
+    body.dark-mode .course-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--oo-gold);
+        opacity: 0.4;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: #ffffff;
+        font-weight: 800;
+    }
+
+    .empty-state p {
+        color: rgba(255, 255, 255, 0.85);
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">
-        <i class="fas fa-book text-primary mr-2"></i>Mes Cours
+<div class="d-sm-flex align-items-center justify-content-between mb-5">
+    <h1 class="h3 mb-0" style="color: #ffffff;">
+        <i class="fas fa-book" style="color: var(--oo-gold); margin-right: 10px;"></i>Mes Cours
     </h1>
-    <a href="{% url 'creer_cours_complet' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Créer un nouveau cours
+    <a href="{% url 'creer_cours_complet' %}" class="d-none d-sm-inline-block btn btn-sm" style="background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);">
+        <i class="fas fa-plus fa-sm mr-1"></i> Créer un nouveau cours
     </a>
 </div>
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Liste de vos cours publiés</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Niveau</th>
-                        <th>Objectif</th>
-                        <th>Description</th>
-                        <th>Ressource</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cours in mes_cours %}
-                    <tr>
-                        <td class="font-weight-bold">{{ cours.titre }}</td>
-                        <td>
-                            {% if cours.categorie %}
-                                <span class="badge badge-info px-2 py-1">{{ cours.categorie }}</span>
-                            {% else %}
-                                <span class="text-muted small">Aucune</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ cours.niveau }}</td>
-                        <td title="{{ cours.objectif }}"><small>{{ cours.objectif|truncatechars:50 }}</small></td>
-                        <td title="{{ cours.description }}"><small>{{ cours.description|truncatechars:80 }}</small></td>
-                        <td class="text-center">
-                            {% if cours.ressource %}
-                                <a href="{{ cours.ressource.url }}" class="btn btn-sm btn-link" target="_blank" title="Télécharger">
-                                    <i class="fas {{ cours.get_file_icon }} fa-2x"></i>
-                                    <span class="d-block mt-1 small font-weight-bold text-uppercase text-dark">{{ cours.get_extension }}</span>
-                                </a>
-                            {% else %}
-                                <span class="text-muted small">Aucun fichier</span>
-                            {% endif %}
-                        </td>
-                        <td><small>{{ cours.date_publication|date:"d/m/Y" }}</small></td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'gerer_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-primary" title="Gérer (Chapitres, Ressources)">
-                                    <i class="fas fa-cog"></i> Gérer
-                                </a>
-                                <a href="{% url 'supprimer_cours_enseignant' cours.id %}" class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">
-                            <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
-                            Vous n'avez pas encore créé de cours. 
-                            <a href="{% url 'creer_cours_complet' %}">Cliquez ici pour commencer.</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+{% if mes_cours %}
+<div class="courses-grid">
+    {% for cours in mes_cours %}
+    <div class="course-card">
+        <div class="course-card__header">
+            <div class="course-card__category">
+                {% if cours.categorie %}{{ cours.categorie }}{% else %}Sans catégorie{% endif %}
+            </div>
+            <h3 class="course-card__title">{{ cours.titre }}</h3>
+        </div>
+
+        <div class="course-card__meta">
+            <div><i class="fas fa-layer-group"></i>{{ cours.niveau }}</div>
+            <div><i class="fas fa-calendar"></i>{{ cours.date_publication|date:"d/m/Y" }}</div>
+            {% if cours.ressource %}
+            <div><i class="fas fa-file"></i>{{ cours.get_extension }}</div>
+            {% endif %}
+        </div>
+
+        <div class="course-card__actions">
+            <a href="{% url 'gerer_cours_enseignant' cours.id %}" class="course-card__btn course-card__btn--manage" title="Gérer">
+                <i class="fas fa-cog"></i> Gérer
+            </a>
+            <a href="{% url 'supprimer_cours_enseignant' cours.id %}" class="course-card__btn course-card__btn--delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')">
+                <i class="fas fa-trash-alt"></i>
+            </a>
         </div>
     </div>
+    {% endfor %}
 </div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">« Première</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹ Précédente</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">« Première</span></li>
+            <li class="page-item disabled"><span class="page-link">‹ Précédente</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivante ›</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Dernière »</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Suivante ›</span></li>
+            <li class="page-item disabled"><span class="page-link">Dernière »</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-folder-open"></i>
+    <h4>Aucun cours disponible</h4>
+    <p>Vous n'avez pas encore créé de cours. Cliquez sur le bouton ci-dessus pour commencer.</p>
+    <a href="{% url 'creer_cours_complet' %}" class="btn mt-3" style="background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%); color: #ffffff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+        <i class="fas fa-plus mr-1"></i> Créer mon premier cours
+    </a>
+</div>
+{% endif %}
 {% endblock %}

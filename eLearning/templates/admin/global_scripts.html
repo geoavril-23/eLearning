@@ -1,0 +1,67 @@
+<!-- Global AJAX & Notifications Scripts -->
+<script src="{% static 'js/notifications.js' %}"></script>
+
+<style>
+    /* Global notification container */
+    .alerts-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        max-width: 400px;
+        z-index: 9999;
+    }
+
+    /* Auto-dismiss alerts styling */
+    .alert {
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+        margin-bottom: 12px;
+        animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(400px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .alert-success {
+        border-left: 3px solid #1cc88a !important;
+    }
+
+    .alert-danger, .alert-error {
+        border-left: 3px solid #dc2626 !important;
+    }
+
+    .alert-info {
+        border-left: 3px solid #FFC107 !important;
+    }
+
+    body.dark-mode .alert {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+    }
+</style>
+
+<!-- Refresh interval for new messages -->
+<script>
+    // Optional: Refresh messages every 30 seconds
+    (function() {
+        if (document.body.classList.contains('messagerie-page')) {
+            setInterval(() => {
+                if (!document.hidden) {
+                    location.reload();
+                }
+            }, 30000);
+        }
+    })();
+</script>

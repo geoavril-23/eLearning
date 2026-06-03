@@ -5,41 +5,85 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --oo-teal: #133e3f;
+        --oo-gold: #FFC107;
+    }
+
     .result-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: none;
-        border-left: 5px solid #e3e6f0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.15);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: liquid-shimmer 6s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes liquid-shimmer {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    .result-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 193, 7, 0.35);
     }
 
     .result-card.status-corrected {
-        border-left-color: #1cc88a;
+        border-left: 3px solid #1cc88a;
     }
 
     .result-card.status-pending {
-        border-left-color: #f6c23e;
+        border-left: 3px solid var(--oo-gold);
     }
 
     .score-badge {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #1cc88a;
-        background: #e8f5e9;
+        color: #ffffff;
+        background: linear-gradient(135deg, #1cc88a 0%, #16a34a 100%);
         padding: 0.5rem 1rem;
-        border-radius: 8px;
+        border-radius: 12px;
         display: inline-block;
+        box-shadow: 0 8px 20px rgba(28, 200, 138, 0.2);
     }
 
     .feedback-box {
-        background: #f8f9fc;
-        border-radius: 8px;
+        background: rgba(19, 62, 63, 0.08);
+        border-radius: 12px;
         padding: 1rem;
-        border-left: 4px solid #4e73df;
+        border-left: 3px solid var(--oo-gold);
         margin-top: 1rem;
         font-size: 0.95rem;
-        color: #5a5c69;
+        color: #ffffff;
+        backdrop-filter: blur(4px);
+    }
+
+    body.dark-mode .result-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    body.dark-mode .feedback-box {
+        background: rgba(255, 193, 7, 0.08);
+        color: #ffffff;
     }
 </style>
 {% endblock %}

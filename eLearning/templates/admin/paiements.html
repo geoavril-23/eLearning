@@ -7,31 +7,88 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --oo-teal: #133e3f;
+        --oo-gold: #FFC107;
+    }
+
     .balance-card {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        color: white;
-        border-radius: 15px;
+        background: linear-gradient(135deg, rgba(19, 62, 63, 0.95) 0%, rgba(19, 62, 63, 0.88) 100%);
+        border: 2px solid rgba(255, 193, 7, 0.35);
+        border-radius: 24px;
         overflow: hidden;
         position: relative;
+        color: white;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 0 20px rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        animation: balance-pulse 3s ease-in-out infinite;
     }
+
+    @keyframes balance-pulse {
+        0%, 100% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 0 20px rgba(255, 255, 255, 0.06); }
+        50% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), inset 0 0 25px rgba(255, 193, 7, 0.08); }
+    }
+
+    .balance-card:hover {
+        border-color: rgba(255, 193, 7, 0.95);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35), inset 0 0 25px rgba(255, 193, 7, 0.1);
+    }
+
     .balance-card .circles {
         position: absolute;
         top: -20px;
         right: -20px;
-        opacity: 0.1;
+        opacity: 0.05;
     }
+
     .transaction-icon {
         width: 40px;
         height: 40px;
-        border-radius: 10px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
-    .bg-light-success { background-color: rgba(28, 200, 138, 0.1); color: #1cc88a; }
-    .bg-light-primary { background-color: rgba(78, 115, 223, 0.1); color: #4e73df; }
-    .bg-light-warning { background-color: rgba(246, 194, 62, 0.1); color: #f6c23e; }
-    .bg-light-info { background-color: rgba(54, 185, 204, 0.1); color: #36b9cc; }
+
+    .bg-light-success { background-color: rgba(28, 200, 138, 0.15); color: #1cc88a; border: 1px solid rgba(28, 200, 138, 0.3); }
+    .bg-light-primary { background-color: rgba(19, 62, 63, 0.15); color: var(--oo-teal); border: 1px solid rgba(19, 62, 63, 0.3); }
+    .bg-light-warning { background-color: rgba(246, 194, 62, 0.15); color: #f6c23e; border: 1px solid rgba(246, 194, 62, 0.3); }
+    .bg-light-info { background-color: rgba(28, 200, 138, 0.15); color: #1cc88a; border: 1px solid rgba(28, 200, 138, 0.3); }
+
+    .card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.15) !important;
+        border-radius: 20px !important;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: liquid-shimmer 6s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes liquid-shimmer {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    body.dark-mode .card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+    }
 </style>
 {% endblock %}
 
