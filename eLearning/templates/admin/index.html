@@ -201,8 +201,8 @@
     </div>
 
     {% else %}
-    <!-- Student Cards -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <!-- Student Cards - Équilibrés -->
+    <div class="col-xl-4 col-md-6 mb-4">
         <div class="stat-panel border-left-primary">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -215,20 +215,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-panel border-left-success">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="panel-title">Progression Globale</div>
-                    <div class="panel-value">{{ stats.progression|default:"0" }}%</div>
-                </div>
-                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
-                    <i class="fas fa-tasks"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
         <div class="stat-panel border-left-info">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -241,7 +228,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
         <div class="stat-panel border-left-warning">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -257,86 +244,8 @@
     {% endif %}
 </div>
 
-<!-- CHARTS AREA -->
-<div class="row">
-    <div class="col-xl-8 col-lg-7">
-        <div class="stat-panel chart-card mb-4 p-4">
-            <h6 class="font-weight-bold mb-4" style="color: #133e3f;">Activité & Engagement</h6>
-            <div class="chart-area" style="height: 320px;">
-                <canvas id="myAreaChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-lg-5">
-        <div class="stat-panel chart-card mb-4 p-4">
-            <h6 class="font-weight-bold mb-4" style="color: #133e3f;">Répartition</h6>
-            <div class="chart-pie pt-4 pb-2" style="height: 250px;">
-                <canvas id="myPieChart"></canvas>
-            </div>
-            <div class="mt-4 text-center small">
-                <span class="mr-2"><i class="fas fa-circle" style="color:#133e3f;"></i> Actif</span>
-                <span class="mr-2"><i class="fas fa-circle" style="color:#FFC107;"></i> Complété</span>
-                <span class="mr-2"><i class="fas fa-circle" style="color:#4ecdc4;"></i> En attente</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 {% endblock content %}
 
 {% block extra_js %}
-<script src="{% static 'admin/vendor/chart.js/Chart.min.js' %}"></script>
-<script>
-    // Modern Chart.js Config
-    Chart.defaults.global.defaultFontFamily = 'Poppins', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-    Chart.defaults.global.defaultFontColor = '#858796';
-
-    var ctxArea = document.getElementById("myAreaChart");
-    var myAreaChart = new Chart(ctxArea, {
-        type: 'line',
-        data: {
-            labels: {{ activite_labels|default:'["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]'|safe }},
-    datasets: [{
-        label: "Activité",
-        lineTension: 0.4,
-        backgroundColor: "rgba(19, 62, 63, 0.05)",
-        borderColor: "rgba(19, 62, 63, 1)",
-        pointRadius: 4,
-        pointBackgroundColor: "rgba(19, 62, 63, 1)",
-        pointBorderColor: "#fff",
-        pointBorderWidth: 2,
-        data: {{ activite_data|default:"[]"|safe }},
-            }],
-        },
-    options: {
-        maintainAspectRatio: false,
-            layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
-        scales: {
-            xAxes: [{ gridLines: { display: false, drawBorder: false } }],
-                yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "#f1f5f9", zeroLineColor: "#f1f5f9", drawBorder: false } }],
-            },
-        legend: { display: false },
-        tooltips: { backgroundColor: "#fff", bodyFontColor: "#555", titleFontColor: '#133e3f', borderColor: '#edf2f7', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 }
-    }
-    });
-
-    var ctxPie = document.getElementById("myPieChart");
-    var myPieChart = new Chart(ctxPie, {
-        type: 'doughnut',
-        data: {
-            labels: ["Direct", "Social", "Referral"],
-            datasets: [{
-                data: [55, 30, 15],
-                backgroundColor: ['#133e3f', '#fec913', '#4bc5b8'],
-                hoverBorderColor: "rgba(234, 236, 244, 1)",
-            }],
-        },
-        options: {
-            maintainAspectRatio: false,
-            tooltips: { backgroundColor: "#fff", bodyFontColor: "#555", borderColor: '#edf2f7', borderWidth: 1 },
-            legend: { display: false },
-            cutoutPercentage: 80,
-        },
-    });
-</script>
+<!-- Charts removed as per user request -->
 {% endblock %}

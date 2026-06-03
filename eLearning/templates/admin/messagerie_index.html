@@ -5,51 +5,185 @@
 
 {% block extra_css %}
 <style>
-    .conversation-card {
+    .page-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #133e3f;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-nouveau-msg {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        cursor: pointer;
-        text-decoration: none;
-        color: inherit;
-        display: block;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
+        transition: all 0.3s ease;
     }
-    .conversation-card:hover {
+
+    .btn-nouveau-msg:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 20px rgba(19, 62, 63, 0.3);
+    }
+
+    /* Conversation List Container */
+    .conversations-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Individual Conversation Cards */
+    .conversation-card {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
         text-decoration: none;
         color: inherit;
+        cursor: pointer;
+        background: white;
+        position: relative;
+        overflow: hidden;
     }
+
+    .conversation-card:last-child {
+        border-bottom: none;
+    }
+
+    .conversation-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: linear-gradient(180deg, #133e3f, #FFC107);
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease;
+    }
+
+    .conversation-card:hover {
+        background: linear-gradient(135deg, rgba(19, 62, 63, 0.05), rgba(255, 193, 7, 0.02));
+        box-shadow: inset 0 0 20px rgba(19, 62, 63, 0.1);
+        transform: translateX(4px);
+    }
+
+    .conversation-card:hover::before {
+        transform: scaleY(1);
+    }
+
     .conversation-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: bold;
+        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
+        flex-shrink: 0;
     }
+
+    .conversation-content {
+        flex-grow: 1;
+        min-width: 0;
+        margin: 0 1rem;
+    }
+
+    .conversation-name {
+        font-weight: 700;
+        color: #133e3f;
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+    }
+
+    .conversation-message {
+        font-size: 0.85rem;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .conversation-time {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
     .unread-badge {
-        width: 12px;
-        height: 12px;
-        background-color: #e74a3b;
+        width: 10px;
+        height: 10px;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
         border-radius: 50%;
         display: inline-block;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border: 2px dashed #e5e7eb;
+        border-radius: 16px;
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: #FFC107;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: #1f2937;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Dark mode */
+    body.dark-mode .conversations-container {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    body.dark-mode .conversation-card {
+        background: #1f2937;
+        border-bottom-color: #374151;
+    }
+
+    body.dark-mode .conversation-card:hover {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(19, 62, 63, 0.1));
+    }
+
+    body.dark-mode .conversation-name {
+        color: #f3f4f6;
+    }
+
+    body.dark-mode .conversation-message {
+        color: #d1d5db;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">
-        <i class="fas fa-envelope text-primary mr-2"></i>Messagerie
+    <h1 class="page-title">
+        <i class="fas fa-envelope mr-2" style="color: #FFC107;"></i>Messagerie
     </h1>
-    <a href="{% url 'nouvelle_conversation' %}" class="btn btn-primary rounded-pill shadow-sm">
-        <i class="fas fa-plus fa-sm text-white-50 mr-2"></i>Nouveau Message
+    <a href="{% url 'nouvelle_conversation' %}" class="btn btn-nouveau-msg">
+        <i class="fas fa-plus mr-2"></i> Nouveau Message
     </a>
 </div>
 
@@ -65,62 +199,58 @@
 <div class="row">
     <div class="col-12">
         {% if conversations %}
-            <div class="card shadow mb-4 border-0 rounded-lg">
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush rounded-lg">
-                        {% for conv in conversations %}
-                            {% with last_msg=conv.messages.last %}
-                            <a href="{% url 'detail_conversation' conv.id %}" class="list-group-item list-group-item-action p-3 conversation-card border-bottom">
-                                <div class="d-flex align-items-center">
-                                    <div class="conversation-avatar mr-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <h6 class="mb-0 font-weight-bold text-gray-900">
-                                                {% for p in conv.participants.all %}
-                                                    {% if p != request.user %}
-                                                        {{ p.nom }} {{ p.prenom }}
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </h6>
-                                            <small class="text-muted">
-                                                {% if last_msg %}
-                                                    {{ last_msg.date_envoi|date:"d M. H:i" }}
-                                                {% endif %}
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-muted small text-truncate" style="max-width: 80%;">
-                                            {% if last_msg %}
-                                                {% if last_msg.expediteur == request.user %}
-                                                    <strong>Vous :</strong> 
-                                                {% endif %}
-                                                {{ last_msg.contenu }}
-                                            {% else %}
-                                                <i>Aucun message</i>
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                    {% if last_msg and last_msg.expediteur != request.user and not last_msg.lu %}
-                                        <div class="ml-2">
-                                            <span class="unread-badge"></span>
-                                        </div>
+            <div class="conversations-container">
+                <div class="d-flex flex-column">
+                    {% for conv in conversations %}
+                        {% with last_msg=conv.messages.last %}
+                        <a href="{% url 'detail_conversation' conv.id %}" class="conversation-card">
+                            <div class="conversation-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="conversation-content">
+                                <div class="conversation-name">
+                                    {% for p in conv.participants.all %}
+                                        {% if p != request.user %}
+                                            {{ p.nom }} {{ p.prenom }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="conversation-message">
+                                    {% if last_msg %}
+                                        {% if last_msg.expediteur == request.user %}
+                                            <strong>Vous :</strong>
+                                        {% endif %}
+                                        {{ last_msg.contenu }}
+                                    {% else %}
+                                        <i>Aucun message</i>
                                     {% endif %}
                                 </div>
-                            </a>
-                            {% endwith %}
-                        {% endfor %}
-                    </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="conversation-time">
+                                    {% if last_msg %}
+                                        {{ last_msg.date_envoi|date:"d M. H:i" }}
+                                    {% endif %}
+                                </div>
+                                {% if last_msg and last_msg.expediteur != request.user and not last_msg.lu %}
+                                    <div class="ml-3">
+                                        <span class="unread-badge"></span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endwith %}
+                    {% endfor %}
                 </div>
             </div>
         {% else %}
-            <div class="card border-0 shadow-sm rounded-lg text-center p-5">
-                <div class="mb-3">
-                    <i class="fas fa-envelope-open text-gray-300 fa-4x"></i>
-                </div>
-                <h4 class="text-gray-800 font-weight-bold">Aucune conversation</h4>
-                <p class="text-muted">Vous n'avez pas encore envoyé ou reçu de messages.</p>
-                <a href="{% url 'nouvelle_conversation' %}" class="btn btn-primary mt-2">Démarrer une discussion</a>
+            <div class="empty-state">
+                <i class="fas fa-envelope-open"></i>
+                <h4>Aucune conversation</h4>
+                <p>Vous n'avez pas encore envoyé ou reçu de messages.</p>
+                <a href="{% url 'nouvelle_conversation' %}" class="btn btn-nouveau-msg">
+                    <i class="fas fa-plus mr-2"></i> Démarrer une discussion
+                </a>
             </div>
         {% endif %}
     </div>

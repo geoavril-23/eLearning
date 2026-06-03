@@ -300,6 +300,33 @@ body {
   transform: scale(1.05);
 }
 
+.badge-glass-premium {
+  display: inline-block;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #FFC107 0%, #f6c23e 100%);
+  color: #133e3f;
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid #FFC107;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  cursor: default;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.badge-glass-premium:hover {
+  background: linear-gradient(135deg, #f6c23e 0%, #FFC107 100%);
+  color: #1f2937;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: #FFC107;
+  box-shadow: 0 8px 32px 0 rgba(255, 193, 7, 0.5);
+  transform: scale(1.05);
+}
+
 .course_section .box .action-box {
   margin-top: auto;
   display: flex;

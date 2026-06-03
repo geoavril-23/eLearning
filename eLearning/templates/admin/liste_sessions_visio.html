@@ -7,29 +7,33 @@
 <style>
     .live-card {
         border: none;
-        border-radius: 16px;
+        border-radius: 20px;
         background: white;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
         overflow: hidden;
         position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 
     .live-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
     }
 
     .live-status-badge {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
+        top: 12px;
+        right: 12px;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 0.65rem;
+        font-weight: 800;
         text-transform: uppercase;
         z-index: 2;
+        letter-spacing: 0.5px;
     }
 
     .status-avenir { background: #e3f2fd; color: #1976d2; }
@@ -43,64 +47,77 @@
     }
 
     .live-card-header {
-        height: 100px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 70px;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 2.5rem;
+        font-size: 2rem;
+        flex-shrink: 0;
     }
 
     .live-card-body {
-        padding: 1.5rem;
+        padding: 1.25rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
 
     .live-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
+        color: #133e3f;
+        margin-bottom: 0.75rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        height: 2.8rem;
+        line-height: 1.3;
     }
 
     .live-info {
-        font-size: 0.85rem;
-        color: #718096;
+        font-size: 0.8rem;
+        color: #6b7280;
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 0.4rem;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .live-info i {
+        color: #133e3f;
+        width: 14px;
+        text-align: center;
     }
 
     .btn-join {
-        background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         color: white;
         border: none;
         border-radius: 10px;
         width: 100%;
-        padding: 10px;
+        padding: 0.65rem;
         font-weight: 700;
-        margin-top: 1rem;
+        font-size: 0.85rem;
+        margin-top: auto;
+        margin-bottom: 0.75rem;
         transition: all 0.3s;
     }
 
     .btn-join:hover {
-        filter: brightness(1.1);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
         color: white;
-        transform: scale(1.02);
     }
 
     .btn-delete {
         color: #e53e3e;
         background: #fff5f5;
         border: none;
-        padding: 8px;
+        padding: 0.5rem;
         border-radius: 8px;
+        font-size: 0.9rem;
         transition: all 0.2s;
     }
 
@@ -111,43 +128,82 @@
 
     .header-section {
         background: white;
-        padding: 2rem;
+        padding: 1.5rem;
         border-radius: 16px;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-section h1 {
+        font-size: 1.5rem;
+        color: #133e3f;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .header-section p {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
     }
 
     .btn-new-visio {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         color: white;
         border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
+        border-radius: 10px;
+        padding: 0.65rem 1.5rem;
         font-weight: 700;
-        display: flex;
+        font-size: 0.9rem;
+        display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.5rem;
         transition: all 0.3s;
         text-decoration: none;
+        white-space: nowrap;
     }
 
     .btn-new-visio:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 16px rgba(19, 62, 63, 0.3);
         color: white;
+    }
+
+    .visio-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+        .visio-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .visio-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+        .header-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
     <div class="header-section">
         <div>
-            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Visioconférences Live</h1>
-            <p class="text-muted mb-0">Gérez vos réunions Google Meet et sessions en direct.</p>
+            <h1>Visioconférences Live</h1>
+            <p>Gérez vos réunions Google Meet et sessions en direct.</p>
         </div>
         {% if request.user.is_enseignant %}
         <a href="{% url 'creer_session_visio' %}" class="btn-new-visio">
@@ -157,9 +213,8 @@
     </div>
 
     {% if sessions %}
-    <div class="row">
+    <div class="visio-grid">
         {% for session in sessions %}
-        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
             <div class="live-card">
                 <span class="live-status-badge {% if session.statut == 'en cours' %}status-encours{% elif session.statut == 'terminé' %}status-termine{% else %}status-avenir{% endif %}">
                     {% if session.statut == 'en cours' %}<i class="fas fa-circle mr-1"></i>{% endif %}
@@ -185,24 +240,22 @@
                         <span>{{ session.duree }} minutes</span>
                     </div>
 
-                    <div class="d-flex gap-2 mt-3">
-                        {% if session.statut != 'terminé' %}
-                        <a href="{{ session.lien_reunion }}" target="_blank" class="btn btn-join flex-grow-1">
-                            <i class="fas fa-external-link-alt mr-2"></i> Rejoindre Meet
-                        </a>
-                        {% endif %}
-                        {% if request.user.is_enseignant or request.user.is_administrateur %}
-                        <form action="{% url 'supprimer_session_visio' session.id %}" method="POST" class="ml-2 mt-3" onsubmit="return confirm('Supprimer cette session ?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
+                    {% if session.statut != 'terminé' %}
+                    <a href="{{ session.lien_reunion }}" target="_blank" class="btn btn-join">
+                        <i class="fas fa-external-link-alt mr-2"></i> Rejoindre Meet
+                    </a>
+                    {% endif %}
+
+                    {% if request.user.is_enseignant or request.user.is_administrateur %}
+                    <form action="{% url 'supprimer_session_visio' session.id %}" method="POST" style="margin-top: 0.5rem;" onsubmit="return confirm('Supprimer cette session ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete w-100">
+                            <i class="fas fa-trash mr-1"></i> Supprimer
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
-        </div>
         {% endfor %}
     </div>
     {% else %}

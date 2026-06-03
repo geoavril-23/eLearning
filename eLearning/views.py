@@ -1864,6 +1864,10 @@ def mes_courses(request):
         else:
             insc.progression = 0
 
+    # Séparer les cours gratuits et premium
+    inscriptions_gratuites = [ins for ins in inscriptions if not ins.cours.est_premium]
+    inscriptions_premium = [ins for ins in inscriptions if ins.cours.est_premium]
+
     nb_en_cours = inscriptions.filter(statut='validee').count()
     nb_termines = inscriptions.filter(statut='terminee').count()
 
@@ -1886,7 +1890,8 @@ def mes_courses(request):
     ).select_related('categorie', 'enseignant').order_by('-date_publication')[:6]
 
     return render(request, 'admin/mes_formations.html', {
-        'inscriptions': inscriptions,
+        'inscriptions': inscriptions_gratuites,
+        'inscriptions_premium': inscriptions_premium,
         'notifs': notifs,
         'nouveaux_cours': nouveaux_cours,
         'stats': {
