@@ -12,6 +12,78 @@
         --oo-gold: #FFC107;
     }
 
+    /* ── Global glass animation style (contact/register style) ── */
+    .card {
+        animation: oo-float-pay 5s ease-in-out infinite !important;
+    }
+    .card:nth-child(2) { animation-delay: 0.3s !important; }
+    .card:nth-child(3) { animation-delay: 0.6s !important; }
+    .card:nth-child(4) { animation-delay: 0.9s !important; }
+
+    @keyframes oo-float-pay {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    /* Liquid border on card hover */
+    .card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        border: 2px solid rgba(255,193,7,0.22);
+        pointer-events: none;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        z-index: 2;
+    }
+
+    .card:hover::after {
+        border-color: rgba(255,193,7,0.88);
+        box-shadow: 0 22px 70px rgba(255,193,7,0.14);
+        animation: oo-liquid-pay 1.2s ease-in-out infinite;
+    }
+
+    @keyframes oo-liquid-pay {
+        0%   { border-radius: 20px 36px 18px 48px; }
+        25%  { border-radius: 36px 20px 48px 18px; }
+        50%  { border-radius: 24px 54px 24px 42px; }
+        75%  { border-radius: 54px 28px 42px 20px; }
+        100% { border-radius: 20px 36px 18px 48px; }
+    }
+
+    /* White text on dark glass backgrounds */
+    .card .text-gray-800 { color: rgba(255,255,255,0.95) !important; }
+    .card .text-gray-600 { color: rgba(255,255,255,0.80) !important; }
+    .card .text-xs.font-weight-bold { color: rgba(255,255,255,0.85) !important; }
+    .card th, .card td { color: rgba(255,255,255,0.90) !important; }
+    .card .small.text-muted { color: rgba(255,255,255,0.75) !important; }
+
+    /* Table styling */
+    .table { color: rgba(255,255,255,0.90) !important; }
+    .table thead.bg-light th { background: rgba(255,255,255,0.12) !important; color: rgba(255,255,255,0.90) !important; }
+    .table-hover tbody tr:hover { background: rgba(255,255,255,0.06) !important; }
+    .table-bordered td, .table-bordered th { border-color: rgba(255,255,255,0.12) !important; }
+
+    /* Modal glass style */
+    .modal-content {
+        background: linear-gradient(135deg, rgba(19,62,63,0.97) 0%, rgba(15,52,53,0.97) 100%) !important;
+        border: 1px solid rgba(255,193,7,0.35) !important;
+        border-radius: 20px !important;
+        color: rgba(255,255,255,0.92) !important;
+        backdrop-filter: blur(16px);
+    }
+    .modal-header { border-bottom-color: rgba(255,255,255,0.15) !important; }
+    .modal-footer { border-top-color: rgba(255,255,255,0.15) !important; }
+    .modal-title { color: rgba(255,255,255,0.97) !important; }
+    .modal label { color: rgba(255,255,255,0.90) !important; }
+    .modal .form-control {
+        background: rgba(255,255,255,0.10) !important;
+        border-color: rgba(255,255,255,0.22) !important;
+        color: rgba(255,255,255,0.92) !important;
+        border-radius: 12px !important;
+    }
+    .modal-body p { color: rgba(255,255,255,0.88) !important; }
+
     .balance-card {
         background: linear-gradient(135deg, rgba(19, 62, 63, 0.95) 0%, rgba(19, 62, 63, 0.88) 100%);
         border: 2px solid rgba(255, 193, 7, 0.35);

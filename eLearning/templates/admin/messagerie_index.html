@@ -8,52 +8,85 @@
     .page-title {
         font-size: 2rem;
         font-weight: 800;
-        color: #133e3f;
+        color: #1f2937;
         margin-bottom: 1.5rem;
     }
 
+    body.dark-mode .page-title { color: rgba(255,255,255,0.95); }
+
     .btn-nouveau-msg {
         background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
+        border: 1px solid rgba(255,193,7,0.35);
+        border-radius: 20px;
+        padding: 0.65rem 1.5rem;
         font-weight: 700;
-        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(19,62,63,0.25);
         transition: all 0.3s ease;
-    }
-
-    .btn-nouveau-msg:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(19, 62, 63, 0.3);
-    }
-
-    /* Conversation List Container */
-    .conversations-container {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e5e7eb;
-    }
-
-    /* Individual Conversation Cards */
-    .conversation-card {
-        display: block;
-        padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: inherit;
-        cursor: pointer;
-        background: white;
         position: relative;
         overflow: hidden;
     }
 
-    .conversation-card:last-child {
-        border-bottom: none;
+    .btn-nouveau-msg::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,193,7,0.35), transparent);
+        transform: translateX(-120%);
+        transition: transform 0.6s ease;
+        pointer-events: none;
     }
 
+    .btn-nouveau-msg:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(19,62,63,0.35);
+        border-color: rgba(255,193,7,0.75);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-nouveau-msg:hover::after { transform: translateX(120%); }
+
+    /* Conversation List Container */
+    .conversations-container {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        animation: oo-float-msg 5s ease-in-out infinite;
+    }
+
+    body.dark-mode .conversations-container {
+        background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
+        border-color: rgba(255,255,255,0.22);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 16px 50px rgba(0,0,0,0.15), inset 0 0 14px rgba(255,255,255,0.10);
+    }
+
+    @keyframes oo-float-msg {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    /* Individual Conversation Cards */
+    .conversation-card {
+        display: flex;
+        align-items: center;
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.25s ease;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .conversation-card:last-child { border-bottom: none; }
+
+    /* Green left accent (replaces blue) */
     .conversation-card::before {
         content: '';
         position: absolute;
@@ -68,30 +101,30 @@
     }
 
     .conversation-card:hover {
-        background: linear-gradient(135deg, rgba(19, 62, 63, 0.05), rgba(255, 193, 7, 0.02));
-        box-shadow: inset 0 0 20px rgba(19, 62, 63, 0.1);
-        transform: translateX(4px);
+        background: linear-gradient(135deg, rgba(19,62,63,0.18), rgba(255,193,7,0.06));
+        transform: translateX(5px);
+        text-decoration: none;
+        color: inherit;
     }
 
-    .conversation-card:hover::before {
-        transform: scaleY(1);
-    }
+    .conversation-card:hover::before { transform: scaleY(1); }
 
+    /* Avatar with profile photo support */
     .conversation-avatar {
         width: 48px;
         height: 48px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        border-radius: 14px;
+        background: linear-gradient(135deg, #133e3f 0%, #1a5556 100%);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.9rem;
         font-weight: bold;
-        box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);
+        box-shadow: 0 4px 12px rgba(19,62,63,0.30);
         flex-shrink: 0;
         overflow: hidden;
-        object-fit: cover;
+        border: 2px solid rgba(255,193,7,0.35);
     }
 
     .conversation-avatar img {
@@ -109,13 +142,13 @@
 
     .conversation-name {
         font-weight: 700;
-        color: #133e3f;
+        color: #1f2937;
         margin-bottom: 0.3rem;
         font-size: 0.95rem;
     }
 
     .conversation-message {
-        font-size: 0.85rem;
+        font-size: 0.84rem;
         color: #6b7280;
         white-space: nowrap;
         overflow: hidden;
@@ -124,64 +157,49 @@
     }
 
     .conversation-time {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         color: #9ca3af;
         white-space: nowrap;
         flex-shrink: 0;
     }
 
+    body.dark-mode .conversation-card { border-bottom-color: rgba(255,255,255,0.10); }
+    body.dark-mode .conversation-name { color: rgba(255,255,255,0.95); }
+    body.dark-mode .conversation-message { color: rgba(255,255,255,0.68); }
+    body.dark-mode .conversation-time { color: rgba(255,255,255,0.55); }
+
     .unread-badge {
-        width: 10px;
-        height: 10px;
-        background: linear-gradient(135deg, #dc2626, #ef4444);
+        width: 11px;
+        height: 11px;
+        background: linear-gradient(135deg, #1cc88a, #16a34a);
         border-radius: 50%;
         display: inline-block;
-        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        box-shadow: 0 2px 8px rgba(28,200,138,0.45);
     }
 
     /* Empty state */
     .empty-state {
         text-align: center;
         padding: 3rem;
-        background: white;
+        background: #ffffff;
         border: 2px dashed #e5e7eb;
-        border-radius: 16px;
+        border-radius: 20px;
     }
 
-    .empty-state i {
-        font-size: 3.5rem;
-        color: #FFC107;
-        opacity: 0.3;
-        margin-bottom: 1rem;
-    }
+    .empty-state i { font-size: 3.5rem; color: #FFC107; opacity: 0.4; margin-bottom: 1rem; }
+    .empty-state h4 { color: #1f2937; font-weight: 800; margin-bottom: 0.5rem; }
+    .empty-state p { color: #6b7280; }
 
-    .empty-state h4 {
-        color: #1f2937;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
+    body.dark-mode .empty-state {
+        background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
+        border-color: rgba(255,255,255,0.20);
+        backdrop-filter: blur(12px);
     }
+    body.dark-mode .empty-state h4 { color: rgba(255,255,255,0.92); }
+    body.dark-mode .empty-state p { color: rgba(255,255,255,0.72); }
 
-    /* Dark mode */
-    body.dark-mode .conversations-container {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    body.dark-mode .conversation-card {
-        background: #1f2937;
-        border-bottom-color: #374151;
-    }
-
-    body.dark-mode .conversation-card:hover {
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(19, 62, 63, 0.1));
-    }
-
-    body.dark-mode .conversation-name {
-        color: #f3f4f6;
-    }
-
-    body.dark-mode .conversation-message {
-        color: #d1d5db;
+    @media (prefers-reduced-motion: reduce) {
+        .conversations-container { animation: none; }
     }
 </style>
 {% endblock %}
@@ -213,8 +231,15 @@
                     {% for conv in conversations %}
                         {% with last_msg=conv.messages.last %}
                         <a href="{% url 'detail_conversation' conv.id %}" class="conversation-card">
+                            <!-- Avatar: profile photo or green icon fallback -->
                             <div class="conversation-avatar">
-                                <i class="fas fa-user"></i>
+                                {% for p in conv.participants.all %}{% if p != request.user %}
+                                    {% if p.photo_profil %}
+                                        <img src="{{ p.photo_profil.url }}" alt="{{ p.nom }}" />
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                {% endif %}{% endfor %}
                             </div>
                             <div class="conversation-content">
                                 <div class="conversation-name">

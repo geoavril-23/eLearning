@@ -3,20 +3,72 @@
 
 {% block title %}Cours Premium - eLearning{% endblock %}
 
+{% block body_class %}sub_page{% endblock %}
+
 {% block extra_css %}
 <style>
+  /* ====== Same dark body as voir_cours ====== */
+  body {
+    background: linear-gradient(135deg, rgba(0,210,200,0.12), rgba(19,62,63,0.97));
+    min-height: 100vh;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* ── Scroll slide-up animation ── */
+  .premium-card {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.65s ease, transform 0.65s ease !important;
+  }
+  .premium-card.is-visible {
+    opacity: 1;
+    transform: translateY(0) !important;
+  }
+  /* stagger delays */
+  .premium-card:nth-child(1) { transition-delay: 0.05s !important; }
+  .premium-card:nth-child(2) { transition-delay: 0.15s !important; }
+  .premium-card:nth-child(3) { transition-delay: 0.25s !important; }
+  .premium-card:nth-child(4) { transition-delay: 0.35s !important; }
+  .premium-card:nth-child(5) { transition-delay: 0.45s !important; }
+  .premium-card:nth-child(6) { transition-delay: 0.55s !important; }
+
+  /* After .is-visible, allow the float animation */
+  .premium-card.is-visible { animation: oo-float 4.5s ease-in-out infinite !important; }
+
+  /* ====== Floating particles (register-style) ====== */
+  .particles-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 193, 7, 0.22);
+    animation: float-particle linear infinite;
+  }
+  @keyframes float-particle {
+    0%   { transform: translateY(100vh) scale(0);   opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-120px) scale(1.3); opacity: 0; }
+  }
+
   /* ====== Premium Hero with Liquid Glass ====== */
   .premium-hero {
     position: relative;
     width: 100%;
-    min-height: 70vh;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background-image: url({% static 'images/login-bg.jpg' %});
     background-size: cover;
     background-position: center;
-    padding: 60px 0;
+    background-attachment: fixed;
+    padding: 16px 0 40px;
     overflow: hidden;
   }
 
@@ -265,27 +317,56 @@
     background: rgba(28, 200, 138, 0.92);
   }
 
-  /* ====== Hero Title Section ====== */
-  .premium-title-section {
-    text-align: center;
-    margin-bottom: 40px;
-    color: #ffffff;
+  /* ── Collapse hero_area gap (sub_page fix) ─── */
+  .hero_area { min-height: 0 !important; }
+
+  /* ====== Header bar — même style que voir_cours ====== */
+  .premium-page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.8rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   }
 
-  .premium-title-section h1 {
-    font-size: 2.5rem;
+  .premium-page-header .header-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 193, 7, 0.18);
+    border: 1px solid rgba(255, 193, 7, 0.40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFC107;
+    font-size: 1.1rem;
+  }
+
+  .premium-page-header .header-text { flex: 1; min-width: 0; }
+
+  .premium-page-header .header-text h1 {
+    margin: 0 0 2px;
+    font-size: 1.4rem;
     font-weight: 800;
-    margin-bottom: 16px;
-    background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    line-height: 1.2;
   }
 
-  .premium-title-section p {
-    font-size: 1.05rem;
-    color: rgba(255, 255, 255, 0.85);
-    max-width: 700px;
-    margin: 0 auto;
+  .premium-page-header .header-text p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ====== Course Grid Section ====== */
@@ -301,8 +382,8 @@
   /* ====== Keep layout pleasant on small screens ====== */
   @media (max-width: 768px) {
     .premium-hero { min-height: 100vh; }
-    .premium-title-section h1 { font-size: 2rem; }
-    .premium-title-section p { font-size: 0.95rem; }
+    .premium-page-header .header-text h1 { font-size: 1.15rem; }
+    .premium-page-header .header-text p { display: none; }
     .premium-cards-wrap { grid-template-columns: 1fr; }
     .premium-card__content { padding: 20px; }
   }
@@ -313,14 +394,21 @@
 <section class="premium-hero">
   <div class="premium-hero__overlay" aria-hidden="true"></div>
 
+  <!-- Register-style floating particles -->
+  <div class="particles-field" id="particlesField" aria-hidden="true"></div>
+
   <div class="premium-hero__center">
     <div style="width: 100%; max-width: 1200px; padding: 0 16px;">
-      <div class="premium-title-section">
-        <h1>Cours Premium <i class="fas fa-crown" style="font-size: 0.85em;"></i></h1>
-        <p>
-          <i class="fas fa-magic" style="color: #ffc107; margin-right: 10px;"></i>
-          Accédez à des contenus exclusifs et spécialisés. Débloquez les chapitres dont vous avez besoin pour propulser votre carrière.
-        </p>
+
+      <!-- Header bar style voir_cours -->
+      <div class="premium-page-header">
+        <div class="header-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        <div class="header-text">
+          <h1>Cours Premium</h1>
+          <p><i class="fas fa-magic" style="color:#FFC107; margin-right:6px;"></i>Contenus exclusifs — débloquez les chapitres dont vous avez besoin</p>
+        </div>
       </div>
 
       <div class="premium-cards-wrap">
@@ -377,6 +465,41 @@
 
   <script>
     (function () {
+      // ── 0. Generate floating particles (register-style) ──
+      const field = document.getElementById('particlesField');
+      if (field) {
+        for (let i = 0; i < 18; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          const size = Math.random() * 16 + 6;
+          p.style.cssText = `
+            width: ${size}px; height: ${size}px;
+            left: ${Math.random() * 100}%;
+            bottom: -${size}px;
+            animation-duration: ${Math.random() * 12 + 8}s;
+            animation-delay: ${Math.random() * 10}s;
+            opacity: ${Math.random() * 0.5 + 0.1};
+            background: ${Math.random() > 0.5 ? 'rgba(255,193,7,0.25)' : 'rgba(255,255,255,0.12)'};
+          `;
+          field.appendChild(p);
+        }
+      }
+
+      // ── 1. Scroll slide-up via IntersectionObserver ──
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.premium-card').forEach(function(card) {
+        observer.observe(card);
+      });
+
+      // ── 2. 3D tilt on mouse move ──
       const cards = document.querySelectorAll('.premium-card');
       const maxTilt = 10;
 
@@ -384,6 +507,7 @@
         let rafId = null;
 
         function onMove(e) {
+          if (!card.classList.contains('is-visible')) return;
           const rect = card.getBoundingClientRect();
           const x = (e.clientX - rect.left) / rect.width;
           const y = (e.clientY - rect.top) / rect.height;
@@ -409,5 +533,4 @@
     })();
   </script>
 </section>
-{% endblock %}
 {% endblock %}

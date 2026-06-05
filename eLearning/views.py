@@ -1851,18 +1851,25 @@ def mes_courses(request):
         etudiant=request.user.etudiant
     ).select_related('cours', 'cours__categorie').prefetch_related('cours__chapitres')
 
-    # Calcul de la progression réelle par cours
+    # Calcul de la progression réelle par cours et détermination du statut
     for insc in inscriptions:
         total_chapitres = insc.cours.chapitres.count()
         if total_chapitres > 0:
             debloques = ChapitreDebloque.objects.filter(etudiant=request.user.etudiant, chapitre__cours=insc.cours).count()
             insc.progression = min(int((debloques / total_chapitres) * 100), 100)
-            # Si progression est 100%, on pourrait marquer comme terminée si ce n'est pas déjà le cas
-            if insc.progression == 100 and insc.statut != 'terminee':
-                insc.statut = 'terminee'
-                insc.save(update_fields=['statut'])
         else:
             insc.progression = 0
+
+        # Déterminer le statut en fonction de la progression
+        if insc.progression == 0:
+            insc.statut = 'en_attente'
+        elif insc.progression == 100:
+            insc.statut = 'terminee'
+        else:
+            insc.statut = 'validee'
+
+        # Sauvegarder les changements
+        insc.save(update_fields=['statut'])
 
     # Séparer les cours gratuits et premium
     inscriptions_gratuites = [ins for ins in inscriptions if not ins.cours.est_premium]

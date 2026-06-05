@@ -142,6 +142,25 @@
         body.dark-mode .bg-white { background-color: #242632 !important; }
         body.dark-mode .topbar { background-color: #242632 !important; border-bottom: 1px solid #323545; }
         body.dark-mode .sidebar { background-color: #1a1c23 !important; }
+
+        /* ── Navbar icons : noir en clair, blanc en sombre ──────── */
+        .topbar .nav-link i,
+        .topbar .btn-link i,
+        #sidebarToggleTop i {
+            color: #1a1a2e !important;
+        }
+        body.dark-mode .topbar .nav-link i,
+        body.dark-mode .topbar .btn-link i,
+        body.dark-mode #sidebarToggleTop i {
+            color: #ffffff !important;
+        }
+        /* Icône lune : grise bien visible en clair */
+        .topbar .nav-link .fa-moon { color: #4b5563 !important; }
+        /* Icône soleil : garder jaune en sombre */
+        body.dark-mode .topbar .nav-link .fa-sun { color: #FFC107 !important; }
+        /* Icône cloche notifications */
+        .topbar .nav-link .fa-bell { color: #1a1a2e !important; }
+        body.dark-mode .topbar .nav-link .fa-bell { color: #ffffff !important; }
         body.dark-mode .table { color: #d1d1d1; }
         body.dark-mode .footer { background-color: #1a1c23 !important; border-top: 1px solid #323545; }
 
@@ -303,8 +322,8 @@
         <div id="messageToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true"
             data-delay="15000"
             style="pointer-events: auto; min-width: 300px; max-width: 90%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none; z-index: 10000; pointer-events: auto;">
-            <div class="toast-header bg-primary text-white" style="border-radius: 12px 12px 0 0;">
-                <i class="fas fa-envelope mr-2"></i>
+            <div class="toast-header text-white" style="border-radius: 12px 12px 0 0; background:linear-gradient(135deg,#133e3f,#1a5556);">
+                <i class="fas fa-envelope mr-2" style="color:#FFC107;"></i>
                 <strong class="mr-auto" id="toastSender">Nouveau message</strong>
                 <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -424,32 +443,35 @@
 
             function checkNewMessages() {
                 Promise.all([
-                  fetch("{% url 'api_unread_messages' %}").then(r=>r.json()),
-                  fetch("{% url 'fetch_notifications' %}").then(r=>r.json())
+                  fetch("{% url 'api_unread_messages' %}").then(r=>r.json()).catch(()=>({count:0,notifications:[]})),
+                  fetch("{% url 'fetch_notifications' %}").then(r=>r.json()).catch(()=>({count:0,notifications:[]}))
                 ]).then(([msgData, notifData])=>{
-                  let total = msgData.count + notifData.count;
+                  let total = (msgData.count||0) + (notifData.count||0);
                   if(total>0){
                     $('#notification-badge').text(total>9?'9+':total).show();
                   } else {
                     $('#notification-badge').hide();
                   }
-                  let html='<h6 class="dropdown-header">Messages & Notifications</h6>';
-                  msgData.notifications.forEach(n=>{
-                    html+=`<a class="dropdown-item d-flex align-items-center" href="${n.url}">
-                      <div class="mr-3"><div class="icon-circle bg-primary">
+                  let html='';
+                  (msgData.notifications||[]).forEach(n=>{
+                    html+=`<a class="dropdown-item d-flex align-items-center py-2" href="${n.url||'#'}">
+                      <div class="mr-3"><div class="icon-circle" style="background:#133e3f;">
                         <i class="fas fa-envelope text-white"></i></div></div>
-                      <div><div class="small text-gray-500">${n.date} — ${n.sender}</div>
-                        <span class="font-weight-bold">${n.content}</span></div></a>`;
+                      <div><div class="small text-gray-500">${n.date||''} — ${n.sender||''}</div>
+                        <span class="font-weight-bold" style="color:#133e3f;">${n.content||''}</span></div></a>`;
                   });
-                  notifData.notifications.forEach(n=>{
-                    html+=`<a class="dropdown-item d-flex align-items-center" href="#">
-                      <div class="mr-3"><div class="icon-circle" style="background:#133e3f">
-                        <i class="fas ${n.icon} text-white"></i></div></div>
-                      <div><div class="small text-gray-500">${n.date}</div>
-                        <span class="font-weight-bold">${n.message}</span></div></a>`;
+                  (notifData.notifications||[]).forEach(n=>{
+                    html+=`<a class="dropdown-item d-flex align-items-center py-2" href="#">
+                      <div class="mr-3"><div class="icon-circle" style="background:#133e3f;">
+                        <i class="fas ${n.icon||'fa-bell'} text-white"></i></div></div>
+                      <div><div class="small text-gray-500">${n.date||''}</div>
+                        <span class="font-weight-bold" style="color:#133e3f;">${n.message||''}</span></div></a>`;
                   });
-                  html+='<a class="dropdown-item text-center small" href="{% url "messagerie_index" %}">Tout voir</a>';
-                  $('#notifications-list').html(html);
+                  if(html===''){
+                    html='<div class="dropdown-item text-center small text-gray-500 py-3"><i class="fas fa-check-circle text-success mr-1"></i> Aucune nouvelle notification.</div>';
+                  }
+                  /* Only update the inner list; preserve the styled header */
+                  $('#dynamic-notifications').html(html);
                 });
             }
 

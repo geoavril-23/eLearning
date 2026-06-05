@@ -10,49 +10,84 @@
         --oo-gold: #FFC107;
     }
 
+    /* ── Glass card with float + liquid border (style contact/register) ── */
     .result-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.15);
-        transition: all 0.3s ease;
-        overflow: hidden;
         position: relative;
+        background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.08) 100%);
+        border: 1px solid rgba(255,255,255,0.25);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.15);
+        transition: all 0.35s ease;
+        overflow: hidden;
+        animation: oo-float-res 4.8s ease-in-out infinite;
     }
 
-    .result-card::before {
+    .result-card:nth-child(2) { animation-delay: 0.25s; }
+    .result-card:nth-child(3) { animation-delay: 0.5s; }
+    .result-card:nth-child(4) { animation-delay: 0.75s; }
+
+    @keyframes oo-float-res {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-7px); }
+    }
+
+    /* shimmer sweep */
+    .result-card::after {
         content: '';
         position: absolute;
         top: 0;
         left: -100%;
-        width: 100%;
+        width: 60%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        animation: liquid-shimmer 6s infinite;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+        animation: shimmer-sweep 5s 1.5s ease-in-out infinite;
         pointer-events: none;
+        z-index: 0;
     }
 
-    @keyframes liquid-shimmer {
+    @keyframes shimmer-sweep {
         0% { left: -100%; }
-        50% { left: 100%; }
-        100% { left: 100%; }
+        50% { left: 120%; }
+        100% { left: 120%; }
+    }
+
+    /* liquid border on hover */
+    .result-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        border: 2px solid rgba(255,193,7,0.28);
+        pointer-events: none;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        z-index: 1;
+    }
+
+    .result-card:hover::before {
+        border-color: rgba(255,193,7,0.90);
+        box-shadow: 0 22px 70px rgba(255,193,7,0.15);
+        animation: oo-liquid-res 1.18s ease-in-out infinite;
+    }
+
+    @keyframes oo-liquid-res {
+        0%   { border-radius: 24px 42px 22px 52px; }
+        25%  { border-radius: 42px 24px 52px 22px; }
+        50%  { border-radius: 28px 58px 28px 48px; }
+        75%  { border-radius: 58px 32px 48px 24px; }
+        100% { border-radius: 24px 42px 22px 52px; }
     }
 
     .result-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 193, 7, 0.35);
+        transform: translateY(-8px) !important;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.20), inset 0 0 20px rgba(255,255,255,0.20);
     }
 
-    .result-card.status-corrected {
-        border-left: 3px solid #1cc88a;
-    }
+    .result-card.status-corrected { border-left: 3px solid #1cc88a; }
+    .result-card.status-pending   { border-left: 3px solid var(--oo-gold); }
 
-    .result-card.status-pending {
-        border-left: 3px solid var(--oo-gold);
-    }
+    .result-card .card-body { position: relative; z-index: 2; }
 
     .score-badge {
         font-size: 1.5rem;
@@ -60,44 +95,90 @@
         color: #ffffff;
         background: linear-gradient(135deg, #1cc88a 0%, #16a34a 100%);
         padding: 0.5rem 1rem;
-        border-radius: 12px;
+        border-radius: 14px;
         display: inline-block;
-        box-shadow: 0 8px 20px rgba(28, 200, 138, 0.2);
+        box-shadow: 0 8px 20px rgba(28,200,138,0.25);
     }
 
     .feedback-box {
-        background: rgba(19, 62, 63, 0.08);
-        border-radius: 12px;
+        background: rgba(19,62,63,0.12);
+        border-radius: 14px;
         padding: 1rem;
         border-left: 3px solid var(--oo-gold);
         margin-top: 1rem;
         font-size: 0.95rem;
-        color: #ffffff;
-        backdrop-filter: blur(4px);
+        color: rgba(255,255,255,0.95);
+        backdrop-filter: blur(6px);
     }
 
-    body.dark-mode .result-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
-        border-color: rgba(255, 255, 255, 0.18);
+    /* Text visibility in all modes */
+    .result-card .card-body h5  { color: rgba(255,255,255,0.97) !important; }
+    .result-card .card-body .text-gray-800 { color: rgba(255,255,255,0.97) !important; }
+    .result-card .card-body .text-muted    { color: rgba(255,255,255,0.78) !important; }
+    .result-card .card-body .font-weight-bold { color: rgba(255,255,255,0.97) !important; }
+    .result-card .card-body small { color: rgba(255,255,255,0.78) !important; }
+
+    /* Buttons in cards */
+    .result-card .btn-outline-primary,
+    .result-card .btn-outline-secondary {
+        background: rgba(19,62,63,0.60) !important;
+        border-color: rgba(255,255,255,0.35) !important;
+        color: rgba(255,255,255,0.92) !important;
+        border-radius: 20px !important;
+        transition: all 0.2s ease;
     }
 
-    body.dark-mode .feedback-box {
-        background: rgba(255, 193, 7, 0.08);
-        color: #ffffff;
+    .result-card .btn-outline-primary:hover,
+    .result-card .btn-outline-secondary:hover {
+        background: rgba(19,62,63,0.85) !important;
+        border-color: var(--oo-gold) !important;
+        color: #fff !important;
+        transform: translateY(-1px);
     }
 
-    .result-card .card-body h5,
-    .result-card .card-body .text-gray-800 { color: #133e3f !important; }
-    .result-card .card-body .text-muted { color: #555 !important; }
+    /* Collapse section */
+    .result-card .collapse .table,
+    .result-card .collapse .bg-light {
+        background: rgba(255,255,255,0.06) !important;
+        border-color: rgba(255,255,255,0.15) !important;
+        color: rgba(255,255,255,0.90) !important;
+        border-radius: 12px;
+    }
+
+    .result-card .collapse th,
+    .result-card .collapse td { color: rgba(255,255,255,0.88) !important; border-color: rgba(255,255,255,0.12) !important; }
+
+    .page-title-res {
+        color: rgba(255,255,255,0.97);
+        font-weight: 800;
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-res {
+        background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
+        border: 1px solid rgba(255,255,255,0.20);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .empty-res i { color: var(--oo-gold); opacity: 0.5; }
+    .empty-res h4 { color: rgba(255,255,255,0.90); }
+
+    @media (prefers-reduced-motion: reduce) {
+        .result-card { animation: none; }
+        .result-card::after { animation: none; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="min-height:100vh;
-  background:linear-gradient(135deg,rgba(0,210,195,0.15),rgba(19,62,63,0.08));
-  padding:30px 0;">
+<div style="min-height:100vh; padding:20px 0;">
 
-<h1 class="h3 mb-4 text-gray-800"><i class="fas fa-medal mr-2 text-warning"></i> Mes Résultats</h1>
+<h1 class="page-title-res"><i class="fas fa-medal mr-2" style="color:var(--oo-gold);"></i> Mes Résultats</h1>
 
 {% if messages %}
 {% for message in messages %}
@@ -252,10 +333,10 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <i class="fas fa-clipboard-check fa-4x text-gray-300 mb-3"></i>
-        <h4 class="text-gray-500 font-weight-bold">Aucun résultat pour le moment</h4>
-        <p class="text-muted">Vous n'avez soumis aucun quiz ou épreuve.</p>
+    <div class="empty-res">
+        <i class="fas fa-clipboard-check fa-4x mb-3"></i>
+        <h4>Aucun résultat pour le moment</h4>
+        <p>Vous n'avez soumis aucun quiz ou épreuve.</p>
         <a href="{% url 'mes_quiz_etudiant' %}" class="btn btn-primary mt-2 rounded-pill px-4">Aller aux quiz</a>
     </div>
     {% endif %}

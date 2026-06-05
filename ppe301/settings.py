@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'elearning',
         'USER': 'postgres',
-        'PASSWORD': 'wilster',
+        'PASSWORD': '3432',
         'HOST': 'localhost',
         'PORT': '5432',
     }

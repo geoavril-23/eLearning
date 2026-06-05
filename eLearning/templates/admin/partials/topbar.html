@@ -58,19 +58,23 @@
             <!-- Dropdown - Alerts -->
             <div id="notifications-list"
                 class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                aria-labelledby="alertsDropdown">
-                <h6 class="dropdown-header">
+                aria-labelledby="alertsDropdown"
+                style="min-width:320px; max-width:380px;">
+                <h6 class="dropdown-header d-flex align-items-center" style="background:linear-gradient(135deg,#133e3f,#1a5556); color:#fff; border-radius:8px 8px 0 0; padding:10px 14px;">
+                    <i class="fas fa-bell mr-2" style="color:#FFC107;"></i>
                     Centre de Notifications
                 </h6>
 
-                <div id="dynamic-notifications">
+                <div id="dynamic-notifications" style="max-height:320px; overflow-y:auto;">
                     <!-- Les notifications seront insérées ici par AJAX -->
                     <div class="dropdown-item text-center small text-gray-500 py-3 no-notifications-msg">
-                        Aucune nouvelle notification.
+                        <i class="fas fa-check-circle text-success mr-1"></i> Aucune nouvelle notification.
                     </div>
                 </div>
 
-                <a class="dropdown-item text-center small text-gray-500" href="#">Afficher toutes les notifications</a>
+                <a class="dropdown-item text-center small font-weight-bold" href="{% url 'messagerie_index' %}" style="color:#133e3f; border-top:1px solid rgba(0,0,0,0.08); padding:10px;">
+                    <i class="fas fa-envelope mr-1" style="color:#FFC107;"></i> Voir tous les messages
+                </a>
             </div>
         </li>
 
