@@ -2157,6 +2157,38 @@ def mes_resultats_etudiant(request):
 
 
 @login_required
+def detail_resultat_etudiant(request, soumission_id):
+    if not request.user.is_etudiant:
+        messages.error(request, 'Accès réservé aux étudiants.')
+        return redirect('dashboard')
+
+    soumission = get_object_or_404(SoumissionQuiz, id=soumission_id, etudiant=request.user.etudiant)
+
+    soumission.questions_info = []
+    if soumission.reponses_qcm:
+        try:
+            reponses_dict = json.loads(soumission.reponses_qcm)
+            questions = soumission.quiz.questions.all()
+            for q in questions:
+                rep_etudiant = reponses_dict.get(f'question_{q.id}', 'Non répondu')
+                bonne_reponse = ""
+                if not q.est_ouverte:
+                    correct_choix = q.choix.filter(est_correct=True).first()
+                    if correct_choix:
+                        bonne_reponse = correct_choix.texte
+                soumission.questions_info.append({
+                    'question': q.texte,
+                    'reponse_etudiant': rep_etudiant,
+                    'bonne_reponse': bonne_reponse,
+                    'points': q.points
+                })
+        except json.JSONDecodeError:
+            pass
+
+    return render(request, 'admin/detail_resultat.html', {'soumission': soumission})
+
+
+@login_required
 def corrections_attente(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')

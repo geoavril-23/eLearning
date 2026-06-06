@@ -13,15 +13,21 @@
     /* ── Glass card with float + liquid border (style contact/register) ── */
     .result-card {
         position: relative;
-        background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.08) 100%);
-        border: 1px solid rgba(255,255,255,0.25);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
         border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.15);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         transition: all 0.35s ease;
         overflow: hidden;
         animation: oo-float-res 4.8s ease-in-out infinite;
+    }
+
+    body.dark-mode .result-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.08) 100%);
+        border-color: rgba(255,255,255,0.25);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.15);
     }
 
     .result-card:nth-child(2) { animation-delay: 0.25s; }
@@ -90,83 +96,180 @@
     .result-card .card-body { position: relative; z-index: 2; }
 
     .score-badge {
-        font-size: 1.5rem;
+        font-size: 0.78rem;
         font-weight: 800;
         color: #ffffff;
         background: linear-gradient(135deg, #1cc88a 0%, #16a34a 100%);
-        padding: 0.5rem 1rem;
-        border-radius: 14px;
+        padding: 0.25rem 0.55rem;
+        border-radius: 8px;
         display: inline-block;
-        box-shadow: 0 8px 20px rgba(28,200,138,0.25);
+        box-shadow: 0 4px 10px rgba(28,200,138,0.25);
+    }
+
+    .btn-voir-correction {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 50px;
+        border: 1px solid #133e3f;
+        background: transparent;
+        color: #133e3f;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-voir-correction:hover {
+        background: #133e3f;
+        color: #fff;
+    }
+
+    body.dark-mode .btn-voir-correction {
+        border-color: rgba(255,255,255,0.45);
+        color: rgba(255,255,255,0.88);
+    }
+
+    body.dark-mode .btn-voir-correction:hover {
+        background: rgba(19,62,63,0.70);
+        border-color: var(--oo-gold);
+        color: #fff;
     }
 
     .feedback-box {
-        background: rgba(19,62,63,0.12);
+        background: rgba(19,62,63,0.08);
         border-radius: 14px;
         padding: 1rem;
         border-left: 3px solid var(--oo-gold);
         margin-top: 1rem;
         font-size: 0.95rem;
-        color: rgba(255,255,255,0.95);
-        backdrop-filter: blur(6px);
+        color: #1f2937;
     }
 
-    /* Text visibility in all modes */
-    .result-card .card-body h5  { color: rgba(255,255,255,0.97) !important; }
-    .result-card .card-body .text-gray-800 { color: rgba(255,255,255,0.97) !important; }
-    .result-card .card-body .text-muted    { color: rgba(255,255,255,0.78) !important; }
-    .result-card .card-body .font-weight-bold { color: rgba(255,255,255,0.97) !important; }
-    .result-card .card-body small { color: rgba(255,255,255,0.78) !important; }
+    /* Text — light mode (default) */
+    .result-card .card-body h5  { color: #1f2937 !important; }
+    .result-card .card-body .text-gray-800 { color: #1f2937 !important; }
+    .result-card .card-body .text-muted    { color: #6b7280 !important; }
+    .result-card .card-body .font-weight-bold { color: #1f2937 !important; }
+    .result-card .card-body small { color: #6b7280 !important; }
 
     /* Buttons in cards */
     .result-card .btn-outline-primary,
     .result-card .btn-outline-secondary {
-        background: rgba(19,62,63,0.60) !important;
-        border-color: rgba(255,255,255,0.35) !important;
-        color: rgba(255,255,255,0.92) !important;
         border-radius: 20px !important;
         transition: all 0.2s ease;
     }
 
-    .result-card .btn-outline-primary:hover,
-    .result-card .btn-outline-secondary:hover {
-        background: rgba(19,62,63,0.85) !important;
-        border-color: var(--oo-gold) !important;
-        color: #fff !important;
-        transform: translateY(-1px);
-    }
-
-    /* Collapse section */
+    /* Collapse section — light mode */
     .result-card .collapse .table,
     .result-card .collapse .bg-light {
-        background: rgba(255,255,255,0.06) !important;
-        border-color: rgba(255,255,255,0.15) !important;
-        color: rgba(255,255,255,0.90) !important;
+        background: #f9fafb !important;
+        border-color: #e5e7eb !important;
+        color: #1f2937 !important;
         border-radius: 12px;
     }
 
     .result-card .collapse th,
-    .result-card .collapse td { color: rgba(255,255,255,0.88) !important; border-color: rgba(255,255,255,0.12) !important; }
+    .result-card .collapse td { color: #1f2937 !important; border-color: #e5e7eb !important; }
 
     .page-title-res {
-        color: rgba(255,255,255,0.97);
+        color: #1f2937;
         font-weight: 800;
         font-size: 1.6rem;
         margin-bottom: 1.5rem;
     }
 
     .empty-res {
-        background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
-        border: 1px solid rgba(255,255,255,0.20);
-        backdrop-filter: blur(12px);
+        background: #ffffff;
+        border: 2px dashed #e5e7eb;
         border-radius: 20px;
         padding: 3rem;
         text-align: center;
-        color: rgba(255,255,255,0.85);
+        color: #4b5563;
     }
 
     .empty-res i { color: var(--oo-gold); opacity: 0.5; }
-    .empty-res h4 { color: rgba(255,255,255,0.90); }
+    .empty-res h4 { color: #1f2937; }
+
+    /* Questions list */
+    .questions-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .question-item {
+        background: #f9fafb;
+        border-radius: 10px;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid #133e3f;
+    }
+
+    .q-text {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.45rem;
+    }
+
+    .q-answers { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .q-answer {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+    }
+
+    .q-answer.correct { background: #dcfce7; color: #16a34a; }
+    .q-answer.wrong   { background: #fee2e2; color: #dc2626; }
+    .q-answer.good    { background: #dcfce7; color: #16a34a; }
+
+    /* Fichier box */
+    .fichier-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .fichier-icon { font-size: 1.5rem; color: #133e3f; }
+    .fichier-name { font-size: 0.82rem; font-weight: 600; color: #1f2937; }
+
+    /* dark mode */
+    body.dark-mode .question-item { background: rgba(255,255,255,0.06); border-left-color: var(--oo-gold); }
+    body.dark-mode .q-text { color: #f3f4f6; }
+    body.dark-mode .fichier-box { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+    body.dark-mode .fichier-name { color: #f3f4f6; }
+
+    /* ── Dark mode overrides ── */
+    body.dark-mode .feedback-box { background: rgba(19,62,63,0.30); color: rgba(255,255,255,0.95); }
+    body.dark-mode .result-card .card-body h5  { color: rgba(255,255,255,0.97) !important; }
+    body.dark-mode .result-card .card-body .text-gray-800 { color: rgba(255,255,255,0.97) !important; }
+    body.dark-mode .result-card .card-body .text-muted    { color: rgba(255,255,255,0.78) !important; }
+    body.dark-mode .result-card .card-body .font-weight-bold { color: rgba(255,255,255,0.97) !important; }
+    body.dark-mode .result-card .card-body small { color: rgba(255,255,255,0.78) !important; }
+    body.dark-mode .result-card .btn-outline-primary,
+    body.dark-mode .result-card .btn-outline-secondary {
+        background: rgba(19,62,63,0.60) !important;
+        border-color: rgba(255,255,255,0.35) !important;
+        color: rgba(255,255,255,0.92) !important;
+    }
+    body.dark-mode .result-card .collapse .table,
+    body.dark-mode .result-card .collapse .bg-light {
+        background: rgba(255,255,255,0.06) !important;
+        border-color: rgba(255,255,255,0.15) !important;
+        color: rgba(255,255,255,0.90) !important;
+    }
+    body.dark-mode .result-card .collapse th,
+    body.dark-mode .result-card .collapse td { color: rgba(255,255,255,0.88) !important; border-color: rgba(255,255,255,0.12) !important; }
+    body.dark-mode .result-card .collapse thead.thead-light th { background: #374151 !important; color: #f3f4f6 !important; }
+    body.dark-mode .page-title-res { color: rgba(255,255,255,0.97); }
+    body.dark-mode .empty-res { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.20); color: rgba(255,255,255,0.85); }
+    body.dark-mode .empty-res h4 { color: rgba(255,255,255,0.90); }
 
     @media (prefers-reduced-motion: reduce) {
         .result-card { animation: none; }
@@ -212,120 +315,22 @@
                 </div>
 
                 {% if soumission.est_corrige %}
-                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
-                    <div class="d-flex align-items-center">
-                        <div class="score-badge mr-3">
-                            {{ soumission.note_obtenue }} <small class="text-muted" style="font-size: 0.8rem;">/ {{ soumission.quiz.note_max }}</small>
-                        </div>
-
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" style="gap:0.6rem;">
+                    <div class="score-badge">
+                        {{ soumission.note_obtenue }} <small style="font-size:0.7em;opacity:0.85;">/ {{ soumission.quiz.note_max }}</small>
                     </div>
-                    
-                    <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#feedback{{ soumission.id }}">
-                        <i class="fas fa-eye mr-1"></i> Voir la correction et mon travail
-                    </button>
+                    <a href="{% url 'detail_resultat_etudiant' soumission.id %}" class="btn-voir-correction">
+                        <i class="fas fa-eye"></i> Voir la correction et mon travail
+                    </a>
                 </div>
 
-                    <div class="collapse mt-3" id="feedback{{ soumission.id }}">
-                        <!-- Feedback de l'enseignant / IA -->
-                        <h6 class="font-weight-bold text-gray-800 mb-2"><i
-                                class="fas fa-comment-dots text-primary mr-1"></i> Commentaires :</h6>
-                        <div class="feedback-box mb-3">
-                            {{ soumission.commentaires|linebreaksbr }}
-                        </div>
-
-                        <!-- Détail du travail -->
-                        <h6 class="font-weight-bold text-gray-800 mb-2 mt-4"><i
-                                class="fas fa-file-alt text-primary mr-1"></i> Mon Travail :</h6>
-
-                        {% if soumission.fichier_reponse %}
-                        <div class="p-3 bg-light rounded border text-center">
-                            <i class="fas fa-file-word fa-2x text-primary mb-2"></i>
-                            <p class="mb-2"><strong>Fichier soumis :</strong> {{
-                                soumission.fichier_reponse.name|slice:"17:" }}</p>
-                            <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-sm btn-primary rounded-pill"
-                                download target="_blank">
-                                <i class="fas fa-download mr-1"></i> Télécharger mon fichier
-                            </a>
-                        </div>
-                        {% elif soumission.questions_info %}
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered bg-white">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Question</th>
-                                        <th>Ma réponse</th>
-                                        <th>Bonne réponse</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for q in soumission.questions_info %}
-                                    <tr>
-                                        <td>{{ q.question }}</td>
-                                        <td
-                                            class="{% if q.reponse_etudiant == q.bonne_reponse %}text-success font-weight-bold{% elif q.bonne_reponse %}text-danger font-weight-bold{% endif %}">
-                                            {{ q.reponse_etudiant }}
-                                        </td>
-                                        <td class="text-success">{{ q.bonne_reponse|default:"-" }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="text-muted small">Détails non disponibles.</div>
-                        {% endif %}
-                    </div>
                     {% else %}
-                    <div class="alert alert-light border mt-3 mb-3 text-center text-muted">
-                        <i class="fas fa-clock fa-2x mb-2"></i><br>
-                        Votre enseignant n'a pas encore finalisé la correction de cette épreuve.
+                    <div class="text-muted small mb-3" style="display:flex;align-items:center;gap:0.4rem;">
+                        <i class="fas fa-clock"></i> En attente de correction par l'enseignant.
                     </div>
-
-                    <button class="btn btn-sm btn-outline-secondary mt-2" type="button" data-toggle="collapse"
-                        data-target="#travail{{ soumission.id }}">
-                        <i class="fas fa-eye mr-1"></i> Voir ce que j'ai soumis
-                    </button>
-
-                    <div class="collapse mt-3" id="travail{{ soumission.id }}">
-                        <!-- Détail du travail -->
-                        <h6 class="font-weight-bold text-gray-800 mb-2 mt-2"><i
-                                class="fas fa-file-alt text-primary mr-1"></i> Mon Travail :</h6>
-
-                        {% if soumission.fichier_reponse %}
-                        <div class="p-3 bg-light rounded border text-center">
-                            <i class="fas fa-file-word fa-2x text-secondary mb-2"></i>
-                            <p class="mb-2"><strong>Fichier soumis :</strong> {{
-                                soumission.fichier_reponse.name|slice:"17:" }}</p>
-                            <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-sm btn-secondary rounded-pill"
-                                download target="_blank">
-                                <i class="fas fa-download mr-1"></i> Télécharger mon fichier
-                            </a>
-                        </div>
-                        {% elif soumission.questions_info %}
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered bg-white">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Question</th>
-                                        <th>Ma réponse</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for q in soumission.questions_info %}
-                                    <tr>
-                                        <td>{{ q.question }}</td>
-                                        <td class="font-weight-bold text-secondary">
-                                            {{ q.reponse_etudiant }}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="text-muted small">Détails non disponibles.</div>
-                        {% endif %}
-                    </div>
+                    <a href="{% url 'detail_resultat_etudiant' soumission.id %}" class="btn-voir-correction">
+                        <i class="fas fa-eye"></i> Voir ce que j'ai soumis
+                    </a>
                     {% endif %}
                 </div>
             </div>

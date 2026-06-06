@@ -57,6 +57,7 @@ urlpatterns = [
     path('dashboard/etudiant/quiz/<int:id>/', views.detail_quiz_etudiant, name='detail_quiz_etudiant'),
     path('dashboard/etudiant/quiz/<int:id>/soumettre/', views.soumettre_quiz, name='soumettre_quiz'),
     path('dashboard/etudiant/mes-resultats/', views.mes_resultats_etudiant, name='mes_resultats_etudiant'),
+    path('dashboard/etudiant/mes-resultats/<int:soumission_id>/', views.detail_resultat_etudiant, name='detail_resultat_etudiant'),
     
     # Correction Quiz (Enseignant)
     path('dashboard/enseignant/corrections/', views.corrections_attente, name='corrections_attente'),

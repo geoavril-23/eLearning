@@ -173,10 +173,12 @@
     }
     .empty-state i {
         font-size: 3.5rem;
-        color: #FFC107;
+        color: #133e3f;
         margin-bottom: 1rem;
-        opacity: 0.3;
+        opacity: 0.6;
     }
+
+    body.dark-mode .empty-state i { color: #FFC107; opacity: 0.55; }
     .empty-state h3 {
         color: #1f2937;
         font-weight: 800;
@@ -185,6 +187,30 @@
     .empty-state p {
         color: #6b7280;
         margin-bottom: 1.5rem;
+    }
+
+    .btn-retour {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        color: #fff !important;
+        border: none;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .btn-retour i { color: #FFC107; font-size: 0.7rem; }
+
+    .btn-retour:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(19,62,63,0.28);
+        color: #fff !important;
+        text-decoration: none;
     }
 
     /* Dark mode */
@@ -274,8 +300,8 @@
     <i class="fas fa-clipboard-list"></i>
     <h3>Pas de quiz disponible pour toi</h3>
     <p>Aucun de tes enseignants n'a encore publié de quiz ou d'évaluation pour les cours auxquels tu es inscrit.</p>
-    <a href="{% url 'mes_courses' %}" class="btn btn-primary px-4 rounded-pill">
-        <i class="fas fa-book-open mr-2"></i>Retourner à mes cours
+    <a href="{% url 'mes_courses' %}" class="btn-retour">
+        <i class="fas fa-book-open"></i> Retourner à mes cours
     </a>
 </div>
 {% endif %}

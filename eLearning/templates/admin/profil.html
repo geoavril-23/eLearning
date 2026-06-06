@@ -1,551 +1,676 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block title %}Mon Profil - eLearning{% endblock %}
+{% block title %}Mon Profil — eLearning{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    /* PREMIUM PROFIL DESIGN */
-    .card {
-        border-radius: 24px !important;
-        border: 1px solid rgba(255,255,255,0.18) !important;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
-        backdrop-filter: blur(12px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.15) !important;
+    :root {
+        --p-teal: #133e3f;
+        --p-gold: #FFC107;
+        --p-radius: 24px;
+    }
+
+    /* ── Hero banner ── */
+    .profil-hero {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        border-radius: var(--p-radius);
+        padding: 2.5rem 2rem 4.5rem;
         position: relative;
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        margin-bottom: 0;
     }
 
-    .card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(19, 62, 63, 0.15) !important;
-    }
-
-    /* Shimmer effect on cards */
-    .card::after {
+    .profil-hero::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: -100%;
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        transition: left 0.6s ease;
+        top: -60px; right: -60px;
+        width: 260px; height: 260px;
+        background: rgba(255,193,7,0.08);
+        border-radius: 50%;
         pointer-events: none;
-        z-index: 10;
     }
 
-    .card:hover::after {
-        left: 150%;
+    .profil-hero-liquid {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 5px;
+        background: linear-gradient(90deg, #00d2c8, #133e3f, #FFC107);
+        background-size: 200% 100%;
+        animation: liq 8s ease-in-out infinite;
     }
 
-    /* Replace sky blue (text-primary) with Deep Green */
-    .text-primary,
-    .text-info {
-        color: #133e3f !important;
+    @keyframes liq {
+        0%,100% { background-position: 0% center; }
+        50%      { background-position: 100% center; }
     }
 
-    /* Buttons */
-    .btn-primary {
-        background: linear-gradient(135deg, #133e3f 0%, #1a5556 100%) !important;
-        border: none !important;
-        border-radius: 12px !important;
-        color: white !important;
-        transition: all 0.3s ease !important;
+    .profil-hero-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
     }
 
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #1a5556 0%, #133e3f 100%) !important;
-        box-shadow: 0 8px 20px rgba(19, 62, 63, 0.3) !important;
-        transform: translateY(-2px);
+    .profil-avatar-wrap {
+        position: relative;
+        flex-shrink: 0;
     }
 
-    /* Card Headers */
-    .card-header {
-        background: rgba(255, 255, 255, 0.4) !important;
-        border-bottom: 1px solid rgba(19, 62, 63, 0.1) !important;
+    .profil-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255,193,7,0.6);
+        box-shadow: 0 0 0 4px rgba(255,193,7,0.15), 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .profil-avatar-edit {
+        position: absolute;
+        bottom: 2px; right: 2px;
+        width: 28px; height: 28px;
+        background: var(--p-gold);
+        color: #133e3f;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 900;
+        cursor: pointer;
+        border: 2px solid #133e3f;
+        transition: transform 0.2s;
+    }
+
+    .profil-avatar-edit:hover { transform: scale(1.15); }
+
+    .profil-hero-info { flex: 1; min-width: 180px; }
+
+    .profil-hero-name {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0 0 0.25rem;
+        line-height: 1.2;
+    }
+
+    .profil-hero-role {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: rgba(255,193,7,0.18);
+        color: var(--p-gold);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin-bottom: 0.4rem;
+    }
+
+    .profil-hero-email {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.65);
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+
+    .profil-hero-actions {
+        display: flex; gap: 0.5rem; flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    .btn-hero {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 6px 16px;
+        font-size: 0.72rem; font-weight: 700;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.30);
+        background: rgba(255,255,255,0.10);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-hero:hover { background: rgba(255,255,255,0.20); color: #fff; text-decoration: none; }
+    .btn-hero.gold  { background: var(--p-gold); color: #133e3f; border-color: var(--p-gold); }
+    .btn-hero.gold:hover { background: #e6ac00; color: #133e3f; }
+
+    /* ── Cards overlap the hero ── */
+    .profil-body {
+        margin-top: -2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .profil-body .row-main {
+        display: flex;
+        gap: 1.5rem;
+        align-items: stretch;
+        margin-bottom: 1.5rem;
+    }
+
+    .profil-left {
+        width: 360px;
+        min-width: 280px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .profil-left .p-card:last-child {
+        flex: 1;
+    }
+
+    .profil-right {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profil-right .p-card {
+        flex: 1;
+    }
+
+    .profil-full { margin-bottom: 1.5rem; }
+
+    @media (max-width: 991px) {
+        .profil-body .row-main { flex-direction: column; }
+        .profil-left { width: 100%; }
+    }
+
+    /* ── Generic section card ── */
+    .p-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: var(--p-radius);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .p-card-header {
+        padding: 1rem 1.5rem 0.75rem;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex; align-items: center; gap: 0.6rem;
+    }
+
+    .p-card-header i { color: var(--p-gold); font-size: 1rem; }
+
+    .p-card-header h2 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .p-card-body { padding: 1.25rem 1.5rem; }
+
+    /* ── Info rows ── */
+    .info-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.88rem;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+    .info-row i { color: var(--p-teal); width: 16px; text-align: center; flex-shrink: 0; }
+    .info-row .info-label { color: #9ca3af; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: block; }
+    .info-row .info-val   { color: #1f2937; font-weight: 600; }
+
+    /* ── Stat chips ── */
+    .stat-chips { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+
+    .stat-chip {
+        flex: 1; min-width: 100px;
+        background: linear-gradient(135deg, rgba(19,62,63,0.06), rgba(255,193,7,0.04));
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 0.85rem 1rem;
+        text-align: center;
+    }
+
+    .stat-chip-val   { font-size: 1.5rem; font-weight: 900; color: var(--p-teal); line-height: 1; }
+    .stat-chip-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; margin-top: 0.2rem; }
+
+    /* ── Progress ── */
+    .prog-item { margin-bottom: 1rem; }
+    .prog-item:last-child { margin-bottom: 0; }
+    .prog-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: 700; color: #1f2937; margin-bottom: 0.4rem; }
+    .prog-label span { color: var(--p-teal); }
+    .prog-bar-track { height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+    .prog-bar-fill  { height: 100%; background: linear-gradient(90deg, #133e3f, #FFC107); border-radius: 4px; transition: width 0.6s ease; }
+
+    /* ── Timeline ── */
+    .timeline-item {
+        display: flex; gap: 0.75rem; align-items: flex-start;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.83rem;
+    }
+
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot { width: 8px; height: 8px; background: var(--p-gold); border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .timeline-date { color: #9ca3af; font-size: 0.72rem; white-space: nowrap; }
+    .timeline-action { color: #1f2937; font-weight: 600; }
+
+    /* ── Theme toggles ── */
+    .theme-btns { display: flex; gap: 0.75rem; }
+
+    .btn-theme {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        padding: 0.65rem;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        font-size: 0.82rem; font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-theme.active, .btn-theme:hover { border-color: var(--p-teal); color: var(--p-teal); background: rgba(19,62,63,0.04); }
+    .btn-theme.active { background: rgba(19,62,63,0.08); }
+
+    /* ── Historique grid 2 colonnes ── */
+    .profil-full .p-card-body { padding: 0.75rem 1rem; }
+
+    .histo-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+    }
+
+    .histo-grid .timeline-item {
+        border-bottom: 1px solid #f3f4f6;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .histo-grid .timeline-date   { font-size: 0.68rem; }
+    .histo-grid .timeline-action { font-size: 0.78rem; }
+    .histo-grid .timeline-dot    { width: 6px; height: 6px; margin-top: 4px; }
+
+    .histo-grid .timeline-item:nth-child(odd)  { border-right: 1px solid #f3f4f6; }
+    .histo-grid .timeline-item:last-child,
+    .histo-grid .timeline-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+
+    .histo-empty {
+        grid-column: 1 / -1;
+        font-size: 0.82rem;
+        color: #9ca3af;
+        text-align: center;
+        padding: 1.5rem 0;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .histo-grid { grid-template-columns: 1fr; }
+        .histo-grid .timeline-item:nth-child(odd) { border-right: none; }
+    }
+
+    body.dark-mode .histo-grid .timeline-item { border-color: rgba(255,255,255,0.07); }
+
+    /* ── Delete photo btn ── */
+    .btn-del-photo {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 4px 10px; font-size: 0.65rem; font-weight: 700;
+        background: #fee2e2; color: #dc2626; border: none; border-radius: 20px;
+        cursor: pointer; margin-top: 4px; transition: background 0.2s;
+    }
+    .btn-del-photo:hover { background: #fecaca; }
+
+    /* ── Dark mode ── */
+
+    /* Hero */
+    body.dark-mode .profil-hero {
+        background: linear-gradient(135deg, #0d2829 0%, #0a1f20 100%);
+        border: 1px solid rgba(255,193,7,0.15);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.40), inset 0 0 60px rgba(19,62,63,0.25);
+    }
+    body.dark-mode .profil-hero-name  { color: #f9fafb; }
+    body.dark-mode .profil-hero-email { color: rgba(255,255,255,0.55); }
+    body.dark-mode .profil-avatar {
+        border-color: rgba(255,193,7,0.55);
+        box-shadow: 0 0 0 4px rgba(255,193,7,0.12), 0 8px 24px rgba(0,0,0,0.45);
+    }
+
+    /* Cards */
+    body.dark-mode .p-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.03) 100%);
+        border-color: rgba(255,255,255,0.10);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 0 12px rgba(255,255,255,0.03);
         backdrop-filter: blur(10px);
     }
+    body.dark-mode .p-card-header     { border-bottom-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+    body.dark-mode .p-card-header h2  { color: #f3f4f6; }
+    body.dark-mode .p-card-header i   { color: var(--p-gold); filter: drop-shadow(0 0 6px rgba(255,193,7,0.4)); }
 
-    /* Progress bars */
-    .progress {
-        border-radius: 12px !important;
-        height: 12px !important;
-        background-color: #edf2f7 !important;
-    }
+    /* Info rows */
+    body.dark-mode .info-row           { border-bottom-color: rgba(255,255,255,0.07); }
+    body.dark-mode .info-row:hover     { background: rgba(255,255,255,0.03); border-radius: 8px; }
+    body.dark-mode .info-row .info-label { color: rgba(255,255,255,0.35); }
+    body.dark-mode .info-row .info-val { color: #f3f4f6; }
+    body.dark-mode .info-row i         { color: var(--p-gold); }
 
-    .progress-bar {
-        background: linear-gradient(90deg, #133e3f 0%, #fec913 100%) !important;
-        border-radius: 12px !important;
+    /* Stats */
+    body.dark-mode .stat-chip {
+        background: linear-gradient(135deg, rgba(255,193,7,0.08), rgba(19,62,63,0.20));
+        border-color: rgba(255,193,7,0.20);
     }
+    body.dark-mode .stat-chip-val   { color: var(--p-gold); text-shadow: 0 0 16px rgba(255,193,7,0.35); }
+    body.dark-mode .stat-chip-label { color: rgba(255,255,255,0.45); }
 
-    /* Profile Image */
-    /* ── glass-style img border (replaces yellow #fec913) ── */
-    .img-profile {
-        border: 4px solid rgba(19,62,63,0.50) !important;
-        box-shadow: 0 0 0 3px rgba(255,193,7,0.28), 0 8px 24px rgba(19,62,63,0.22) !important;
-        padding: 3px;
-        background: rgba(255,255,255,0.12);
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
+    /* Progress */
+    body.dark-mode .prog-label      { color: #e5e7eb; }
+    body.dark-mode .prog-label span { color: var(--p-gold); }
+    body.dark-mode .prog-bar-track  { background: rgba(255,255,255,0.08); }
+    body.dark-mode .p-card-body h3  { color: rgba(255,255,255,0.35) !important; }
 
-    .img-profile:hover {
-        transform: scale(1.05) rotate(2deg);
-        box-shadow: 0 0 0 4px rgba(255,193,7,0.65), 0 12px 32px rgba(19,62,63,0.30) !important;
-    }
+    /* Timeline */
+    body.dark-mode .timeline-item    { border-bottom-color: rgba(255,255,255,0.07); }
+    body.dark-mode .timeline-date    { color: rgba(255,255,255,0.40); }
+    body.dark-mode .timeline-action  { color: #e5e7eb; }
+    body.dark-mode .timeline-dot     { box-shadow: 0 0 8px rgba(255,193,7,0.5); }
 
-    /* Timeline items */
-    .timeline .mb-2 {
-        padding: 12px 16px;
-        background: rgba(19, 62, 63, 0.08);
-        border-left: 4px solid rgba(19,62,63,0.70);
-        border-radius: 0 12px 12px 0;
-        margin-bottom: 10px !important;
-        transition: all 0.3s ease;
-    }
+    /* Theme buttons */
+    body.dark-mode .btn-theme         { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.50); }
+    body.dark-mode .btn-theme.active,
+    body.dark-mode .btn-theme:hover   { border-color: var(--p-gold); color: var(--p-gold); background: rgba(255,193,7,0.08); }
 
-    .timeline .mb-2:hover {
-        background: rgba(19, 62, 63, 0.08);
-        transform: translateX(5px);
-    }
+    /* Inline-style text overrides */
+    body.dark-mode .p-card-body p,
+    body.dark-mode .p-card-body small { color: rgba(255,255,255,0.45) !important; }
 
-    /* Dark Mode Overrides */
-    body.dark-mode .card,
-    [data-theme="dark"] .card,
-    .dark-theme .card {
-        background: rgba(255, 255, 255, 0.06) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        backdrop-filter: blur(24px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-    }
+    /* ── Modal modern ── */
+    .modal-content { border-radius: 20px !important; border: none !important; box-shadow: 0 24px 60px rgba(0,0,0,0.18) !important; }
+    .modal-header  { border-bottom: 1px solid #f3f4f6 !important; padding: 1.25rem 1.5rem !important; }
+    .modal-footer  { border-top: 1px solid #f3f4f6 !important; padding: 1rem 1.5rem !important; }
+    .modal-title   { font-weight: 800 !important; color: #133e3f !important; font-size: 1rem !important; }
+    .modal-body label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7280; }
+    .modal-body .form-control { border-radius: 10px !important; border-color: #e5e7eb !important; font-size: 0.9rem; }
+    .modal-body .form-control:focus { border-color: #133e3f !important; box-shadow: 0 0 0 3px rgba(19,62,63,0.12) !important; }
 
-    body.dark-mode .card-header,
-    [data-theme="dark"] .card-header,
-    .dark-theme .card-header {
-        background: rgba(255, 255, 255, 0.02) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
+    .btn-modal-cancel { padding: 6px 18px; font-size: 0.78rem; font-weight: 700; border-radius: 50px; background: #f3f4f6; color: #6b7280; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-modal-cancel:hover { background: #e5e7eb; }
+    .btn-modal-save   { padding: 6px 18px; font-size: 0.78rem; font-weight: 700; border-radius: 50px; background: linear-gradient(135deg, #133e3f, #0f3435); color: #fff; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-modal-save:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(19,62,63,0.25); }
 
-    body.dark-mode .timeline .mb-2,
-    [data-theme="dark"] .timeline .mb-2,
-    .dark-theme .timeline .mb-2 {
-        background: rgba(255, 255, 255, 0.03) !important;
-    }
-
-    body.dark-mode .img-profile,
-    [data-theme="dark"] .img-profile,
-    .dark-theme .img-profile {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: #FFC107 !important;
-    }
-
-    /* General dark mode rules */
-    body.dark-mode .text-muted,
-    [data-theme="dark"] .text-muted,
-    .dark-theme .text-muted {
-        color: #ffffff !important;
-    }
-
-    body.dark-mode h1,
-    body.dark-mode h2,
-    body.dark-mode h3,
-    body.dark-mode h4,
-    body.dark-mode h5,
-    body.dark-mode h6,
-    [data-theme="dark"] h1,
-    [data-theme="dark"] h2,
-    [data-theme="dark"] h3,
-    [data-theme="dark"] h4,
-    [data-theme="dark"] h5,
-    [data-theme="dark"] h6,
-    .dark-theme h1,
-    .dark-theme h2,
-    .dark-theme h3,
-    .dark-theme h4,
-    .dark-theme h5,
-    .dark-theme h6 {
-        color: #FFC107 !important;
-    }
-
-    body.dark-mode p,
-    body.dark-mode span,
-    body.dark-mode li,
-    body.dark-mode td,
-    body.dark-mode th,
-    [data-theme="dark"] p,
-    [data-theme="dark"] span,
-    [data-theme="dark"] li,
-    [data-theme="dark"] td,
-    [data-theme="dark"] th,
-    .dark-theme p,
-    .dark-theme span,
-    .dark-theme li,
-    .dark-theme td,
-    .dark-theme th {
-        color: #ffffff !important;
-    }
-
-    /* Rules:
-       1. All text that is currently green (#133e3f or similar dark teal) in dark mode: color: #FFC107 !important;
-       2. All text that is currently gray (#6c757d, #999, #aaa, .text-muted, secondary text): color: #ffffff !important;
-    */
-    body.dark-mode [style*="color:#133e3f"],
-    body.dark-mode [style*="color: #133e3f"],
-    [data-theme="dark"] [style*="color:#133e3f"],
-    [data-theme="dark"] [style*="color: #133e3f"],
-    .dark-theme [style*="color:#133e3f"],
-    .dark-theme [style*="color: #133e3f"],
-    body.dark-mode .text-primary,
-    [data-theme="dark"] .text-primary,
-    .dark-theme .text-primary {
-        color: #FFC107 !important;
-    }
-
-    body.dark-mode .text-secondary,
-    [data-theme="dark"] .text-secondary,
-    .dark-theme .text-secondary,
-    body.dark-mode .text-gray-600,
-    [data-theme="dark"] .text-gray-600,
-    .dark-theme .text-gray-600,
-    body.dark-mode .text-gray-700,
-    [data-theme="dark"] .text-gray-700,
-    .dark-theme .text-gray-700 {
-        color: #ffffff !important;
-    }
-
-    /* 3. Profile page specific in dark mode:
-       - Profile labels, field names, section titles → #FFC107
-       - Profile values, descriptions, placeholder text → #ffffff
-       - Input fields in dark mode:
-           background: rgba(255,255,255,0.08);
-           color: #ffffff;
-           border-color: rgba(255,255,255,0.2);
-       - Input placeholders:
-           color: rgba(255,255,255,0.5);
-    */
-    body.dark-mode strong,
-    [data-theme="dark"] strong,
-    .dark-theme strong,
-    body.dark-mode .font-weight-bold,
-    [data-theme="dark"] .font-weight-bold,
-    .dark-theme .font-weight-bold,
-    body.dark-mode label,
-    [data-theme="dark"] label,
-    .dark-theme label {
-        color: #FFC107 !important;
-    }
-
-    body.dark-mode input.form-control,
-    [data-theme="dark"] input.form-control,
-    .dark-theme input.form-control,
-    body.dark-mode select.form-control,
-    [data-theme="dark"] select.form-control,
-    .dark-theme select.form-control,
-    body.dark-mode textarea.form-control,
-    [data-theme="dark"] textarea.form-control,
-    .dark-theme textarea.form-control {
-        background: rgba(255, 255, 255, 0.08) !important;
-        color: #ffffff !important;
-        border-color: rgba(255, 255, 255, 0.2) !important;
-    }
-
-    body.dark-mode input.form-control::placeholder,
-    [data-theme="dark"] input.form-control::placeholder,
-    .dark-theme input.form-control::placeholder {
-        color: rgba(255, 255, 255, 0.5) !important;
-    }
-
-    /* Modals background in dark mode */
-    body.dark-mode .modal-content,
-    [data-theme="dark"] .modal-content,
-    .dark-theme .modal-content {
-        background: #242632 !important;
-        border-color: rgba(255, 255, 255, 0.1) !important;
-    }
+    body.dark-mode .modal-content { background: #1f2937 !important; }
+    body.dark-mode .modal-header  { border-bottom-color: #374151 !important; }
+    body.dark-mode .modal-footer  { border-top-color: #374151 !important; }
+    body.dark-mode .modal-title   { color: var(--p-gold) !important; }
+    body.dark-mode .modal-body label { color: #9ca3af; }
+    body.dark-mode .modal-body .form-control { background: rgba(255,255,255,0.06) !important; color: #f3f4f6 !important; border-color: #374151 !important; }
+    body.dark-mode .btn-modal-cancel { background: #374151; color: #9ca3af; }
 </style>
+{% endblock %}
 
-<div class="container-fluid">
+{% block content %}
 
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Mon Profil</h1>
+<!-- Hero -->
+<div class="profil-hero">
+    <div class="profil-hero-liquid"></div>
+    <div class="profil-hero-inner">
+        <div class="profil-avatar-wrap">
+            {% if request.user.photo_profil %}
+            <img class="profil-avatar" src="{{ user.photo_profil.url }}" alt="Photo de profil">
+            {% else %}
+            <img class="profil-avatar" src="{% static 'admin/img/undraw_profile.svg' %}" alt="Photo de profil">
+            {% endif %}
+            <div class="profil-avatar-edit" data-toggle="modal" data-target="#modalPhoto" title="Changer la photo">
+                <i class="fas fa-camera"></i>
+            </div>
+        </div>
+
+        <div class="profil-hero-info">
+            <h1 class="profil-hero-name">{{ user.nom|default:"" }} {{ user.prenom|default:"(Sans nom)" }}</h1>
+            <div class="profil-hero-role"><i class="fas fa-id-badge"></i> {{ user.get_role_display|default:user.role }}</div>
+            <div class="profil-hero-email"><i class="fas fa-envelope"></i> {{ user.email }}</div>
+            {% if request.user.photo_profil %}
+            <form action="{% url 'profil' %}" method="POST" class="d-inline mt-1">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_photo">
+                <button type="submit" class="btn-del-photo" onclick="return confirm('Supprimer la photo ?')">
+                    <i class="fas fa-trash"></i> Supprimer la photo
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="profil-hero-actions">
+            <button class="btn-hero gold" data-toggle="modal" data-target="#modalInfo">
+                <i class="fas fa-edit"></i> Modifier
+            </button>
+        </div>
     </div>
+</div>
 
-    <div class="row">
+<!-- Body -->
+<div class="profil-body">
 
-        <!-- Infos Personnelles -->
-        <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card shadow h-100">
+    <!-- Ligne 1 : Infos+Thème (gauche) | Stats (droite) — même hauteur -->
+    <div class="row-main">
 
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informations Personnelles</h6>
+        <!-- Colonne gauche : Infos + Thème (Thème prend l'espace restant) -->
+        <div class="profil-left">
+
+            <div class="p-card">
+                <div class="p-card-header">
+                    <i class="fas fa-user"></i>
+                    <h2>Informations personnelles</h2>
                 </div>
-                <div class="card-body text-center">
-                    <div class="position-relative d-inline-block mb-3">
-                        {% if request.user.photo_profil %}
-                        <img class="img-profile rounded-circle border shadow" src="{{ user.photo_profil.url }}"
-                            style="width: 150px; height: 150px; object-fit: cover;">
-                        {% else %}
-                        <img class="img-profile rounded-circle border shadow"
-                            src="{% static 'admin/img/undraw_profile.svg' %}"
-                            style="width: 150px; height: 150px; object-fit: cover;">
-                        {% endif %}
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-circle btn-primary shadow" data-toggle="modal"
-                                data-target="#modalPhoto" title="Changer la photo">
-                                <i class="fas fa-camera"></i>
-                            </button>
-                            {% if request.user.photo_profil %}
-                            <form action="{% url 'profil' %}" method="POST" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_photo">
-                                <button type="submit" class="btn btn-sm btn-circle btn-danger shadow"
-                                    onclick="return confirm('Supprimer la photo ?')" title="Supprimer la photo">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
+                <div class="p-card-body">
+                    <div class="info-row">
+                        <i class="fas fa-envelope"></i>
+                        <div><span class="info-label">Email</span><span class="info-val">{{ user.email }}</span></div>
                     </div>
-                    <h5 class="font-weight-bold text-gray-800">{{ user.nom|default:user.prenom|default:"(Sans nom)" }} {{ user.prenom }}</h5>
-                    <p class="text-muted text-uppercase small">{{ user.get_role_display|default:user.role }}</p>
-                    <hr>
-                    <div class="text-left px-3">
-                        <p><i class="fas fa-envelope text-primary mr-2"></i><strong>Email :</strong> {{ user.email }}</p>
-                        <p><i class="fas fa-user-circle text-primary mr-2"></i><strong>Nom :</strong> {{ user.nom|default:"Non renseigné" }} {{ user.prenom|default:"" }}</p>
-                        <p><i class="fas fa-user-clock text-primary mr-2"></i><strong>Âge :</strong> {{ user.age|default:"Non renseigné" }}</p>
-                        <p><i class="fas fa-map-marker-alt text-primary mr-2"></i><strong>Adresse :</strong> {{ user.adresse|default:"Non renseignée" }}</p>
+                    <div class="info-row">
+                        <i class="fas fa-user-circle"></i>
+                        <div><span class="info-label">Nom complet</span><span class="info-val">{{ user.nom|default:"—" }} {{ user.prenom|default:"" }}</span></div>
                     </div>
-                    <button class="btn btn-primary btn-sm btn-block mt-3 rounded-pill" data-toggle="modal"
-                        data-target="#modalInfo">
-                        <i class="fas fa-edit mr-1"></i> Modifier mes infos
-                    </button>
+                    <div class="info-row">
+                        <i class="fas fa-birthday-cake"></i>
+                        <div><span class="info-label">Âge</span><span class="info-val">{{ user.age|default:"Non renseigné" }}</span></div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div><span class="info-label">Adresse</span><span class="info-val">{{ user.adresse|default:"Non renseignée" }}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thème — grandit pour s'aligner avec le bas de Stats -->
+            <div class="p-card">
+                <div class="p-card-header">
+                    <i class="fas fa-palette"></i>
+                    <h2>Thème d'affichage</h2>
+                </div>
+                <div class="p-card-body">
+                    <p style="font-size:0.8rem;color:#9ca3af;margin-bottom:0.85rem;">Choisissez le thème de votre interface.</p>
+                    <div class="theme-btns">
+                        <button onclick="setTheme('light')" class="btn-theme {% if user.theme == 'light' %}active{% endif %}">
+                            <i class="fas fa-sun"></i> Clair
+                        </button>
+                        <button onclick="setTheme('dark')" class="btn-theme {% if user.theme == 'dark' %}active{% endif %}">
+                            <i class="fas fa-moon"></i> Sombre
+                        </button>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-
-        <!-- Statistiques d'apprentissage -->
-        {% if not request.user.is_enseignant %}
-        <div class="col-xl-8 col-lg-7 d-flex flex-column">
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Mes Statistiques d'Apprentissage</h6>
+        <!-- Colonne droite : Stats uniquement, même hauteur que gauche -->
+        <div class="profil-right">
+            {% if not request.user.is_enseignant %}
+            <div class="p-card">
+                <div class="p-card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h2>Statistiques d'apprentissage</h2>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-4 text-center">
-                            <div class="h3 mb-0 font-weight-bold text-primary">{{ stats.temps_passe|default:"0h" }}
-                            </div>
-                            <div class="text-xs font-weight-bold text-uppercase text-muted">Temps d'apprentissage</div>
+                <div class="p-card-body">
+                    <div class="stat-chips">
+                        <div class="stat-chip">
+                            <div class="stat-chip-val">{{ stats.temps_passe|default:"0h" }}</div>
+                            <div class="stat-chip-label">Temps d'étude</div>
                         </div>
-                        <div class="col-md-6 mb-4 text-center">
-                            <div class="h3 mb-0 font-weight-bold text-info">{{ stats.cours_termines|default:"0" }}</div>
-                            <div class="text-xs font-weight-bold text-uppercase text-muted">Cours Terminés</div>
+                        <div class="stat-chip">
+                            <div class="stat-chip-val">{{ stats.cours_termines|default:"0" }}</div>
+                            <div class="stat-chip-label">Cours terminés</div>
                         </div>
                     </div>
-
-                    <h6 class="mt-2 font-weight-bold">Progression des cours en cours</h6>
+                    {% if progression %}
+                    <h3 style="font-size:0.8rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.85rem;margin-top:1rem;">Progression en cours</h3>
                     {% for p in progression %}
-                    <h4 class="small font-weight-bold">{{ p.cours.titre }} <span class="float-right">{{ p.pourcentage }}%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar {{ p.css_class }}" role="progressbar"
-                            style="width: {{ p.pourcentage }}%" aria-valuenow="{{ p.pourcentage }}" aria-valuemin="0"
-                            aria-valuemax="100"></div>
+                    <div class="prog-item">
+                        <div class="prog-label">{{ p.cours.titre }}<span>{{ p.pourcentage }}%</span></div>
+                        <div class="prog-bar-track"><div class="prog-bar-fill" style="width:{{ p.pourcentage }}%"></div></div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="font-size:0.82rem;color:#9ca3af;text-align:center;padding:1rem 0;margin:0;">Aucun cours en progression.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Ligne 2 : Historique plein écran -->
+    <div class="profil-full">
+        <div class="p-card">
+            <div class="p-card-header">
+                <i class="fas fa-history"></i>
+                <h2>Historique d'activités</h2>
+            </div>
+            <div class="p-card-body">
+
+                <div class="histo-grid">
+                    {% for item in historique %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <div class="timeline-date">{{ item.date|date:"d/m/Y à H:i" }}</div>
+                            <div class="timeline-action">{{ item.action }}</div>
+                        </div>
                     </div>
                     {% empty %}
-                    <p class="text-muted italic small text-center my-4">Aucun cours en cours de progression.</p>
+                    <p class="histo-empty">Aucune activité pour le moment.</p>
                     {% endfor %}
-
                 </div>
-            </div>
-            {% else %}
-            <div class="col-xl-8 col-lg-7 d-flex flex-column">
 
+                {% if historique.has_other_pages %}
+                <nav class="mt-3">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if historique.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ historique.previous_page_number }}">&laquo;</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        {% endif %}
+                        {% for i in historique.paginator.page_range %}
+                        <li class="page-item {% if historique.number == i %}active{% endif %}"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                        {% endfor %}
+                        {% if historique.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ historique.next_page_number }}">&raquo;</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
                 {% endif %}
 
-                <!-- Historique d'activités -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Historique d'Activités</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="timeline small">
-                            {% for item in historique %}
-                            <div class="mb-2">
-                                <span class="text-muted mr-2">{{ item.date|date:"d/m/Y H:i" }}</span>
-                                <span class="font-weight-bold">{{ item.action }}</span>
-                            </div>
-                            {% empty %}
-                            <div class="mb-2">
-                                <span class="text-muted mr-2">Aucune activité pour le moment.</span>
-                            </div>
-                            {% endfor %}
-                        </div>
+            </div>
+        </div>
+    </div>
 
-                        <!-- Pagination Historique -->
-                        {% if historique.has_other_pages %}
-                        <nav aria-label="Page navigation" class="mt-4">
-                            <ul class="pagination pagination-sm justify-content-center">
-                                {% if historique.has_previous %}
-                                <li class="page-item"><a class="page-link"
-                                        href="?page={{ historique.previous_page_number }}">&laquo;</a></li>
-                                {% else %}
-                                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-                                {% endif %}
+</div>
 
-                                {% for i in historique.paginator.page_range %}
-                                {% if historique.number == i %}
-                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
-                                {% else %}
-                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                                {% endif %}
-                                {% endfor %}
+{% endblock %}
 
-                                {% if historique.has_next %}
-                                <li class="page-item"><a class="page-link"
-                                        href="?page={{ historique.next_page_number }}">&raquo;</a></li>
-                                {% else %}
-                                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                        {% endif %}
-                    </div>
+{% block extra_js %}
+<!-- Modal — Modifier infos -->
+<div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{% url 'profil' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_info">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier mes informations</h5>
+                    <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-
-                <!-- Paramètres d'Affichage -->
-                <div class="card shadow mb-4 mt-auto">
-
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Paramètres d'Affichage</h6>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Nom</label>
+                            <input type="text" name="nom" class="form-control" value="{{ user.nom }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Prénom</label>
+                            <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}" required>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p class="small text-muted">Personnalisez votre expérience en choisissant le thème de votre
-                            interface.</p>
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <button onclick="setTheme('light')"
-                                    class="btn btn-block {% if user.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill shadow-sm">
-                                    <i class="fas fa-sun mr-2"></i> Thème Clair
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button onclick="setTheme('dark')"
-                                    class="btn btn-block {% if user.theme == 'dark' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill shadow-sm">
-                                    <i class="fas fa-moon mr-2"></i> Thème Sombre
-                                </button>
-                            </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label>Âge</label>
+                            <input type="number" name="age" class="form-control" value="{{ user.age|default_if_none:'' }}">
+                        </div>
+                        <div class="col-md-8 form-group">
+                            <label>Adresse</label>
+                            <input type="text" name="adresse" class="form-control" value="{{ user.adresse|default_if_none:'' }}">
                         </div>
                     </div>
                 </div>
-
-            </div>
-
-        </div>
-
-    </div>
-    {% endblock %}
-
-    {% block extra_js %}
-    <!-- Modals -->
-    <!-- Modal Info -->
-    <div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form action="{% url 'profil' %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="update_info">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-primary font-weight-bold">Modifier mes informations</h5>
-                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label class="small font-weight-bold">Nom</label>
-                                <input type="text" name="nom" class="form-control" value="{{ user.nom }}"
-                                    required>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label class="small font-weight-bold">Prénom</label>
-                                <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}"
-                                    required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="small font-weight-bold">Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ user.email }}"
-                                required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 form-group">
-                                <label class="small font-weight-bold">Âge</label>
-                                <input type="number" name="age" class="form-control"
-                                    value="{{ user.age|default_if_none:'' }}">
-                            </div>
-                            <div class="col-md-8 form-group">
-                                <label class="small font-weight-bold">Adresse</label>
-                                <input type="text" name="adresse" class="form-control"
-                                    value="{{ user.adresse|default_if_none:'' }}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button"
-                            data-dismiss="modal">Annuler</button>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Enregistrer</button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-cancel" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn-modal-save" type="submit">Enregistrer</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Modal Photo -->
-    <div class="modal fade" id="modalPhoto" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form action="{% url 'profil' %}" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="update_photo">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-primary font-weight-bold">Changer la photo de profil</h5>
-                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
+<!-- Modal — Photo -->
+<div class="modal fade" id="modalPhoto" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{% url 'profil' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_photo">
+                <div class="modal-header">
+                    <h5 class="modal-title">Changer la photo de profil</h5>
+                    <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p style="font-size:0.82rem;color:#9ca3af;margin-bottom:1rem;">Choisissez une image carrée pour un meilleur rendu.</p>
+                    <div class="custom-file">
+                        <input type="file" name="photo" class="custom-file-input" id="customFile" accept="image/*" required>
+                        <label class="custom-file-label" for="customFile" style="border-radius:10px;">Choisir un fichier...</label>
                     </div>
-                    <div class="modal-body text-center">
-                        <p class="small text-muted mb-3">Choisissez une image carrée pour un meilleur rendu.</p>
-                        <div class="custom-file mb-3">
-                            <input type="file" name="photo" class="custom-file-input" id="customFile" accept="image/*"
-                                required>
-                            <label class="custom-file-label" for="customFile">Choisir un fichier...</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary btn-sm rounded-pill px-3" type="button"
-                            data-dismiss="modal">Annuler</button>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3" type="submit">Télécharger</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-cancel" type="button" data-dismiss="modal">Annuler</button>
+                    <button class="btn-modal-save" type="submit">Télécharger</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Affichage du nom du fichier dans le label bootstrap
-
-        document.querySelector('.custom-file-input').addEventListener('change', function (e) {
-            var fileName = document.getElementById("customFile").files[0].name;
-            var nextSibling = e.target.nextElementSibling;
-            nextSibling.innerText = fileName;
-        });
-    </script>
-    {% endblock %}
+<script>
+document.querySelector('.custom-file-input').addEventListener('change', function (e) {
+    var fileName = document.getElementById("customFile").files[0].name;
+    e.target.nextElementSibling.innerText = fileName;
+});
+</script>
+{% endblock %}

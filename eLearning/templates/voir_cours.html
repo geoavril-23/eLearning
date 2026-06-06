@@ -479,6 +479,62 @@
         .glass-card { animation: none; }
         .nav-btn::after { transition: none; }
     }
+
+    /* ── Timer dans sidebar ── */
+    .tt-sidebar-widget {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .tt-sidebar-title {
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .tt-sidebar-clock {
+        font-size: 1.55rem;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #FFC107;
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 0.75rem;
+    }
+
+    .tt-sidebar-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tt-filter-btn {
+        padding: 2px 8px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: transparent;
+        color: rgba(255,255,255,0.6);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .tt-filter-btn.active,
+    .tt-filter-btn:hover {
+        background: #133e3f;
+        color: #FFC107;
+        border-color: #FFC107;
+    }
+
+    .tt-sidebar-total-label { font-size: 0.6rem; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+    .tt-sidebar-total-val   { font-size: 0.92rem; font-weight: 800; color: rgba(255,255,255,0.9); }
 </style>
 {% endblock %}
 
@@ -552,6 +608,19 @@
                     <p>Aucun chapitre disponible</p>
                 </div>
                 {% endif %}
+                <!-- Timer widget cours -->
+                <div class="tt-sidebar-widget">
+                    <div class="tt-sidebar-title"><i class="fas fa-stopwatch"></i> Temps sur ce cours</div>
+                    <div class="tt-sidebar-clock" id="tt-clock-cours">00:00:00</div>
+                    <div class="tt-sidebar-filters">
+                        <button class="tt-filter-btn active" data-period="day">Auj.</button>
+                        <button class="tt-filter-btn" data-period="week">Semaine</button>
+                        <button class="tt-filter-btn" data-period="month">Mois</button>
+                        <button class="tt-filter-btn" data-period="year">Année</button>
+                    </div>
+                    <div class="tt-sidebar-total-label">Total période</div>
+                    <div class="tt-sidebar-total-val" id="tt-total-cours">—</div>
+                </div>
             </aside>
 
             <!-- Content -->
@@ -601,6 +670,21 @@
 {% block content %}{% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/time_tracker.js' %}"></script>
+<script>
+document.documentElement.dataset.trackerPage = 'cours_{{ cours.id }}';
+TimeTracker.init(
+    document.getElementById('tt-clock-cours'),
+    document.getElementById('tt-total-cours')
+);
+document.querySelectorAll('.tt-sidebar-widget .tt-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tt-sidebar-widget .tt-filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        TimeTracker.onFilterChange(this.dataset.period);
+    });
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const toggleBtn = document.getElementById('btn-toggle-sidebar');

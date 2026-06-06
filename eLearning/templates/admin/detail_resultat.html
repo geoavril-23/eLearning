@@ -1,0 +1,321 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Correction — {{ soumission.quiz.titre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --teal: #133e3f;
+        --gold: #FFC107;
+    }
+
+    .detail-header {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .detail-header h1 {
+        font-size: 1.6rem;
+        font-weight: 900;
+        margin: 0 0 0.4rem 0;
+        color: #fff;
+    }
+
+    .detail-header .sub {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.72);
+    }
+
+    .score-big {
+        background: linear-gradient(135deg, #1cc88a 0%, #16a34a 100%);
+        border-radius: 10px;
+        padding: 0.35rem 0.85rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(28,200,138,0.25);
+    }
+
+    .score-big .val {
+        font-size: 1rem;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .score-big .label {
+        font-size: 0.62rem;
+        color: rgba(255,255,255,0.82);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Feedback box */
+    .feedback-section {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--gold);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .feedback-section h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--teal);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .feedback-section p {
+        font-size: 0.92rem;
+        color: #374151;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Questions section */
+    .questions-section {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        margin-bottom: 2rem;
+    }
+
+    .questions-section h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--teal);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .question-block {
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #e5e7eb;
+        background: #f9fafb;
+        transition: border-color 0.2s;
+    }
+
+    .question-block.correct { border-left-color: #16a34a; background: #f0fdf4; }
+    .question-block.wrong   { border-left-color: #dc2626; background: #fff5f5; }
+    .question-block.open    { border-left-color: var(--teal); }
+
+    .q-num {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #9ca3af;
+        margin-bottom: 0.35rem;
+    }
+
+    .q-text {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+        line-height: 1.45;
+    }
+
+    .q-answers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .answer-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .answer-chip.my-correct { background: #dcfce7; color: #16a34a; }
+    .answer-chip.my-wrong   { background: #fee2e2; color: #dc2626; }
+    .answer-chip.my-open    { background: #e0f2fe; color: #0369a1; }
+    .answer-chip.good       { background: #dcfce7; color: #16a34a; font-weight: 700; }
+
+    /* Fichier box */
+    .fichier-box {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+    }
+
+    .fichier-icon { font-size: 2rem; color: var(--teal); }
+
+    .btn-dl {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #133e3f, #0f3435);
+        color: #fff;
+        border-radius: 50px;
+        text-decoration: none;
+        margin-top: 0.4rem;
+    }
+
+    .btn-retour-page {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.35);
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-retour-page:hover {
+        background: rgba(255,255,255,0.25);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* Dark mode */
+    body.dark-mode .feedback-section,
+    body.dark-mode .questions-section {
+        background: #1f2937;
+        border-color: #374151;
+        box-shadow: none;
+    }
+
+    body.dark-mode .feedback-section h2,
+    body.dark-mode .questions-section h2 { color: var(--gold); }
+
+    body.dark-mode .feedback-section p { color: #d1d5db; }
+
+    body.dark-mode .question-block        { background: #111827; border-left-color: #374151; }
+    body.dark-mode .question-block.correct { background: rgba(22,163,74,0.12); border-left-color: #16a34a; }
+    body.dark-mode .question-block.wrong   { background: rgba(220,38,38,0.10); border-left-color: #dc2626; }
+    body.dark-mode .question-block.open    { background: #111827; border-left-color: var(--teal); }
+
+    body.dark-mode .q-text { color: #f3f4f6; }
+    body.dark-mode .q-num  { color: #6b7280; }
+
+    body.dark-mode .fichier-box { background: #111827; border-color: #374151; }
+
+    body.dark-mode .answer-chip.my-correct { background: #166534; color: #86efac; }
+    body.dark-mode .answer-chip.my-wrong   { background: #7f1d1d; color: #fca5a5; }
+    body.dark-mode .answer-chip.good       { background: #166534; color: #86efac; }
+    body.dark-mode .answer-chip.my-open    { background: #0c4a6e; color: #7dd3fc; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="detail-header">
+    <div>
+        <h1><i class="fas fa-clipboard-check mr-2" style="color:var(--gold);"></i>{{ soumission.quiz.titre }}</h1>
+        <div class="sub">
+            <i class="fas fa-book mr-1"></i> {{ soumission.quiz.cours.titre }}
+            &nbsp;·&nbsp;
+            <i class="fas fa-calendar mr-1"></i> Soumis le {{ soumission.date_soumission|date:"d M Y à H:i" }}
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-3" style="gap:1rem;">
+        {% if soumission.est_corrige %}
+        <div class="score-big">
+            <div class="val">{{ soumission.note_obtenue }}<span style="font-size:1rem;opacity:.7;">/{{ soumission.quiz.note_max }}</span></div>
+            <div class="label">Note obtenue</div>
+        </div>
+        {% endif %}
+        <a href="{% url 'mes_resultats_etudiant' %}" class="btn-retour-page">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+{% if soumission.est_corrige and soumission.commentaires %}
+<div class="feedback-section">
+    <h2><i class="fas fa-comment-dots"></i> Commentaires de l'enseignant</h2>
+    <p>{{ soumission.commentaires|linebreaksbr }}</p>
+</div>
+{% endif %}
+
+<div class="questions-section">
+    <h2><i class="fas fa-file-alt"></i> Mon travail</h2>
+
+    {% if soumission.fichier_reponse %}
+    <div class="fichier-box">
+        <i class="fas fa-file-word fichier-icon"></i>
+        <div>
+            <div style="font-weight:700;font-size:0.9rem;color:#1f2937;">{{ soumission.fichier_reponse.name|slice:"17:" }}</div>
+            <a href="{{ soumission.fichier_reponse.url }}" class="btn-dl" download target="_blank">
+                <i class="fas fa-download"></i> Télécharger
+            </a>
+        </div>
+    </div>
+
+    {% elif soumission.questions_info %}
+    <div>
+        {% for q in soumission.questions_info %}
+        {% if soumission.est_corrige %}
+            {% if q.bonne_reponse %}
+                {% if q.reponse_etudiant == q.bonne_reponse %}
+                <div class="question-block correct">
+                {% else %}
+                <div class="question-block wrong">
+                {% endif %}
+            {% else %}
+                <div class="question-block open">
+            {% endif %}
+        {% else %}
+            <div class="question-block open">
+        {% endif %}
+            <div class="q-num">Question {{ forloop.counter }}{% if q.points %} · {{ q.points }} pt{% if q.points > 1 %}s{% endif %}{% endif %}</div>
+            <div class="q-text">{{ q.question }}</div>
+            <div class="q-answers">
+                {% if q.bonne_reponse %}
+                    {% if q.reponse_etudiant == q.bonne_reponse %}
+                    <span class="answer-chip my-correct"><i class="fas fa-check-circle"></i> {{ q.reponse_etudiant }}</span>
+                    {% else %}
+                    <span class="answer-chip my-wrong"><i class="fas fa-times-circle"></i> Ma réponse : {{ q.reponse_etudiant|default:"—" }}</span>
+                    {% if soumission.est_corrige %}
+                    <span class="answer-chip good"><i class="fas fa-check-circle"></i> Bonne réponse : {{ q.bonne_reponse }}</span>
+                    {% endif %}
+                    {% endif %}
+                {% else %}
+                    <span class="answer-chip my-open"><i class="fas fa-pen"></i> {{ q.reponse_etudiant|default:"—" }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <p class="text-muted" style="font-size:0.88rem;">Détails non disponibles.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
