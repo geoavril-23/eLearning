@@ -4,11 +4,15 @@ from django.db.models import F, Min, Prefetch
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import User, Etudiant, Enseignant, Cours, Inscription, Categorie, Quiz, Question, Choix, SessionVisio, Conversation, Message, Notification, SoumissionQuiz, Paiement, Livre, AchatLivre, TransactionSimulee, Chapitre, ChapitreDebloque, LogActivite, RessourceCours, Module, RessourceChapitre
+from .models import User, Etudiant, Enseignant, Cours, Inscription, Categorie, Quiz, Question, Choix, SessionVisio, Conversation, Message, Notification, SoumissionQuiz, Paiement, Livre, AchatLivre, TransactionSimulee, Chapitre, ChapitreDebloque, ChapitreVu, LogActivite, RessourceCours, Module, RessourceChapitre, PaiementPayGate
 import json
+import uuid
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.urls import reverse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import google.generativeai as genai
 import os
 
@@ -130,6 +134,27 @@ def admin_register(request):
 def dashboard(request):
     return get_dashboard_redirect(request.user)
 
+
+def calculer_progression(etudiant, cours):
+    """Progression réelle d'un étudiant sur un cours, en pourcentage (0-100).
+
+    Un chapitre compte comme "acquis" si l'étudiant l'a consulté (ChapitreVu)
+    OU acheté s'il est premium (ChapitreDebloque). On prend l'union des deux.
+    """
+    total_chapitres = cours.chapitres.count()
+    if total_chapitres == 0:
+        return 0
+    ids_vus = set(
+        ChapitreVu.objects.filter(etudiant=etudiant, chapitre__cours=cours)
+        .values_list('chapitre_id', flat=True)
+    )
+    ids_debloques = set(
+        ChapitreDebloque.objects.filter(etudiant=etudiant, chapitre__cours=cours)
+        .values_list('chapitre_id', flat=True)
+    )
+    nb_acquis = len(ids_vus | ids_debloques)
+    return min(int((nb_acquis / total_chapitres) * 100), 100)
+
 # Dashboards (Version "Nue" sans contextes)
 @login_required
 def dashboard_etudiant_view(request):
@@ -146,12 +171,7 @@ def dashboard_etudiant_view(request):
     
     # On calcule la progression pour chaque inscription
     for insc in inscriptions:
-        total_chapitres = insc.cours.chapitres.count()
-        if total_chapitres > 0:
-            debloques = ChapitreDebloque.objects.filter(etudiant=etudiant, chapitre__cours=insc.cours).count()
-            insc.progression = min(int((debloques / total_chapitres) * 100), 100)
-        else:
-            insc.progression = 0
+        insc.progression = calculer_progression(etudiant, insc.cours)
 
     nb_cours_suivis = inscriptions.filter(statut='validee').count()
     
@@ -230,7 +250,7 @@ def dashboard_etudiant_view(request):
         'reussite_labels': reussite_labels,
         'reussite_data': reussite_data,
     }
-    
+
     return render(request, 'admin/index.html', context)
 
 
@@ -493,8 +513,10 @@ def profil(request):
     progression_reelle = []
     if user.is_etudiant:
         etudiant = user.etudiant
-        # 1. Temps passé (Même simulation que dashboard : 2h par chapitre)
-        nb_chapitres = ChapitreDebloque.objects.filter(etudiant=etudiant).count()
+        # 1. Temps passé (estimation : 2h par chapitre consulté ou acheté)
+        ids_vus = set(ChapitreVu.objects.filter(etudiant=etudiant).values_list('chapitre_id', flat=True))
+        ids_deb = set(ChapitreDebloque.objects.filter(etudiant=etudiant).values_list('chapitre_id', flat=True))
+        nb_chapitres = len(ids_vus | ids_deb)
         stats['temps_passe'] = f"{nb_chapitres * 2}h"
         
         # 2. Cours terminés
@@ -503,16 +525,11 @@ def profil(request):
         
         # 3. Calcul progression par cours
         for insc in inscriptions:
-            total = insc.cours.chapitres.count()
-            if total > 0:
-                count_deb = ChapitreDebloque.objects.filter(etudiant=etudiant, chapitre__cours=insc.cours).count()
-                pourcentage = min(int((count_deb / total) * 100), 100)
-                if pourcentage == 100:
-                    nb_termines += 1
-            else:
-                pourcentage = 0
-            
-            if pourcentage < 100: # On n'affiche que ceux "en cours" dans la liste de progression ?
+            pourcentage = calculer_progression(etudiant, insc.cours)
+            if pourcentage == 100:
+                nb_termines += 1
+
+            if 0 < pourcentage < 100: # On n'affiche que les cours réellement entamés (1-99%)
                 css_class = "bg-danger"
                 if pourcentage > 70: css_class = "bg-success"
                 elif pourcentage > 30: css_class = "bg-warning"
@@ -657,135 +674,429 @@ def gestion_cours(request):
 
 @login_required
 def paiements(request):
+    from django.db.models import Sum
+
     if request.user.is_etudiant:
         etudiant = request.user.etudiant
-        transactions = TransactionSimulee.objects.filter(etudiant=etudiant).order_by('-date_transaction')
-        from django.db.models import Sum
-        total_depense = transactions.filter(
-            type_transaction__in=['achat_cours', 'achat_chapitre', 'achat_livre']
-        ).aggregate(total=Sum('montant'))['total'] or 0
-        total_recharge = transactions.filter(
-            type_transaction='recharge'
-        ).aggregate(total=Sum('montant'))['total'] or 0
-        context = {
-            'etudiant': etudiant,
-            'transactions': transactions,
-            'total_depense': total_depense,
+
+        # Source unique : PaiementPayGate (réel ou simulé, statut=paye)
+        pg_paye = PaiementPayGate.objects.filter(
+            etudiant=etudiant, statut='paye'
+        ).select_related('cours').order_by('-date_paiement')
+
+        total_recharge = pg_paye.filter(type_paiement='recharge').aggregate(t=Sum('montant'))['t'] or 0
+        total_depense  = pg_paye.filter(type_paiement='achat_cours').aggregate(t=Sum('montant'))['t'] or 0
+
+        transactions = []
+        for p in pg_paye:
+            if p.type_paiement == 'achat_cours':
+                desc  = f"Achat cours : {p.cours.titre}" if p.cours else "Achat de cours"
+                ttype = 'achat_cours'
+            else:
+                desc  = "Recharge PayGate (TMoney / Flooz)"
+                ttype = 'recharge'
+            transactions.append({
+                'type':        ttype,
+                'description': desc,
+                'montant':     p.montant,
+                'date':        p.date_paiement,
+                'reference':   p.tx_reference or p.identifier[:12],
+            })
+
+        return render(request, 'admin/paiements.html', {
+            'etudiant':       etudiant,
+            'transactions':   transactions,
+            'total_depense':  total_depense,
             'total_recharge': total_recharge,
-        }
-        return render(request, 'admin/paiements.html', context)
-    
-    # Vue Admin / Enseignant — Données détaillées
-    from django.db.models import Sum, Count
-    
-    # Toutes les transactions simulées (richesses réelles des étudiants)
-    toutes_transactions = TransactionSimulee.objects.all().select_related('etudiant').order_by('-date_transaction')
-    
-    # Stats globales
-    total_achats = toutes_transactions.filter(type_transaction__in=['achat_cours', 'achat_chapitre', 'achat_livre']).aggregate(total=Sum('montant'))['total'] or 0
-    total_recharges = toutes_transactions.filter(type_transaction='recharge').aggregate(total=Sum('montant'))['total'] or 0
-    nb_etudiants_actifs = toutes_transactions.values('etudiant').distinct().count()
-    
-    # Par étudiant : solde + total dépensé
+        })
+
+    # ── Vue Admin / Enseignant ─────────────────────────────────────────────
     from .models import Etudiant as EtudiantModel
-    etudiants = EtudiantModel.objects.all()
+
+    # Toutes les transactions PayGate (paye) triées les plus récentes en premier
+    toutes_transactions = PaiementPayGate.objects.filter(
+        statut='paye'
+    ).select_related('etudiant', 'cours').order_by('-date_paiement')
+
+    total_achats    = toutes_transactions.filter(type_paiement='achat_cours').aggregate(t=Sum('montant'))['t'] or 0
+    total_recharges = toutes_transactions.filter(type_paiement='recharge').aggregate(t=Sum('montant'))['t'] or 0
+    nb_etudiants_actifs = toutes_transactions.values('etudiant').distinct().count()
 
     etudiants_data = []
-    for e in etudiants:
-        depenses = TransactionSimulee.objects.filter(
-            etudiant=e, 
-            type_transaction__in=['achat_cours', 'achat_chapitre', 'achat_livre']
-        ).aggregate(total=Sum('montant'))['total'] or 0
-        recharges = TransactionSimulee.objects.filter(etudiant=e, type_transaction='recharge').aggregate(total=Sum('montant'))['total'] or 0
+    for e in EtudiantModel.objects.all():
+        pg = PaiementPayGate.objects.filter(etudiant=e, statut='paye')
+        recharges = pg.filter(type_paiement='recharge').aggregate(t=Sum('montant'))['t'] or 0
+        depenses  = pg.filter(type_paiement='achat_cours').aggregate(t=Sum('montant'))['t'] or 0
         etudiants_data.append({
-            'user': e,
-            'solde': e.solde,
-            'total_depense': depenses,
+            'user':           e,
+            'solde':          e.solde,
             'total_recharge': recharges,
-            'nb_transactions': TransactionSimulee.objects.filter(etudiant=e).count(),
+            'total_depense':  depenses,
+            'nb_transactions': pg.count(),
         })
-    
-    stats = {
-        'revenu_total': total_achats,
-        'total_recharges': total_recharges,
-        'nb_etudiants_actifs': nb_etudiants_actifs,
-        'nb_transactions': toutes_transactions.count(),
-    }
+
     return render(request, 'admin/paiements.html', {
         'toutes_transactions': toutes_transactions,
-        'etudiants_data': etudiants_data,
-        'stats': stats
+        'etudiants_data':      etudiants_data,
+        'stats': {
+            'revenu_total':       total_achats,
+            'total_recharges':    total_recharges,
+            'nb_etudiants_actifs': nb_etudiants_actifs,
+            'nb_transactions':    toutes_transactions.count(),
+        },
     })
 
 
 @login_required
 def acheter_cours_premium(request, cours_id):
+    """Achat d'un cours premium par paiement réel PayGate (TMoney / Flooz).
+
+    On NE débite plus le portefeuille : l'étudiant est redirigé vers la page de
+    paiement PayGate où il saisit son compte mobile money. L'accès au cours est
+    accordé après confirmation du paiement.
+    """
     if not request.user.is_etudiant:
         messages.error(request, "Seuls les étudiants peuvent acheter des cours.")
         return redirect('index')
-    
+
     cours = get_object_or_404(Cours, id=cours_id, est_premium=True)
     etudiant = request.user.etudiant
-    
-    if Inscription.objects.filter(etudiant=etudiant, cours=cours).exists():
-        messages.info(request, "Vous êtes déjà inscrit à ce cours.")
+
+    # Déjà payé ?
+    inscription = Inscription.objects.filter(etudiant=etudiant, cours=cours).first()
+    if inscription and inscription.est_paye:
+        messages.info(request, "Vous avez déjà débloqué ce cours.")
         return redirect('mes_courses')
-    
-    if etudiant.solde >= cours.prix:
-        etudiant.solde -= cours.prix
-        etudiant.save()
-        
-        Inscription.objects.create(
-            etudiant=etudiant,
-            cours=cours,
-            statut='validee',
-            est_paye=True
+
+    if not cours.prix or cours.prix < 100:
+        messages.error(request, "Le prix de ce cours est invalide.")
+        return redirect('liste_cours_premium')
+
+    identifier = uuid.uuid4().hex
+    PaiementPayGate.objects.create(
+        etudiant=etudiant,
+        identifier=identifier,
+        montant=cours.prix,
+        type_paiement='achat_cours',
+        cours=cours,
+        statut='en_attente',
+    )
+
+    # Simulation locale si pas de clé ou mode simulation forcé
+    if not settings.PAYGATE_API_KEY or getattr(settings, 'PAYGATE_SIMULATION', False):
+        return redirect(reverse('paygate_simulation') + f'?ref={identifier}')
+
+    chemin_retour = reverse('paygate_retour') + f'?ref={identifier}'
+    retour_url = (settings.SITE_BASE_URL + chemin_retour) if settings.SITE_BASE_URL else request.build_absolute_uri(chemin_retour)
+
+    from urllib.parse import urlencode
+    params = urlencode({
+        'token': settings.PAYGATE_API_KEY,
+        'amount': int(cours.prix),
+        'description': f"Achat cours {cours.titre[:60]} ({request.user.email})",
+        'identifier': identifier,
+        'url': retour_url,
+    })
+    return redirect(f"{PAYGATE_PAGE_URL}?{params}")
+
+# ──────────────────────────────────────────────────────────────────────────
+#  PAIEMENT RÉEL via PayGate Global (TMoney / Flooz)
+# ──────────────────────────────────────────────────────────────────────────
+PAYGATE_PAGE_URL = "https://paygateglobal.com/v1/page"
+PAYGATE_STATUS_URL = "https://paygateglobal.com/api/v1/status"
+
+
+def _paygate_verifier_paiement(paiement):
+    """Interroge l'API PayGate sur le statut d'un paiement (par identifier).
+
+    Crédite le solde de l'étudiant si le paiement est confirmé (statut 0),
+    de façon idempotente (ne crédite qu'une seule fois).
+
+    Retourne une chaîne :
+      - 'paye'       : paiement confirmé (solde crédité)
+      - 'echoue'     : paiement expiré / annulé
+      - 'en_attente' : paiement encore en cours (il faut réessayer plus tard)
+      - 'erreur'     : impossible de contacter PayGate / clé absente
+    """
+    import requests
+    if paiement.statut == 'paye':
+        return 'paye'
+    if paiement.statut == 'echoue':
+        return 'echoue'
+    if not settings.PAYGATE_API_KEY:
+        return 'erreur'
+
+    try:
+        resp = requests.post(
+            PAYGATE_STATUS_URL,
+            json={'auth_token': settings.PAYGATE_API_KEY, 'identifier': paiement.identifier},
+            timeout=20,
         )
-        
-        Paiement.objects.create(
-            montant=float(cours.prix),
-            date_paiement=timezone.now().date(),
-            moyen_paiement="Portefeuille Virtuel",
-            etudiant=etudiant
-        )
-        
-        TransactionSimulee.objects.create(
-            etudiant=etudiant,
-            montant=cours.prix,
-            type_transaction='achat_cours',
-            description=f"Achat du cours : {cours.titre}"
-        )
-        
-        messages.success(request, f"Félicitations ! Vous avez débloqué le cours '{cours.titre}'.")
-        return redirect('mes_courses')
-    else:
-        messages.error(request, "Solde insuffisant pour acheter ce cours.")
-        return redirect('course')
+        data = resp.json()
+    except Exception:
+        return 'erreur'
+
+    code = data.get('status')
+
+    # status == 0 => paiement réussi côté PayGate
+    if code == 0:
+        from django.utils import timezone as _tz
+        from django.db import transaction as _db_tx
+        with _db_tx.atomic():
+            # On recharge le verrou sur le paiement pour éviter un double crédit concurrent.
+            p = PaiementPayGate.objects.select_for_update().get(id=paiement.id)
+            if p.statut == 'paye':
+                return 'paye'
+            p.statut = 'paye'
+            p.tx_reference = str(data.get('tx_reference', ''))[:100]
+            p.date_paiement = _tz.now()
+            p.save(update_fields=['statut', 'tx_reference', 'date_paiement'])
+
+            etudiant = p.etudiant
+            ref = p.tx_reference or p.identifier
+
+            if p.type_paiement == 'achat_cours' and p.cours_id:
+                # Paiement direct d'un cours premium : on accorde l'accès (sans toucher au solde).
+                inscription, _ = Inscription.objects.get_or_create(
+                    etudiant=etudiant, cours=p.cours,
+                    defaults={'statut': 'validee', 'est_paye': True},
+                )
+                if not inscription.est_paye:
+                    inscription.statut = 'validee'
+                    inscription.est_paye = True
+                    inscription.save(update_fields=['statut', 'est_paye'])
+                Paiement.objects.create(
+                    montant=float(p.montant),
+                    date_paiement=_tz.now().date(),
+                    moyen_paiement="PayGate (TMoney/Flooz)",
+                    etudiant=etudiant,
+                )
+                TransactionSimulee.objects.create(
+                    etudiant=etudiant,
+                    montant=p.montant,
+                    type_transaction='achat_cours',
+                    description=f"Achat cours « {p.cours.titre} » via PayGate (réf. {ref})",
+                )
+            else:
+                # Recharge du portefeuille : on crédite le solde.
+                etudiant.solde += p.montant
+                etudiant.save(update_fields=['solde'])
+                TransactionSimulee.objects.create(
+                    etudiant=etudiant,
+                    montant=p.montant,
+                    type_transaction='recharge',
+                    description=f"Recharge PayGate (réf. {ref})",
+                )
+        return 'paye'
+
+    # status 4 = expiré, 6 = annulé (selon PayGate) => échec définitif
+    if code in (4, 6):
+        if paiement.statut == 'en_attente':
+            paiement.statut = 'echoue'
+            paiement.save(update_fields=['statut'])
+        return 'echoue'
+
+    # status 2 (en cours) ou transaction pas encore enregistrée => on réessaiera
+    return 'en_attente'
+
 
 @login_required
 def recharger_solde(request):
+    """Initie une recharge réelle via la page de paiement hébergée PayGate."""
     if not request.user.is_etudiant:
         return redirect('index')
-    
-    if request.method == 'POST':
-        montant = request.POST.get('montant', 10000)
+
+    if request.method != 'POST':
+        return redirect('paiements')
+
+    from decimal import Decimal, InvalidOperation
+    try:
+        montant = Decimal(request.POST.get('montant', '0'))
+    except (InvalidOperation, TypeError):
+        montant = Decimal('0')
+
+    if montant < 100:
+        messages.error(request, "Montant invalide (minimum 100 FCFA).")
+        return redirect('paiements')
+
+    identifier = uuid.uuid4().hex
+    PaiementPayGate.objects.create(
+        etudiant=request.user.etudiant,
+        identifier=identifier,
+        montant=montant,
+        statut='en_attente',
+    )
+
+    # Simulation locale si pas de clé ou mode simulation forcé
+    if not settings.PAYGATE_API_KEY or getattr(settings, 'PAYGATE_SIMULATION', False):
+        return redirect(reverse('paygate_simulation') + f'?ref={identifier}')
+
+    chemin_retour = reverse('paygate_retour') + f'?ref={identifier}'
+    if settings.SITE_BASE_URL:
+        retour_url = settings.SITE_BASE_URL + chemin_retour
+    else:
+        retour_url = request.build_absolute_uri(chemin_retour)
+
+    from urllib.parse import urlencode
+    params = urlencode({
+        'token': settings.PAYGATE_API_KEY,
+        'amount': int(montant),
+        'description': f"Recharge compte OpenEdu ({request.user.email})",
+        'identifier': identifier,
+        'url': retour_url,
+    })
+    return redirect(f"{PAYGATE_PAGE_URL}?{params}")
+
+
+@login_required
+def paygate_retour(request):
+    """Page de retour après paiement PayGate : on vérifie et on crédite."""
+    if not request.user.is_etudiant:
+        return redirect('index')
+
+    identifier = request.GET.get('ref', '')
+    paiement = PaiementPayGate.objects.filter(
+        identifier=identifier, etudiant=request.user.etudiant
+    ).first()
+
+    if not paiement:
+        messages.error(request, "Transaction introuvable.")
+        return redirect('paiements')
+
+    est_achat_cours = (paiement.type_paiement == 'achat_cours')
+    destination = 'mes_courses' if est_achat_cours else 'paiements'
+
+    statut = _paygate_verifier_paiement(paiement)
+    if statut == 'paye':
+        if est_achat_cours and paiement.cours:
+            messages.success(request, f"Paiement confirmé ! Vous avez débloqué le cours « {paiement.cours.titre} ».")
+        else:
+            messages.success(request, f"Paiement confirmé ! Votre compte a été rechargé de {int(paiement.montant)} FCFA.")
+        return redirect(destination)
+    if statut == 'echoue':
+        messages.error(request, "Le paiement a échoué ou a été annulé. Aucun montant n'a été débité.")
+        return redirect(destination)
+
+    # 'en_attente' ou 'erreur' : on affiche une page qui sonde le statut automatiquement.
+    return render(request, 'paygate_attente.html', {
+        'paiement': paiement,
+        'ref': identifier,
+    })
+
+
+@login_required
+def paygate_statut_json(request):
+    """Endpoint AJAX : renvoie l'état d'un paiement (sondé par la page d'attente)."""
+    ref = request.GET.get('ref', '')
+    paiement = PaiementPayGate.objects.filter(
+        identifier=ref, etudiant=request.user.etudiant
+    ).first() if request.user.is_etudiant else None
+    if not paiement:
+        return JsonResponse({'statut': 'introuvable'}, status=404)
+    statut = _paygate_verifier_paiement(paiement)
+    return JsonResponse({'statut': statut, 'montant': int(paiement.montant)})
+
+
+@csrf_exempt
+def paygate_callback(request):
+    """Webhook appelé par PayGate lorsqu'un paiement est confirmé (production).
+
+    PayGate envoie notamment : identifier, tx_reference, payment_reference, amount.
+    On crédite le solde de façon idempotente.
+    """
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    identifier = request.POST.get('identifier') or request.GET.get('identifier')
+    if not identifier:
+        # Certains appels envoient du JSON
         try:
-            montant_int = int(montant)
-            etudiant = request.user.etudiant
-            etudiant.solde += montant_int
-            etudiant.save()
-            
-            TransactionSimulee.objects.create(
-                etudiant=etudiant,
-                montant=montant_int,
-                type_transaction='recharge',
-                description="Recharge du compte (Simulation)"
+            import json as _json
+            identifier = _json.loads(request.body.decode('utf-8')).get('identifier')
+        except Exception:
+            identifier = None
+
+    if not identifier:
+        return HttpResponse(status=400)
+
+    paiement = PaiementPayGate.objects.filter(identifier=identifier).first()
+    if paiement:
+        _paygate_verifier_paiement(paiement)
+    return HttpResponse("OK")
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  SIMULATION PAYGATE (mode développement – pas de clé API réelle)
+# ──────────────────────────────────────────────────────────────────────────
+
+@login_required
+def paygate_simulation(request):
+    """Fausse page PayGate pour les tests sans clé API."""
+    if not request.user.is_etudiant:
+        return redirect('index')
+
+    identifier = request.GET.get('ref', '')
+    paiement = PaiementPayGate.objects.filter(
+        identifier=identifier, etudiant=request.user.etudiant
+    ).first()
+
+    if not paiement or paiement.statut != 'en_attente':
+        messages.error(request, "Transaction introuvable ou déjà traitée.")
+        return redirect('paiements')
+
+    return render(request, 'paygate_simulation.html', {'paiement': paiement})
+
+
+@login_required
+def paygate_simulation_action(request, action):
+    """Confirme ou annule un paiement simulé (action = 'confirmer' ou 'annuler')."""
+    if request.method != 'POST' or not request.user.is_etudiant:
+        return redirect('index')
+
+    identifier = request.POST.get('ref', '')
+    paiement = PaiementPayGate.objects.filter(
+        identifier=identifier, etudiant=request.user.etudiant, statut='en_attente'
+    ).first()
+
+    if not paiement:
+        messages.error(request, "Transaction introuvable.")
+        return redirect('paiements')
+
+    from django.utils import timezone as _tz
+
+    if action == 'confirmer':
+        ref = f'SIM-{uuid.uuid4().hex[:10].upper()}'
+        paiement.statut = 'paye'
+        paiement.tx_reference = ref
+        paiement.date_paiement = _tz.now()
+        paiement.save(update_fields=['statut', 'tx_reference', 'date_paiement'])
+
+        etudiant = paiement.etudiant
+
+        if paiement.type_paiement == 'achat_cours' and paiement.cours_id:
+            insc, _ = Inscription.objects.get_or_create(
+                etudiant=etudiant, cours=paiement.cours,
+                defaults={'statut': 'validee', 'est_paye': True},
             )
-            messages.success(request, f"Votre compte a été rechargé de {montant_int} FCFA.")
-        except ValueError:
-            messages.error(request, "Montant invalide.")
-        
-    return redirect('paiements')
+            if not insc.est_paye:
+                insc.statut = 'validee'
+                insc.est_paye = True
+                insc.save(update_fields=['statut', 'est_paye'])
+            messages.success(request, f"Paiement confirmé ! Vous avez débloqué « {paiement.cours.titre} ».")
+            return redirect('mes_courses')
+        else:
+            etudiant.solde = (etudiant.solde or 0) + paiement.montant
+            etudiant.save(update_fields=['solde'])
+            messages.success(request, f"Recharge de {int(paiement.montant)} FCFA créditée sur votre compte.")
+            return redirect('paiements')
+
+    else:  # annuler
+        paiement.statut = 'echoue'
+        paiement.save(update_fields=['statut'])
+        messages.error(request, "[SIMULATION] Paiement annulé. Aucun montant débité.")
+        dest = 'mes_courses' if paiement.type_paiement == 'achat_cours' else 'paiements'
+        return redirect(dest)
+
 
 @login_required
 def suivi_activite(request):
@@ -855,76 +1166,68 @@ def creer_cours_complet(request):
 
     if request.method == 'POST':
         try:
-            titre = request.POST.get('titre')
-            cours_id = request.POST.get('cours_id')
-            niveau = request.POST.get('niveau')
-            objectif = request.POST.get('objectif')
+            cours_id = request.POST.get('cours_id', '').strip()
+            titres_finaux = request.POST.getlist('entree_titres')
+            contenus_finaux = request.POST.getlist('entree_contenus')
 
-            # `creer_cours_complet` ne reçoit pas forcément `niveau` depuis le formulaire (template).
-            # Pour éviter l'insertion NULL (NOT NULL en DB), on prend le niveau du cours lié si disponible.
-            if not niveau and request.POST.get('cours_id'):
+            # Ce formulaire sert à ajouter un module à un cours existant : le lien est obligatoire.
+            if not cours_id:
+                messages.error(request, 'Veuillez choisir un cours dans la liste « Lier à un cours existant ».')
+                return redirect('creer_cours_complet')
+
+            target_cours = get_object_or_404(Cours, id=cours_id)
+
+            # Option premium : si la case est cochée, le cours devient payant
+            # et apparaît dans /premium-courses/ (la liste premium se base sur est_premium).
+            if request.POST.get('est_premium') == 'on':
+                from decimal import Decimal, InvalidOperation
+                target_cours.est_premium = True
                 try:
-                    cours_obj_lie_tmp = Cours.objects.get(id=cours_id)
-                    niveau = cours_obj_lie_tmp.niveau
-                except Cours.DoesNotExist:
-                    niveau = None
+                    target_cours.prix = Decimal(request.POST.get('prix') or 0)
+                except (InvalidOperation, TypeError):
+                    target_cours.prix = 0
+                target_cours.save(update_fields=['est_premium', 'prix'])
 
-            if not niveau:
-                niveau = 'Intermédiaire'
-            description = request.POST.get('description') or ""
-            categorie_id = request.POST.get('categorie')
+            titre_module = request.POST.get('titre_module', '').strip()
+            if not titre_module:
+                messages.error(request, 'Le titre du module est obligatoire.')
+                return redirect('creer_cours_complet')
 
-            # Ton template n’envoie pas 'description' au POST.
-            # Fallback sur le contenu Quill (contenu-hidden) pour éviter NULL.
-            if not description:
-                description = request.POST.get('contenu') or ""
-            est_premium = request.POST.get('est_premium') == 'on'
-            prix = request.POST.get('prix', 0)
-            image = request.FILES.get('image')
-            
-            categorie = None
-            if categorie_id:
-                try:
-                    categorie = Categorie.objects.get(id=categorie_id)
-                except Categorie.DoesNotExist:
-                    pass
-
-            nouveau_cours = Cours.objects.create(
-                titre=titre,
-                niveau=niveau,
-                objectif=objectif,
-                description=description,
-            categorie=categorie,
-                enseignant=request.user.enseignant,
-                est_premium=est_premium,
-                prix=prix,
-                image=image,
-                date_publication=timezone.now().date()
+            # Créer un VRAI module pour ce lot de sections (placé après les modules existants)
+            from django.db.models import Max
+            ordre_module = (Module.objects.filter(cours=target_cours).aggregate(Max('ordre'))['ordre__max'] or 0) + 1
+            module = Module.objects.create(
+                cours=target_cours,
+                titre=titre_module,
+                ordre=ordre_module,
             )
 
-            # Si l'enseignant a sélectionné un cours existant, on associe le contenu créé (chapitre)
-            # à ce cours existant.
-            cours_obj_lie = None
-            if cours_id:
-                try:
-                    cours_obj_lie = Cours.objects.get(id=cours_id)
-                except Cours.DoesNotExist:
-                    cours_obj_lie = None
+            # Créer les sections (chapitres) rattachées à ce module
+            nb_crees = 0
+            for i, (t, c) in enumerate(zip(titres_finaux, contenus_finaux)):
+                if t.strip():
+                    Chapitre.objects.create(
+                        cours=target_cours,
+                        module=module,
+                        titre=t.strip(),
+                        contenu=c,
+                        ordre=i + 1,
+                    )
+                    nb_crees += 1
 
-            if cours_obj_lie:
-                # On redirige vers la gestion du cours lié (et non le cours fraîchement créé)
-                messages.success(
-                    request,
-                    f'Contenu créé et lié au cours "{cours_obj_lie.titre}".'
-                )
-                return redirect('gerer_cours_enseignant', cours_id=cours_obj_lie.id)
+            if nb_crees == 0:
+                module.delete()  # pas de section : on ne garde pas un module vide
+                messages.warning(request, 'Aucune section reçue — le module n\'a pas été créé.')
+            else:
+                messages.success(request, f'Module « {titre_module} » ajouté ({nb_crees} section(s)) au cours « {target_cours.titre} ».')
+            return redirect('gerer_cours_enseignant', cours_id=target_cours.id)
 
-            messages.success(request, f'Le cours "{titre}" a été créé. Vous pouvez maintenant ajouter des chapitres et des ressources.')
-            return redirect('gerer_cours_enseignant', cours_id=nouveau_cours.id)
-            
         except Exception as e:
-            messages.error(request, f'Erreur lors de la création du cours : {e}')
+            import traceback
+            messages.error(request, f'Erreur : {e} — {traceback.format_exc()}')
 
+    # Tous les cours : on peut lier un nouveau module à n'importe quel cours existant
+    # (y compris ceux qui ont déjà du contenu), sans afficher leurs chapitres.
     tous_les_cours = Cours.objects.all().order_by('titre')
     categories = Categorie.objects.all()
     return render(request, 'admin/creer_cours.html', {
@@ -938,9 +1241,9 @@ def mes_cours_enseignant(request):
         messages.error(request, 'Accès refusé. Réservé aux enseignants.')
         return redirect('index')
     
-    # Récupérer les cours de l'enseignant avec leurs catégories
-    mes_cours = Cours.objects.filter(enseignant=request.user.enseignant).select_related('categorie')
-    
+    # Tous les cours sont gérables par l'enseignant (plateforme mono-équipe).
+    mes_cours = Cours.objects.all().select_related('categorie').order_by('titre')
+
     return render(request, 'admin/mes_cours.html', {'mes_cours': mes_cours})
 @login_required
 def gerer_cours_enseignant(request, cours_id):
@@ -953,7 +1256,7 @@ def gerer_cours_enseignant(request, cours_id):
     # Ne pas laisser un 404 "no course matches" si le cours existe mais n'est pas
     # visible pour l'enseignant courant : on redirige proprement.
     try:
-        cours = Cours.objects.select_related('enseignant').get(id=cours_id, enseignant=enseignant)
+        cours = Cours.objects.select_related('enseignant').get(id=cours_id)
     except Cours.DoesNotExist:
         messages.error(
             request,
@@ -965,16 +1268,63 @@ def gerer_cours_enseignant(request, cours_id):
         'chapitres',
         'chapitres__ressources'
     ).order_by('ordre')
+    chapitres_sans_module = Chapitre.objects.filter(cours=cours, module=None).order_by('ordre')
     ressources_cours = cours.ressources_annexes.all()
     quiz_list = cours.quiz.all()
 
     context = {
         'cours': cours,
         'modules': modules,
+        'chapitres_sans_module': chapitres_sans_module,
         'ressources_cours': ressources_cours,
         'quiz_list': quiz_list,
     }
     return render(request, 'admin/gerer_cours.html', context)
+
+
+@login_required
+def modifier_cours_complet(request, cours_id):
+    """Édition style 'créer cours' : met à jour le cours et ses sections (chapitres sans module)."""
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+
+    cours = get_object_or_404(Cours, id=cours_id)
+
+    if request.method == 'POST':
+        titre = request.POST.get('titre', '').strip()
+        if titre:
+            cours.titre = titre
+        cours.titre_module = request.POST.get('titre_module', '').strip()
+        cours.objectif = request.POST.get('objectif', cours.objectif)
+        cours.est_premium = request.POST.get('est_premium') == 'on'
+        cours.prix = request.POST.get('prix', 0) or 0
+        cours.save()
+
+        ids = request.POST.getlist('entree_ids')
+        titres = request.POST.getlist('entree_titres')
+        contenus = request.POST.getlist('entree_contenus')
+
+        for cid, t, c in zip(ids, titres, contenus):
+            if not t.strip():
+                continue
+            if cid:
+                ch = Chapitre.objects.filter(id=cid, cours=cours).first()
+                if ch:
+                    ch.titre = t.strip()
+                    ch.contenu = c
+                    ch.save(update_fields=['titre', 'contenu'])
+            else:
+                Chapitre.objects.create(
+                    cours=cours,
+                    titre=t.strip(),
+                    contenu=c,
+                    ordre=Chapitre.objects.filter(cours=cours).count() + 1,
+                )
+
+        messages.success(request, 'Le cours a été mis à jour avec succès.')
+
+    return redirect('gerer_cours_enseignant', cours_id=cours.id)
 
 
 @login_required
@@ -983,7 +1333,7 @@ def ajouter_module(request, cours_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
     
-    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    cours = get_object_or_404(Cours, id=cours_id)
     if request.method == 'POST':
         titre = request.POST.get('titre')
         description = request.POST.get('description', '')
@@ -1024,15 +1374,50 @@ def supprimer_module(request, module_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    module = get_object_or_404(Module, id=module_id, cours__enseignant=request.user.enseignant)
+    module = get_object_or_404(Module, id=module_id)
     cours_id = module.cours.id
     try:
         module.delete()
         messages.success(request, 'Module supprimé avec succès.')
     except Exception as e:
         messages.error(request, f"Erreur lors de la suppression du module : {e}")
-        
+
     return redirect('gerer_cours_enseignant', cours_id=cours_id)
+
+@login_required
+def basculer_module_premium(request, module_id):
+    """Active/désactive le statut premium d'un module (réservé à l'enseignant)."""
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+
+    module = get_object_or_404(Module, id=module_id)
+    module.est_premium = not module.est_premium
+    module.save(update_fields=['est_premium'])
+    etat = "Premium" if module.est_premium else "Gratuit"
+    messages.success(request, f'Module « {module.titre} » est maintenant : {etat}.')
+    return redirect('gerer_cours_enseignant', cours_id=module.cours.id)
+
+
+@login_required
+def modifier_premium_cours(request, cours_id):
+    """Réglage rapide du statut premium + prix d'un cours (depuis la page Gérer)."""
+    if not request.user.is_enseignant:
+        messages.error(request, 'Accès refusé.')
+        return redirect('index')
+
+    cours = get_object_or_404(Cours, id=cours_id)
+    if request.method == 'POST':
+        from decimal import Decimal, InvalidOperation
+        cours.est_premium = request.POST.get('est_premium') == 'on'
+        try:
+            cours.prix = Decimal(request.POST.get('prix') or 0)
+        except (InvalidOperation, TypeError):
+            cours.prix = 0
+        cours.save(update_fields=['est_premium', 'prix'])
+        etat = f"Premium — {int(cours.prix)} FCFA" if cours.est_premium else "Gratuit"
+        messages.success(request, f"Statut du cours mis à jour : {etat}.")
+    return redirect('gerer_cours_enseignant', cours_id=cours.id)
 
 @login_required
 def ajouter_chapitre_cours(request, cours_id):
@@ -1040,7 +1425,7 @@ def ajouter_chapitre_cours(request, cours_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    cours = get_object_or_404(Cours, id=cours_id)
     
     if request.method == 'POST':
         titre = request.POST.get('titre')
@@ -1100,7 +1485,7 @@ def modifier_chapitre_cours(request, chapitre_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     cours_id = chapitre.cours.id
     
     if request.method == 'POST':
@@ -1149,7 +1534,7 @@ def supprimer_chapitre_cours(request, chapitre_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     cours_id = chapitre.cours.id
     
     try:
@@ -1166,7 +1551,7 @@ def ajouter_ressource_cours(request, cours_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    cours = get_object_or_404(Cours, id=cours_id, enseignant=request.user.enseignant)
+    cours = get_object_or_404(Cours, id=cours_id)
     
     if request.method == 'POST':
         titre = request.POST.get('titre')
@@ -1193,7 +1578,7 @@ def supprimer_ressource_cours(request, ressource_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    ressource = get_object_or_404(RessourceCours, id=ressource_id, cours__enseignant=request.user.enseignant)
+    ressource = get_object_or_404(RessourceCours, id=ressource_id)
     cours_id = ressource.cours.id
     
     try:
@@ -1210,7 +1595,7 @@ def ajouter_ressource_chapitre(request, chapitre_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    chapitre = get_object_or_404(Chapitre, id=chapitre_id, cours__enseignant=request.user.enseignant)
+    chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     if request.method == 'POST':
         titre = request.POST.get('titre')
         fichier = request.FILES.get('fichier')
@@ -1241,7 +1626,7 @@ def supprimer_ressource_chapitre(request, ressource_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
         
-    ressource = get_object_or_404(RessourceChapitre, id=ressource_id, chapitre__cours__enseignant=request.user.enseignant)
+    ressource = get_object_or_404(RessourceChapitre, id=ressource_id)
     cours_id = ressource.chapitre.cours.id
     try:
         ressource.delete()
@@ -1258,7 +1643,7 @@ def modifier_cours_enseignant(request, id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
     
-    cours = get_object_or_404(Cours, id=id, enseignant=request.user.enseignant)
+    cours = get_object_or_404(Cours, id=id)
     
     if request.method == 'POST':
         cours.titre = request.POST.get('titre')
@@ -1315,7 +1700,7 @@ def supprimer_cours_enseignant(request, id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
     
-    cours = get_object_or_404(Cours, id=id, enseignant=request.user.enseignant)
+    cours = get_object_or_404(Cours, id=id)
     cours.delete()
     messages.success(request, 'Le cours a été supprimé.')
     return redirect('mes_cours_enseignant')
@@ -1330,9 +1715,7 @@ def liste_quiz_enseignant(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
         return redirect('index')
-    quiz_list = Quiz.objects.filter(
-        cours__enseignant=request.user.enseignant
-    ).select_related('cours').order_by('-id')
+    quiz_list = Quiz.objects.all().select_related('cours').order_by('-id')
     return render(request, 'admin/liste_quiz.html', {'quiz_list': quiz_list})
 
 
@@ -1342,11 +1725,13 @@ def generer_quiz_ia(request):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
 
-    # Récupérer TOUS les cours de la base
+    # Récupérer TOUS les cours de la base + leurs modules (pour le menu déroulant en cascade)
     mes_cours = Cours.objects.all().order_by('titre')
+    mes_modules = Module.objects.select_related('cours').order_by('cours__titre', 'ordre')
 
     if request.method == 'POST':
         cours_id    = request.POST.get('cours')
+        module_id   = request.POST.get('module')
         chapitres   = request.POST.get('chapitres', '').strip()
         nb_questions = int(request.POST.get('nb_questions', 5))
         niveau      = request.POST.get('niveau', 'intermédiaire')
@@ -1356,13 +1741,13 @@ def generer_quiz_ia(request):
 
         if not chapitres:
             messages.error(request, 'Veuillez décrire les chapitres à couvrir.')
-            return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours})
+            return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours, 'mes_modules': mes_modules})
 
         try:
             cours_obj = Cours.objects.get(id=cours_id)
         except Cours.DoesNotExist:
             messages.error(request, 'Cours introuvable.')
-            return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours})
+            return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours, 'mes_modules': mes_modules})
 
         # ── Prompt envoyé à Claude ──
         prompt = f"""Tu es un professeur expert en "{cours_obj.titre}".
@@ -1413,29 +1798,33 @@ FORMAT JSON REQUIS (respecte exactement cette structure) :
             response_text = response.text.strip()
             quiz_data = json.loads(response_text)
 
-            # ── Créer le Quiz en base ──
-            quiz = Quiz.objects.create(
-                titre=quiz_data['titre'],
-                duree=f"{duree} min",
-                note_max=float(nb_questions),
-                type_correction=type_correction,
-                cours=cours_obj
-            )
-
-            # ── Créer les Questions et Choix ──
-            for q_data in quiz_data['questions']:
-                question = Question.objects.create(
-                    quiz=quiz,
-                    texte=q_data['texte'],
-                    points=q_data.get('points', 1.0),
-                    est_ouverte=False
+            # ── Créer le Quiz, ses Questions et Choix dans une transaction ──
+            # Si quoi que ce soit échoue, RIEN n'est enregistré (pas de quiz à moitié créé).
+            from django.db import transaction
+            with transaction.atomic():
+                module_obj = Module.objects.filter(id=module_id, cours=cours_obj).first() if module_id else None
+                quiz = Quiz.objects.create(
+                    titre=quiz_data['titre'][:100],
+                    duree=f"{duree} min",
+                    note_max=float(nb_questions),
+                    type_correction=type_correction,
+                    cours=cours_obj,
+                    module=module_obj
                 )
-                for c_data in q_data['choix']:
-                    Choix.objects.create(
-                        question=question,
-                        texte=c_data['texte'],
-                        est_correct=c_data.get('est_correct', False)
+
+                for q_data in quiz_data['questions']:
+                    question = Question.objects.create(
+                        quiz=quiz,
+                        texte=q_data['texte'],
+                        points=q_data.get('points', 1.0),
+                        est_ouverte=False
                     )
+                    for c_data in q_data['choix']:
+                        Choix.objects.create(
+                            question=question,
+                            texte=c_data['texte'],
+                            est_correct=c_data.get('est_correct', False)
+                        )
 
             messages.success(
                 request,
@@ -1448,7 +1837,7 @@ FORMAT JSON REQUIS (respecte exactement cette structure) :
         except Exception as e:
             messages.error(request, f'❌ Erreur lors de la préparation automatique : {str(e)}')
 
-    return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours})
+    return render(request, 'admin/generer_quiz.html', {'mes_cours': mes_cours, 'mes_modules': mes_modules})
 
 
 @login_required
@@ -1458,37 +1847,64 @@ def creer_quiz_manuel(request):
         return redirect('index')
 
     if request.method == 'POST':
-        titre = request.POST.get('titre')
-        cours_id = request.POST.get('cours')
-        duree = request.POST.get('duree')
+        import json as _json
+        titre          = request.POST.get('titre', '').strip()
+        cours_id       = request.POST.get('cours')
+        module_id      = request.POST.get('module')
+        duree          = request.POST.get('duree', '30')
         type_correction = request.POST.get('type_correction', 'manuelle')
+        questions_json = request.POST.get('questions_json', '[]')
+        ressource      = request.FILES.get('ressource_sujet')
 
         try:
             cours_obj = Cours.objects.get(id=cours_id)
-            fichier_quiz = request.FILES.get('fichier_quiz')
-            note_max = request.POST.get('note_max', 0.0)
+            module_obj = Module.objects.filter(id=module_id, cours=cours_obj).first() if module_id else None
+            questions_data = _json.loads(questions_json)
+
+            # Calcul automatique de la note max depuis les questions
+            note_max = sum(float(q.get('points', 1)) for q in questions_data) if questions_data else 0.0
 
             quiz = Quiz.objects.create(
                 titre=titre,
                 cours=cours_obj,
+                module=module_obj,
                 duree=f"{duree} min",
-                note_max=float(note_max),
+                note_max=note_max,
                 type_correction=type_correction,
-                fichier_quiz=fichier_quiz
+                fichier_quiz=ressource,
             )
-            
-            if fichier_quiz:
-                messages.success(request, f'Quiz "{quiz.titre}" créé avec le fichier joint !')
-                return redirect('liste_quiz_enseignant')
-            else:
-                messages.success(request, f'Quiz "{quiz.titre}" créé ! Ajoutez maintenant vos questions.')
-                return redirect('ajouter_question_quiz', quiz_id=quiz.id)
+
+            # Créer toutes les questions + choix en une passe
+            for q_data in questions_data:
+                question = Question.objects.create(
+                    quiz=quiz,
+                    texte=q_data.get('texte', ''),
+                    points=float(q_data.get('points', 1.0)),
+                    est_ouverte=q_data.get('est_ouverte', True),
+                )
+                for c_data in q_data.get('choix', []):
+                    if c_data.get('texte', '').strip():
+                        Choix.objects.create(
+                            question=question,
+                            texte=c_data['texte'],
+                            est_correct=c_data.get('est_correct', False),
+                        )
+
+            nb_q = len(questions_data)
+            messages.success(request, f'Quiz « {quiz.titre} » créé avec {nb_q} question{"s" if nb_q > 1 else ""} !')
+            return redirect('detail_quiz_enseignant', id=quiz.id)
+
         except Exception as e:
             messages.error(request, f'Erreur lors de la création : {e}')
 
-    # Récupérer TOUS les cours de la base
     mes_cours = Cours.objects.all().order_by('titre')
-    return render(request, 'admin/creer_quiz_manuel.html', {'mes_cours': mes_cours})
+    mes_modules = Module.objects.select_related('cours').order_by('cours__titre', 'ordre')
+    cours_preselect = request.GET.get('cours_id', '')
+    return render(request, 'admin/creer_quiz_manuel.html', {
+        'mes_cours': mes_cours,
+        'mes_modules': mes_modules,
+        'cours_preselect': cours_preselect,
+    })
 
 
 @login_required
@@ -1497,7 +1913,7 @@ def ajouter_question_quiz(request, quiz_id):
         messages.error(request, 'Accès refusé.')
         return redirect('index')
 
-    quiz = get_object_or_404(Quiz, id=quiz_id, cours__enseignant=request.user.enseignant)
+    quiz = get_object_or_404(Quiz, id=quiz_id)
 
     if request.method == 'POST':
         texte_question = request.POST.get('texte_question')
@@ -1556,9 +1972,23 @@ def detail_quiz_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
         return redirect('index')
-    quiz = get_object_or_404(Quiz, id=id, cours__enseignant=request.user.enseignant)
+    quiz = get_object_or_404(Quiz, id=id)
+
+    # Rattacher / détacher le quiz d'un module
+    if request.method == 'POST' and request.POST.get('action') == 'set_module':
+        module_id = request.POST.get('module')
+        quiz.module = Module.objects.filter(id=module_id, cours=quiz.cours).first() if module_id else None
+        quiz.save(update_fields=['module'])
+        messages.success(request, "Module du quiz mis à jour.")
+        return redirect('detail_quiz_enseignant', id=quiz.id)
+
     questions = quiz.questions.prefetch_related('choix').all()
-    return render(request, 'admin/detail_quiz.html', {'quiz': quiz, 'questions': questions})
+    modules_du_cours = Module.objects.filter(cours=quiz.cours).order_by('ordre')
+    return render(request, 'admin/detail_quiz.html', {
+        'quiz': quiz,
+        'questions': questions,
+        'modules_du_cours': modules_du_cours,
+    })
 
 
 @login_required
@@ -1566,7 +1996,7 @@ def supprimer_quiz_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
         return redirect('index')
-    quiz = get_object_or_404(Quiz, id=id, cours__enseignant=request.user.enseignant)
+    quiz = get_object_or_404(Quiz, id=id)
     quiz.delete()
     messages.success(request, 'Quiz supprimé avec succès.')
     return redirect('liste_quiz_enseignant')
@@ -1852,35 +2282,31 @@ def mes_courses(request):
     ).select_related('cours', 'cours__categorie').prefetch_related('cours__chapitres')
 
     # Calcul de la progression réelle par cours et détermination du statut
+    nb_en_cours = 0
+    nb_termines = 0
     for insc in inscriptions:
-        total_chapitres = insc.cours.chapitres.count()
-        if total_chapitres > 0:
-            debloques = ChapitreDebloque.objects.filter(etudiant=request.user.etudiant, chapitre__cours=insc.cours).count()
-            insc.progression = min(int((debloques / total_chapitres) * 100), 100)
-        else:
-            insc.progression = 0
+        insc.progression = calculer_progression(request.user.etudiant, insc.cours)
 
-        # Déterminer le statut en fonction de la progression
-        if insc.progression == 0:
-            insc.statut = 'en_attente'
-        elif insc.progression == 100:
+        # Déterminer le statut en fonction de la progression :
+        # - 100% => terminé
+        # - entamé (1% à 99%) => en cours
+        # - 0% => inscrit mais pas encore commencé (ne compte pas comme "en cours")
+        if insc.progression == 100:
             insc.statut = 'terminee'
+            nb_termines += 1
+        elif insc.progression > 0:
+            insc.statut = 'validee'
+            nb_en_cours += 1
         else:
             insc.statut = 'validee'
 
         # Sauvegarder les changements
         insc.save(update_fields=['statut'])
 
-    # Séparer les cours gratuits et premium
-    inscriptions_gratuites = [ins for ins in inscriptions if not ins.cours.est_premium]
-    inscriptions_premium = [ins for ins in inscriptions if ins.cours.est_premium]
-
-    # Pagination des cours gratuits
-    paginator = Paginator(inscriptions_gratuites, 6)
+    # On affiche TOUS les cours inscrits ensemble (gratuits + premium, sans distinction).
+    # La distinction premium/débloqué se fait au niveau des modules, dans la page du cours.
+    paginator = Paginator(list(inscriptions), 6)
     page_obj = paginator.get_page(request.GET.get('page'))
-
-    nb_en_cours = inscriptions.filter(statut='validee').count()
-    nb_termines = inscriptions.filter(statut='terminee').count()
 
     # Récupérer les notifications non lues
     notifs = Notification.objects.filter(
@@ -1902,7 +2328,6 @@ def mes_courses(request):
 
     return render(request, 'admin/mes_formations.html', {
         'inscriptions': page_obj,
-        'inscriptions_premium': inscriptions_premium,
         'notifs': notifs,
         'nouveaux_cours': nouveaux_cours,
         'stats': {
@@ -1914,22 +2339,37 @@ def mes_courses(request):
 
 @login_required
 def voir_cours(request, cours_id):
-    if not request.user.is_etudiant:
-        messages.error(request, 'Accès réservé aux étudiants.')
-        return redirect('index')
-
     cours = get_object_or_404(Cours, id=cours_id)
-    try:
-        inscription = Inscription.objects.get(cours=cours, etudiant=request.user.etudiant)
-    except Inscription.DoesNotExist:
-        messages.error(request, "Vous n'êtes pas inscrit à ce cours.")
-        return redirect('mes_courses')
+
+    # Aperçu autorisé pour l'enseignant propriétaire (ou le staff) : il voit le cours
+    # tel que l'étudiant le voit, sans inscription ni suivi de progression.
+    est_etudiant = request.user.is_etudiant
+    apercu_prof = False
+    if not est_etudiant:
+        if request.user.is_enseignant or request.user.is_staff:
+            apercu_prof = True
+        else:
+            messages.error(request, 'Accès réservé aux étudiants.')
+            return redirect('index')
+
+    inscription = None
+    if est_etudiant:
+        inscription = Inscription.objects.filter(cours=cours, etudiant=request.user.etudiant).first()
 
     modules = Module.objects.filter(cours=cours).prefetch_related(
         Prefetch('chapitres', queryset=Chapitre.objects.order_by('ordre'))
     ).order_by('ordre')
 
     chapitres_sans_module = Chapitre.objects.filter(cours=cours, module=None).order_by('ordre')
+
+    # Statut premium AU NIVEAU DE CHAQUE MODULE (défini par l'enseignant via Module.est_premium) :
+    # - badge "Premium" affiché seulement si le module est marqué premium ;
+    # - "Débloqué" si l'étudiant a payé le cours (ou aperçu prof), sinon "Bloqué" ;
+    # - module non premium => aucun badge.
+    est_paye = apercu_prof or bool(inscription and inscription.est_paye)
+    modules = list(modules)
+    for module in modules:
+        module.debloque = est_paye
 
     chapitre_id = request.GET.get('chapitre')
     chapitre_actif = None
@@ -1941,8 +2381,15 @@ def voir_cours(request, cours_id):
         except Chapitre.DoesNotExist:
             pass
 
-    if not chapitre_actif and tous_chapitres:
-        chapitre_actif = tous_chapitres[0]
+    # Suivi de progression : on enregistre que l'étudiant a consulté ce chapitre.
+    if chapitre_actif and inscription:
+        ChapitreVu.objects.get_or_create(
+            etudiant=request.user.etudiant,
+            chapitre=chapitre_actif,
+        )
+
+    # Aucun chapitre demandé : on affiche le sommaire (modules/sections du prof).
+    # L'étudiant clique ensuite sur une section pour voir son contenu.
 
     chapitre_precedent = None
     chapitre_suivant = None
@@ -1954,14 +2401,28 @@ def voir_cours(request, cours_id):
             if idx < len(tous_chapitres) - 1:
                 chapitre_suivant = tous_chapitres[idx + 1]
 
+    # Quiz : on rattache chaque quiz à son module ; ceux sans module restent "du cours".
+    quiz_list = list(cours.quiz.select_related('module').all())
+    quizzes_par_module = {}
+    for q in quiz_list:
+        if q.module_id:
+            quizzes_par_module.setdefault(q.module_id, []).append(q)
+    for module in modules:
+        module.quiz_list = quizzes_par_module.get(module.id, [])
+    quiz_sans_module = [q for q in quiz_list if q.module_id is None]
+
     context = {
         'cours': cours,
         'modules': modules,
         'chapitres_sans_module': chapitres_sans_module,
+        'tous_chapitres': tous_chapitres,
         'chapitre_actif': chapitre_actif,
         'chapitre_precedent': chapitre_precedent,
         'chapitre_suivant': chapitre_suivant,
         'inscription': inscription,
+        'quiz_list': quiz_list,
+        'quiz_sans_module': quiz_sans_module,
+        'apercu_prof': apercu_prof,
     }
     return render(request, 'voir_cours.html', context)
 
@@ -2004,9 +2465,8 @@ def mes_quiz_etudiant(request):
 
     # Récupérer les ID des cours où l'étudiant est inscrit (statut = validée)
     cours_inscrits_ids = Inscription.objects.filter(
-        etudiant=request.user.etudiant,
-        statut='validee'
-    ).values_list('cours_id', flat=True)
+        etudiant=request.user.etudiant
+    ).exclude(statut='annulee').values_list('cours_id', flat=True)
 
     # Récupérer les quiz associés à ces cours
     quiz_disponibles = Quiz.objects.filter(
@@ -2024,13 +2484,15 @@ def detail_quiz_etudiant(request, id):
 
     # Récupérer les cours inscrits pour vérifier l'accès
     cours_inscrits_ids = Inscription.objects.filter(
-        etudiant=request.user.etudiant,
-        statut='validee'
-    ).values_list('cours_id', flat=True)
+        etudiant=request.user.etudiant
+    ).exclude(statut='annulee').values_list('cours_id', flat=True)
 
     # Récupérer le quiz s'il appartient bien à un cours inscrit
-    quiz = get_object_or_404(Quiz, id=id, cours_id__in=cours_inscrits_ids)
-    
+    quiz = Quiz.objects.filter(id=id, cours_id__in=cours_inscrits_ids).first()
+    if quiz is None:
+        messages.info(request, "Ce quiz n'existe plus ou n'est pas disponible. Voici vos quiz actuels.")
+        return redirect('mes_quiz_etudiant')
+
     # On récupère aussi les questions au cas où ce serait un QCM en ligne
     questions = quiz.questions.prefetch_related('choix').all()
 
@@ -2195,7 +2657,6 @@ def corrections_attente(request):
         return redirect('dashboard')
         
     soumissions = SoumissionQuiz.objects.filter(
-        quiz__cours__enseignant=request.user.enseignant,
         est_corrige=False
     ).select_related('quiz', 'etudiant', 'quiz__cours').order_by('date_soumission')
     
@@ -2209,9 +2670,8 @@ def corriger_soumission(request, soumission_id):
         return redirect('dashboard')
         
     soumission = get_object_or_404(
-        SoumissionQuiz, 
-        id=soumission_id, 
-        quiz__cours__enseignant=request.user.enseignant
+        SoumissionQuiz,
+        id=soumission_id
     )
     
     if request.method == 'POST':
@@ -2324,13 +2784,13 @@ def liste_cours_premium(request):
         else:
             cours.prix_mini = premium_chapitres.aggregate(Min('prix'))['prix__min'] or 0
         
-        # Vérification si débloqué
+        # Vérification si débloqué : un cours premium n'est débloqué QUE s'il a été payé.
         cours.debloque = False
         if request.user.is_authenticated and request.user.is_etudiant:
             cours.debloque = Inscription.objects.filter(
-                etudiant=request.user.etudiant, 
-                cours=cours, 
-                statut='validee'
+                etudiant=request.user.etudiant,
+                cours=cours,
+                est_paye=True
             ).exists()
             
     return render(request, 'cours_premium.html', {'cours_premium': cours_premium})
@@ -2338,18 +2798,10 @@ def liste_cours_premium(request):
 
 @login_required
 def detail_cours_premium(request, cours_id):
-    cours = get_object_or_404(Cours, id=cours_id)
-
-    est_inscrit = Inscription.objects.filter(
-        etudiant=request.user.etudiant,
-        cours=cours,
-        statut='validee'
-    ).exists()
-
-    if not est_inscrit and not request.user.is_staff:
-        messages.error(request, 'Vous devez être inscrit à ce cours.')
-        return redirect('mes_courses')
-
+    # Sur l'URL /cours/<id>/ on affiche EXACTEMENT la même page que « voir le cours » :
+    # thème vert, minuteur à gauche (filtres jour/semaine/mois/année) et quiz sous
+    # chaque module concerné. On délègue donc à la vue voir_cours.
+    return voir_cours(request, cours_id)
 
     # --- Correction legacy : cours sans chapitres ---
     chapitres_qs = cours.chapitres.all().order_by('ordre')

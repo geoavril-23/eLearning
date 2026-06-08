@@ -1,4 +1,205 @@
-http://127.0.0.1:8000/premium-courses/                    </tbody>
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Paiements - OpenEdu{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-wallet text-primary mr-2"></i>
+            {% if request.user.is_etudiant %}Mon Portefeuille{% else %}Gestion des Paiements{% endif %}
+        </h1>
+    </div>
+
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if request.user.is_etudiant %}
+    <!-- ============ VUE ÉTUDIANT ============ -->
+    <div class="row">
+        <!-- Carte solde -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Solde disponible</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ etudiant.solde|floatformat:0 }} FCFA</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total rechargé</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">+{{ total_recharge|floatformat:0 }} FCFA</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total dépensé</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">-{{ total_depense|floatformat:0 }} FCFA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recharge via PayGate -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-mobile-alt mr-2"></i>Recharger mon compte (TMoney / Flooz)</h6>
+            <span class="badge badge-success ml-auto"><i class="fas fa-shield-alt mr-1"></i>Paiement sécurisé PayGate</span>
+        </div>
+        <div class="card-body">
+            <form action="{% url 'recharger_solde' %}" method="post" class="form-row align-items-end">
+                {% csrf_token %}
+                <div class="form-group col-md-6 mb-2">
+                    <label class="font-weight-bold small">Montant à recharger (FCFA)</label>
+                    <input type="number" name="montant" id="montant-input" class="form-control" min="100" step="100" value="1000" required>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary montant-rapide" data-montant="500">500</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary montant-rapide" data-montant="1000">1 000</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary montant-rapide" data-montant="2000">2 000</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary montant-rapide" data-montant="5000">5 000</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary montant-rapide" data-montant="10000">10 000</button>
+                    </div>
+                </div>
+                <div class="form-group col-md-6 mb-2">
+                    <button type="submit" class="btn btn-success btn-block">
+                        <i class="fas fa-credit-card mr-1"></i> Payer avec PayGate
+                    </button>
+                    <small class="form-text text-muted">Vous serez redirigé vers la page de paiement sécurisée PayGate (TMoney / Flooz). Votre solde sera crédité après confirmation.</small>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Historique des transactions de l'étudiant -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Mes transactions</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTableTransactions" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Référence PayGate</th>
+                            <th>Montant</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>
+                                {% if t.type == 'recharge' %}
+                                    <span class="badge badge-success px-2 py-1 rounded-pill"><i class="fas fa-arrow-down mr-1"></i>Recharge</span>
+                                {% else %}
+                                    <span class="badge badge-primary px-2 py-1 rounded-pill"><i class="fas fa-graduation-cap mr-1"></i>Cours</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ t.description }}</td>
+                            <td class="small text-muted">{{ t.reference }}</td>
+                            <td>
+                                <span class="font-weight-bold {% if t.type == 'recharge' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if t.type == 'recharge' %}+{% else %}-{% endif %}{{ t.montant|floatformat:0 }} FCFA
+                                </span>
+                            </td>
+                            <td>{{ t.date|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">Aucun paiement PayGate pour le moment.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ============ VUE ADMIN / ENSEIGNANT ============ -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Revenu total (achats)</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|floatformat:0 }} FCFA</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total rechargé</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_recharges|floatformat:0 }} FCFA</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Étudiants actifs</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_etudiants_actifs }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Nb transactions</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.nb_transactions }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solde par étudiant -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-users mr-2"></i>Soldes & dépenses par étudiant</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Solde</th>
+                            <th>Total rechargé</th>
+                            <th>Total dépensé</th>
+                            <th>Transactions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in etudiants_data %}
+                        <tr>
+                            <td>
+                                <div class="font-weight-bold">{{ d.user.nom }} {{ d.user.prenom }}</div>
+                                <div class="small text-muted">{{ d.user.email }}</div>
+                            </td>
+                            <td class="font-weight-bold">{{ d.solde|floatformat:0 }} FCFA</td>
+                            <td class="text-success">+{{ d.total_recharge|floatformat:0 }} FCFA</td>
+                            <td class="text-danger">-{{ d.total_depense|floatformat:0 }} FCFA</td>
+                            <td>{{ d.nb_transactions }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">Aucun étudiant.</td></tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -29,26 +230,30 @@ http://127.0.0.1:8000/premium-courses/                    </tbody>
                                 <div class="small text-muted">{{ t.etudiant.email }}</div>
                             </td>
                             <td>
-                                {% if t.type_transaction == 'recharge' %}
+                                {% if t.type_paiement == 'recharge' %}
                                     <span class="badge badge-success px-2 py-1 rounded-pill"><i class="fas fa-arrow-down mr-1"></i>Recharge</span>
-                                {% elif t.type_transaction == 'achat_cours' %}
-                                    <span class="badge badge-primary px-2 py-1 rounded-pill"><i class="fas fa-graduation-cap mr-1"></i>Cours</span>
-                                {% elif t.type_transaction == 'achat_chapitre' %}
-                                    <span class="badge badge-info px-2 py-1 rounded-pill"><i class="fas fa-unlock mr-1"></i>Chapitre</span>
                                 {% else %}
-                                    <span class="badge badge-warning px-2 py-1 rounded-pill"><i class="fas fa-book mr-1"></i>Livre</span>
+                                    <span class="badge badge-primary px-2 py-1 rounded-pill"><i class="fas fa-graduation-cap mr-1"></i>Cours</span>
                                 {% endif %}
                             </td>
-                            <td class="small">{{ t.description }}</td>
+                            <td class="small">
+                                {% if t.type_paiement == 'achat_cours' and t.cours %}
+                                    Achat cours : {{ t.cours.titre }}
+                                {% elif t.type_paiement == 'recharge' %}
+                                    Recharge PayGate (TMoney / Flooz)
+                                {% else %}
+                                    {{ t.type_paiement }}
+                                {% endif %}
+                            </td>
                             <td>
-                                <span class="font-weight-bold {% if t.type_transaction == 'recharge' %}text-success{% else %}text-danger{% endif %}">
-                                    {% if t.type_transaction == 'recharge' %}+{% else %}-{% endif %}{{ t.montant|floatformat:0 }} FCFA
+                                <span class="font-weight-bold {% if t.type_paiement == 'recharge' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if t.type_paiement == 'recharge' %}+{% else %}-{% endif %}{{ t.montant|floatformat:0 }} FCFA
                                 </span>
                             </td>
-                            <td>{{ t.date_transaction|date:"d/m/Y H:i" }}</td>
+                            <td>{{ t.date_paiement|date:"d/m/Y H:i" }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="5" class="text-center text-muted py-4">Aucune transaction.</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted py-4">Aucune transaction PayGate.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -56,7 +261,6 @@ http://127.0.0.1:8000/premium-courses/                    </tbody>
         </div>
     </div>
     {% endif %}
-
 
 </div>
 {% endblock %}
@@ -67,10 +271,15 @@ http://127.0.0.1:8000/premium-courses/                    </tbody>
 <script>
     $(document).ready(function() {
         $('#dataTableTransactions, #dataTablePaiementsAdmin').DataTable({
-            "order": [[ 3, "desc" ]],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
-            }
+            "order": [[ 4, "desc" ]],
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json" }
+        });
+    });
+
+    // Boutons de montant rapide
+    document.querySelectorAll('.montant-rapide').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('montant-input').value = this.dataset.montant;
         });
     });
 </script>

@@ -120,6 +120,29 @@
         else sessionStart = Date.now() - accumulated * 1000;
     });
 
+    /* ── Query any page key (for dashboard selector) ── */
+    function totalForKey(key, period) {
+        const sessions = load();
+        const from = periodDates(period);
+        let total = sessions
+            .filter(s => s.page === key && s.date >= from)
+            .reduce((acc, s) => acc + s.seconds, 0);
+        // Add current live seconds if key matches current page
+        if (key === pageKey) total += accumulated;
+        return total;
+    }
+
+    function totalAllCours(period) {
+        const sessions = load();
+        const from = periodDates(period);
+        let total = sessions
+            .filter(s => s.page.startsWith('cours_') && s.date >= from)
+            .reduce((acc, s) => acc + s.seconds, 0);
+        // Add live if current page is a course
+        if (pageKey.startsWith('cours_')) total += accumulated;
+        return total;
+    }
+
     /* ── Public API ── */
     window.TimeTracker = {
         init(liveEl, totEl) {
@@ -131,6 +154,8 @@
         onFilterChange(period) {
             refreshTotal();
         },
+        totalForKey,
+        totalAllCours,
         fmt,
         fmtClock,
         totalForPeriod

@@ -5,12 +5,12 @@
 
 {% block extra_css %}
 <style>
-    /* === Gradient AI Header === */
+    /* === AI Header === */
     .ai-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 16px;
-        padding: 2rem;
-        color: white;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: #fff;
         margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
@@ -18,73 +18,71 @@
     .ai-header::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
+        top: -50%; right: -10%;
+        width: 300px; height: 300px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.04);
     }
     .ai-header::after {
         content: '';
         position: absolute;
-        bottom: -60%;
-        right: 10%;
-        width: 200px;
-        height: 200px;
+        bottom: -60%; right: 10%;
+        width: 200px; height: 200px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.04);
+        background: rgba(255,193,7,0.06);
     }
     .ai-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.25);
-        padding: 6px 14px;
+        background: rgba(255,193,7,0.18);
+        border: 1px solid rgba(255,193,7,0.4);
+        padding: 5px 14px;
         border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
+        font-size: 0.78rem;
+        font-weight: 700;
         letter-spacing: 0.5px;
         margin-bottom: 1rem;
+        color: #FFC107;
     }
+    .ai-header h1 { color: #fff; position: relative; z-index: 1; }
+    .ai-header p  { color: rgba(255,255,255,0.75); position: relative; z-index: 1; }
 
     /* === Form Card === */
     .quiz-form-card {
         border: none;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(102, 126, 234, 0.12);
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(19,62,63,0.1);
         overflow: hidden;
     }
     .quiz-form-card .card-header {
-        background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
-        border-bottom: 1px solid #e8ecf8;
-        padding: 1.25rem 1.5rem;
+        background: #f0f7f7;
+        border-bottom: 1px solid #d1e8e8;
+        padding: 1.1rem 1.5rem;
     }
+    .quiz-form-card .card-header .font-weight-bold { color: #133e3f !important; }
+    .quiz-form-card .card-header i { color: #FFC107 !important; }
 
     /* === Chapters Textarea === */
     .chapters-textarea {
-        border: 2px solid #e2e8f0;
+        border: 2px solid #e5e7eb;
         border-radius: 12px;
         padding: 14px 16px;
         font-size: 0.92rem;
         transition: all 0.3s ease;
         min-height: 160px;
         resize: vertical;
-        background: #fafbff;
+        background: #f9fafb;
         line-height: 1.7;
+        color: #1f2937;
     }
     .chapters-textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
-        background: white;
+        border-color: #133e3f;
+        box-shadow: 0 0 0 3px rgba(19,62,63,0.1);
+        background: #fff;
         outline: none;
     }
-    .chapters-textarea::placeholder {
-        color: #a0aec0;
-        font-style: italic;
-    }
+    .chapters-textarea::placeholder { color: #9ca3af; font-style: italic; }
 
     /* === Options Grid === */
     .options-grid {
@@ -92,114 +90,130 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
     }
-    @media (max-width: 768px) {
-        .options-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .options-grid { grid-template-columns: 1fr; } }
     .option-box {
-        background: #f8f9ff;
-        border: 2px solid #e8ecf8;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
         border-radius: 12px;
-        padding: 1rem;
-        transition: all 0.2s;
+        padding: 0.75rem;
+        transition: border-color 0.2s;
     }
-    .option-box:hover { border-color: #667eea; }
+    .option-box:hover { border-color: #133e3f; }
     .option-box label {
-        font-weight: 600;
-        color: #4a5568;
-        font-size: 0.85rem;
+        font-weight: 700;
+        color: #133e3f;
+        font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 0.5rem;
+        display: block;
+        white-space: nowrap;
     }
-    .option-box select,
+    .option-box label i { color: #FFC107 !important; }
     .option-box input[type="number"] {
-        border: 1.5px solid #e2e8f0;
+        border: 1.5px solid #e5e7eb;
         border-radius: 8px;
         padding: 8px 12px;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         width: 100%;
-        background: white;
+        background: #fff;
         transition: border-color 0.2s;
-        color: #2d3748;
+        color: #1f2937;
+    }
+    .option-box select {
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 8px 32px 8px 12px;
+        font-size: 0.92rem;
+        width: 100%;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23133e3f' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 12px 12px;
+        transition: border-color 0.2s;
+        color: #1f2937;
+        appearance: none;
+        -webkit-appearance: none;
     }
     .option-box select:focus,
     .option-box input[type="number"]:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102,126,234,0.1);
+        border-color: #133e3f;
+        box-shadow: 0 0 0 2px rgba(19,62,63,0.1);
         outline: none;
     }
 
     /* === Course Selector === */
     .course-select {
-        border: 2px solid #e2e8f0;
+        border: 2px solid #e5e7eb;
         border-radius: 12px;
-        padding: 12px 16px;
+        padding: 12px 40px 12px 16px;
         font-size: 0.95rem;
         width: 100%;
-        background: #fafbff;
+        background: #f9fafb;
         transition: all 0.3s;
-        color: #2d3748;
+        color: #1f2937;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23133e3f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 14px center;
-        padding-right: 40px;
     }
     .course-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        border-color: #133e3f;
+        box-shadow: 0 0 0 3px rgba(19,62,63,0.1);
         outline: none;
-        background-color: white;
+        background-color: #fff;
+    }
+
+    /* === Form label inline (non option-box) === */
+    .form-group .font-weight-bold { color: #133e3f; }
+    .form-group .font-weight-bold i { color: #FFC107 !important; }
+    .form-control:focus {
+        border-color: #133e3f;
+        box-shadow: 0 0 0 3px rgba(19,62,63,0.1);
     }
 
     /* === Generate Button === */
     .btn-generate {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         border: none;
-        color: white;
-        padding: 14px 36px;
-        border-radius: 12px;
-        font-size: 1rem;
+        color: #fff;
+        padding: 12px 32px;
+        border-radius: 50px;
+        font-size: 0.92rem;
         font-weight: 700;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
+        letter-spacing: 0.3px;
+        transition: all 0.25s ease;
         position: relative;
         overflow: hidden;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
+    .btn-generate i { color: #FFC107; }
     .btn-generate:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        color: white;
+        box-shadow: 0 8px 24px rgba(19,62,63,0.35);
+        color: #fff;
     }
     .btn-generate:active { transform: translateY(0); }
-    .btn-generate::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-        transition: left 0.5s;
-    }
-    .btn-generate:hover::before { left: 100%; }
 
     /* === Loading Overlay === */
     #loading-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(15, 15, 35, 0.75);
+        background: rgba(10,20,20,0.8);
         backdrop-filter: blur(6px);
         z-index: 9999;
         align-items: center;
         justify-content: center;
         flex-direction: column;
     }
-    #loading-overlay.active {
-        display: flex;
-    }
+    #loading-overlay.active { display: flex; }
     .loading-card {
-        background: white;
+        background: #fff;
         border-radius: 20px;
         padding: 3rem 4rem;
         text-align: center;
@@ -207,10 +221,9 @@
         max-width: 400px;
     }
     .claude-logo {
-        width: 64px;
-        height: 64px;
+        width: 64px; height: 64px;
         margin: 0 auto 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         border-radius: 16px;
         display: flex;
         align-items: center;
@@ -218,9 +231,10 @@
         font-size: 2rem;
         animation: pulse-logo 1.5s ease-in-out infinite;
     }
+    .claude-logo i { color: #FFC107 !important; }
     @keyframes pulse-logo {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
-        50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(102,126,234,0); }
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(19,62,63,0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(19,62,63,0); }
     }
     .loading-dots {
         display: flex;
@@ -231,7 +245,7 @@
     .loading-dots span {
         width: 10px; height: 10px;
         border-radius: 50%;
-        background: #667eea;
+        background: #133e3f;
         animation: dot-bounce 1.4s infinite ease-in-out;
     }
     .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
@@ -240,48 +254,42 @@
         0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
         40% { transform: scale(1); opacity: 1; }
     }
-    .loading-step {
-        font-size: 0.85rem;
-        color: #718096;
-        min-height: 20px;
-        transition: all 0.3s;
-    }
+    .loading-step { font-size: 0.85rem; color: #6b7280; min-height: 20px; transition: all 0.3s; }
 
-    /* === Tips Box === */
-    .tips-box {
-        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
-        border: 1px solid #c7d7ff;
-        border-radius: 12px;
-        padding: 1.25rem;
+
+    /* === Dark mode === */
+    body.dark-mode .quiz-form-card .card-header  { background: #1a3333; border-color: #2a5555; }
+    body.dark-mode .quiz-form-card .card-header .font-weight-bold { color: #f3f4f6 !important; }
+    body.dark-mode .quiz-form-card .card-body    { background: #1f2937; }
+    body.dark-mode .chapters-textarea            { background: #111827; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .chapters-textarea:focus      { border-color: #FFC107; box-shadow: 0 0 0 3px rgba(255,193,7,0.12); }
+    body.dark-mode .option-box                   { background: #111827; border-color: #374151; }
+    body.dark-mode .option-box:hover             { border-color: #FFC107; }
+    body.dark-mode .option-box label             { color: #FFC107; }
+    body.dark-mode .option-box input[type="number"] { background-color: #1f2937; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .option-box select {
+        background-color: #1f2937;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23FFC107' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 12px 12px;
+        border-color: #374151;
+        color: #f3f4f6;
     }
-    .tip-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 0.75rem;
-        font-size: 0.88rem;
-        color: #4a5568;
-    }
-    .tip-item:last-child { margin-bottom: 0; }
-    .tip-icon {
-        width: 22px; height: 22px;
-        border-radius: 50%;
-        background: #667eea;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.65rem;
-        flex-shrink: 0;
-        margin-top: 1px;
-    }
+    body.dark-mode .course-select                { background: #111827; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .course-select:focus          { border-color: #FFC107; }
+    body.dark-mode .form-group .font-weight-bold { color: #FFC107 !important; }
+    body.dark-mode .form-control                 { background: #111827; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .loading-card                 { background: #1f2937; }
+    body.dark-mode .loading-card h5              { color: #f3f4f6; }
+    body.dark-mode .loading-dots span            { background: #FFC107; }
 </style>
 {% endblock %}
 
 {% block content %}
 
 <!-- AI Header -->
-<div class="ai-header" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
+<div class="ai-header">
     <div class="ai-badge">
         <i class="fas fa-magic"></i>
         Assistant Intelligent
@@ -304,179 +312,129 @@
     {% endfor %}
 {% endif %}
 
-<div class="row">
-    <!-- === MAIN FORM === -->
-    <div class="col-lg-8">
-        <div class="card quiz-form-card mb-4">
-            <div class="card-header d-flex align-items-center">
-                <i class="fas fa-magic text-primary mr-2"></i>
-                <h6 class="m-0 font-weight-bold text-primary">Paramètres de génération</h6>
-            </div>
-            <div class="card-body p-4">
-                <form method="POST" id="quiz-form">
-                    {% csrf_token %}
+<div class="card quiz-form-card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <i class="fas fa-magic mr-2"></i>
+        <h6 class="m-0 font-weight-bold">Paramètres de génération</h6>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" id="quiz-form">
+            {% csrf_token %}
 
-                    <!-- Sélection du cours -->
-                    <div class="form-group mb-4">
-                        <label class="font-weight-bold text-gray-700 mb-2">
-                            <i class="fas fa-book-open text-primary mr-1"></i>
-                            Cours associé
-                        </label>
-                        <select name="cours" class="course-select" required id="cours-select">
-                            <option value="">— Choisissez un cours —</option>
-                            {% for cours in mes_cours %}
-                            <option value="{{ cours.id }}">{{ cours.titre }} ({{ cours.niveau }})</option>
-                            {% empty %}
-                            <option disabled>Aucun cours disponible — créez d'abord un cours</option>
-                            {% endfor %}
+            <!-- Cours -->
+            <div class="form-group mb-3">
+                <label class="font-weight-bold mb-2">
+                    <i class="fas fa-book-open mr-1"></i> Cours associé
+                </label>
+                <select name="cours" class="course-select" required id="cours-select">
+                    <option value="">— Choisissez un cours —</option>
+                    {% for cours in mes_cours %}
+                    <option value="{{ cours.id }}" {% if cours_preselect == cours.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cours.titre }} ({{ cours.niveau }})
+                    </option>
+                    {% empty %}
+                    <option disabled>Aucun cours disponible</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="font-weight-bold mb-2">
+                    <i class="fas fa-cube mr-1"></i> Module associé (optionnel)
+                </label>
+                <select name="module" class="course-select" id="module-select">
+                    <option value="">— Aucun (quiz du cours entier) —</option>
+                    {% for m in mes_modules %}
+                    <option value="{{ m.id }}" data-cours="{{ m.cours_id }}">{{ m.titre }}</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted">Le quiz s'affichera sous ce module dans la page du cours.</small>
+            </div>
+
+            <!-- 3 Options en ligne égale -->
+            <div class="row mb-2">
+                <div class="col-md-4 mb-3">
+                    <div class="option-box">
+                        <label><i class="fas fa-hashtag mr-1"></i> Nb de questions</label>
+                        <input type="number" name="nb_questions" value="5" min="3" max="20" id="nb-questions">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="option-box">
+                        <label><i class="fas fa-signal mr-1"></i> Difficulté</label>
+                        <select name="niveau">
+                            <option value="débutant">🟢 Débutant</option>
+                            <option value="intermédiaire" selected>🟡 Intermédiaire</option>
+                            <option value="avancé">🔴 Avancé</option>
+                            <option value="expert">⚫ Expert</option>
                         </select>
                     </div>
-
-                    <!-- Chapitres à couvrir -->
-                    <div class="form-group mb-4">
-                        <label class="font-weight-bold text-gray-700 mb-2">
-                            <i class="fas fa-list-ol text-primary mr-1"></i>
-                            Chapitres / Sujets à couvrir
-                            <span class="text-danger">*</span>
-                        </label>
-                        <textarea
-                            name="chapitres"
-                            class="chapters-textarea form-control"
-                            id="chapitres"
-                            placeholder="Exemple :
-Chapitre 1 : Introduction aux algorithmes — définitions, complexité temporelle, algorithmes de tri (bubble sort, quick sort)
-Chapitre 2 : Structures de données — tableaux, listes chaînées, piles, files d'attente
-Chapitre 3 : Récursivité — principe, cas de base, exemples pratiques (factorielle, Fibonacci)
-
-Plus vous êtes précis, meilleures seront les questions générées."
-                            rows="7"
-                            required
-                        ></textarea>
-                        <small class="text-muted mt-1 d-block">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Listez les chapitres avec leurs concepts clés pour des questions plus pertinentes.
-                        </small>
-                    </div>
-
-                    <!-- Instructions Personnalisées (Style de Prompt) -->
-                    <div class="form-group mb-4">
-                        <label class="font-weight-bold text-gray-700 mb-2">
-                            <i class="fas fa-comment-dots text-primary mr-1"></i>
-                            Style de l'IA / Consignes particulières (Optionnel)
-                        </label>
-                        <textarea
-                            name="instructions_ia"
-                            class="form-control"
-                            id="instructions_ia"
-                            placeholder="Ex: 'Utilise un ton humoristique', 'Fais des questions très techniques', 'Donne des exemples concrets du monde de l'entreprise', 'Sois très sévère dans les formulations'..."
-                            rows="3"
-                            style="border-radius: 12px; border: 2px solid #e2e8f0; background: #fafbff; padding: 12px 16px; font-size: 0.9rem;"
-                        ></textarea>
-                        <small class="text-muted mt-1 d-block">
-                            <i class="fas fa-magic mr-1"></i>
-                            Personnalisez la manière dont l'assistant rédige vos questions.
-                        </small>
-                    </div>
-
-                    <!-- Options -->
-                    <div class="options-grid mb-4">
-                        <div class="option-box">
-                            <label><i class="fas fa-hashtag mr-1 text-primary"></i> Nombre de questions</label>
-                            <input type="number" name="nb_questions" value="5" min="3" max="20" id="nb-questions">
-                            <small class="text-muted d-block mt-1">Entre 3 et 20</small>
-                        </div>
-                        <div class="option-box">
-                            <label><i class="fas fa-signal mr-1 text-warning"></i> Niveau de difficulté</label>
-                            <select name="niveau">
-                                <option value="débutant">🟢 Débutant</option>
-                                <option value="intermédiaire" selected>🟡 Intermédiaire</option>
-                                <option value="avancé">🔴 Avancé</option>
-                                <option value="expert">⚫ Expert</option>
-                            </select>
-                        </div>
-                        <div class="option-box">
-                            <label><i class="fas fa-clock mr-1 text-info"></i> Durée (minutes)</label>
-                            <input type="number" name="duree" value="15" min="5" max="120" id="duree">
-                            <small class="text-muted d-block mt-1">Temps alloué</small>
-                        </div>
-                        <div class="option-box" style="grid-column: 1 / -1;">
-                            <label><i class="fas fa-robot mr-1 text-success"></i> Type de correction</label>
-                            <select name="type_correction" required>
-                                <option value="manuelle">Correction Manuelle (par l'enseignant)</option>
-                                <option value="auto">Correction Automatique (par l'IA Gemini)</option>
-                            </select>
-                            <small class="text-muted d-block mt-1">Choisissez comment les soumissions des étudiants seront évaluées.</small>
-                        </div>
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="d-flex align-items-center">
-                    <!-- Submit -->
-                    <div class="d-flex align-items-center">
-                        <button type="submit" class="btn-generate mr-3" id="submit-btn" style="background: linear-gradient(135deg, #1a73e8 0%, #00d2ff 100%);">
-                            <i class="fas fa-magic mr-2"></i>
-                            Générer le Quiz automatiquement
-                        </button>
-                        <a href="{% url 'liste_quiz_enseignant' %}" class="btn btn-outline-secondary rounded-lg">
-                            <i class="fas fa-list mr-1"></i> Mes Quiz
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- === TIPS PANEL === -->
-    <div class="col-lg-4">
-        <div class="card quiz-form-card mb-4">
-            <div class="card-header">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-lightbulb mr-1 text-warning"></i>
-                    Conseils pour de meilleures questions
-                </h6>
-            </div>
-            <div class="card-body p-4">
-                <div class="tips-box">
-                    <div class="tip-item">
-                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
-                        <span>Mentionnez les <strong>concepts précis</strong> du chapitre (ex: "tri rapide, complexité O(n log n)")</span>
-                    </div>
-                    <div class="tip-item">
-                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
-                        <span>Indiquez le <strong>contexte du cours</strong> pour des questions adaptées au niveau</span>
-                    </div>
-                    <div class="tip-item">
-                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
-                        <span>Listez <strong>plusieurs chapitres</strong> pour un quiz couvrant tout le programme</span>
-                    </div>
-                    <div class="tip-item">
-                        <div class="tip-icon"><i class="fas fa-check fa-xs"></i></div>
-                        <span>Utilisez <strong>5–10 questions</strong> pour un bon équilibre durée/couverture</span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="option-box">
+                        <label><i class="fas fa-clock mr-1"></i> Durée (minutes)</label>
+                        <input type="number" name="duree" value="15" min="5" max="120" id="duree">
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Example block -->
-        <div class="card quiz-form-card">
-            <div class="card-header">
-                <h6 class="m-0 font-weight-bold text-success">
-                    <i class="fas fa-file-alt mr-1"></i>
-                    Exemple de saisie
-                </h6>
+            <!-- Chapitres -->
+            <div class="form-group mb-4">
+                <label class="font-weight-bold mb-2">
+                    <i class="fas fa-list-ol mr-1"></i>
+                    Chapitres / Sujets à couvrir <span class="text-danger">*</span>
+                </label>
+                <textarea
+                    name="chapitres"
+                    class="chapters-textarea form-control"
+                    id="chapitres"
+                    placeholder="Décrivez vos chapitres avec leurs concepts clés…&#10;Ex : Chapitre 1 : Tri rapide, complexité O(n log n)&#10;     Chapitre 2 : Listes chaînées, piles, files d'attente"
+                    rows="6"
+                    required
+                ></textarea>
+                <small class="text-muted mt-1 d-block" id="chapitres-hint">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Plus vous êtes précis, meilleures seront les questions générées.
+                </small>
             </div>
-            <div class="card-body p-4">
-                <small class="text-muted d-block mb-2">Pour un cours de Python :</small>
-                <div style="background:#f8f9fa;border-left:3px solid #667eea;padding:10px 14px;border-radius:0 8px 8px 0;font-size:0.82rem;line-height:1.7;color:#4a5568;">
-                    <strong>Chapitre 1 :</strong> Variables, types de données (int, str, list, dict)<br>
-                    <strong>Chapitre 2 :</strong> Boucles for/while, conditions if/elif/else<br>
-                    <strong>Chapitre 3 :</strong> Fonctions, paramètres, valeur de retour
+
+            <!-- Consignes IA + Type correction -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <label class="font-weight-bold mb-2">
+                        <i class="fas fa-comment-dots mr-1"></i>
+                        Consignes particulières à l'IA <span style="font-size:.8rem;font-weight:400;color:#9ca3af;">(optionnel)</span>
+                    </label>
+                    <textarea
+                        name="instructions_ia"
+                        class="form-control"
+                        placeholder="Ex : ton humoristique, questions très techniques, exemples du monde de l'entreprise…"
+                        rows="3"
+                        style="border-radius:12px;border:2px solid #e5e7eb;background:#f9fafb;padding:12px 16px;font-size:.9rem;"
+                    ></textarea>
                 </div>
-                <button class="btn btn-sm btn-outline-primary mt-3 w-100 rounded-lg" id="use-example">
-                    <i class="fas fa-paste mr-1"></i> Utiliser cet exemple
+                <div class="col-md-4">
+                    <div class="option-box h-100 d-flex flex-column justify-content-center">
+                        <label><i class="fas fa-robot mr-1"></i> Type de correction</label>
+                        <select name="type_correction" required>
+                            <option value="manuelle">Manuelle (enseignant)</option>
+                            <option value="auto">Automatique (IA Gemini)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex align-items-center">
+                <button type="submit" class="btn-generate mr-3" id="submit-btn">
+                    <i class="fas fa-magic"></i>
+                    Générer le Quiz automatiquement
                 </button>
+                <a href="{% url 'liste_quiz_enseignant' %}" class="btn rounded-pill px-4" style="border:1.5px solid #d1d5db;color:#6b7280;font-weight:700;">
+                    <i class="fas fa-list mr-1"></i> Mes Quiz
+                </a>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -499,6 +457,21 @@ Plus vous êtes précis, meilleures seront les questions générées."
 
 {% block extra_js %}
 <script>
+/* Cascade Cours → Module */
+(function () {
+    const coursSel  = document.getElementById('cours-select');
+    const moduleSel = document.getElementById('module-select');
+    if (!coursSel || !moduleSel) return;
+    const allOptions = Array.from(moduleSel.querySelectorAll('option[data-cours]'));
+    function filterModules() {
+        const coursId = coursSel.value;
+        moduleSel.value = '';
+        allOptions.forEach(opt => { opt.hidden = (opt.getAttribute('data-cours') !== coursId); });
+    }
+    coursSel.addEventListener('change', filterModules);
+    filterModules();
+})();
+
 const steps = [
     "📚 Lecture des chapitres…",
     "🧠 Analyse du contenu pédagogique…",
@@ -524,15 +497,6 @@ document.getElementById('quiz-form').addEventListener('submit', function(e) {
         stepIndex = (stepIndex + 1) % steps.length;
         document.getElementById('loading-step').textContent = steps[stepIndex];
     }, 2000);
-});
-
-// Example filler
-document.getElementById('use-example').addEventListener('click', function() {
-    document.getElementById('chapitres').value =
-`Chapitre 1 : Variables et types de données — entiers, flottants, chaînes, listes, dictionnaires
-Chapitre 2 : Structures de contrôle — boucles for/while, conditions if/elif/else, break/continue
-Chapitre 3 : Fonctions — définition, paramètres, valeurs par défaut, valeur de retour, portée`;
-    document.getElementById('chapitres').focus();
 });
 
 // Character counter

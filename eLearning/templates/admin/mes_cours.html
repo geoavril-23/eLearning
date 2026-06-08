@@ -10,6 +10,14 @@
         --oo-gold: #FFC107;
     }
 
+    /* Titre de page : teal en clair, gold en sombre */
+    .oe-page-title {
+        color: #133e3f;
+    }
+    body.dark-mode .oe-page-title {
+        color: #FFC107 !important;
+    }
+
     .courses-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -190,16 +198,66 @@
     .empty-state p {
         color: rgba(255, 255, 255, 0.85);
     }
+
+    /* ── Light-mode overrides : le glass ne fonctionne que sur fond sombre ── */
+    body:not(.dark-mode) .course-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body:not(.dark-mode) .course-card__title {
+        color: #133e3f !important;
+    }
+    body:not(.dark-mode) .course-card__category {
+        color: #b8860b !important;
+    }
+    body:not(.dark-mode) .course-card__meta {
+        color: #4b5563 !important;
+        border-bottom-color: rgba(19, 62, 63, 0.10) !important;
+    }
+    body:not(.dark-mode) .course-card__meta i {
+        color: #FFC107 !important;
+    }
+    body:not(.dark-mode) .course-card:hover {
+        box-shadow: 0 10px 32px rgba(19, 62, 63, 0.14) !important;
+        border-color: rgba(19, 62, 63, 0.35) !important;
+    }
+    body:not(.dark-mode) .empty-state {
+        background: #ffffff !important;
+        border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body:not(.dark-mode) .empty-state h4 { color: #133e3f !important; }
+    body:not(.dark-mode) .empty-state p  { color: #4b5563 !important; }
+    body:not(.dark-mode) .page-link {
+        background: #ffffff !important;
+        border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        color: #133e3f !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body:not(.dark-mode) .page-link:hover {
+        background: rgba(19, 62, 63, 0.06) !important;
+        border-color: rgba(19, 62, 63, 0.35) !important;
+    }
+    body:not(.dark-mode) .page-item.active .page-link {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%) !important;
+        color: #ffffff !important;
+        border-color: #133e3f !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-5">
-    <h1 class="h3 mb-0" style="color: #ffffff;">
+    <h1 class="h3 mb-0 oe-page-title">
         <i class="fas fa-book" style="color: var(--oo-gold); margin-right: 10px;"></i>Mes Cours
     </h1>
-    <a href="{% url 'creer_cours_complet' %}" class="d-none d-sm-inline-block btn btn-sm" style="background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);">
+    <a href="{% url 'creer_cours_complet' %}" class="d-none d-sm-inline-block btn btn-sm" style="background: linear-gradient(135deg, var(--oo-teal) 0%, #0f3435 100%); color: #ffffff; border: none; border-radius: 50px; padding: 0.5rem 1.4rem; box-shadow: 0 4px 12px rgba(19, 62, 63, 0.2);">
         <i class="fas fa-plus fa-sm mr-1"></i> Créer un nouveau cours
     </a>
 </div>
@@ -209,9 +267,7 @@
     {% for cours in mes_cours %}
     <div class="course-card">
         <div class="course-card__header">
-            <div class="course-card__category">
-                {% if cours.categorie %}{{ cours.categorie }}{% else %}Sans catégorie{% endif %}
-            </div>
+            {% if cours.categorie %}<div class="course-card__category">{{ cours.categorie }}</div>{% endif %}
             <h3 class="course-card__title">{{ cours.titre }}</h3>
         </div>
 
@@ -221,9 +277,19 @@
             {% if cours.ressource %}
             <div><i class="fas fa-file"></i>{{ cours.get_extension }}</div>
             {% endif %}
+            <div>
+                {% if cours.est_premium %}
+                    <i class="fas fa-crown"></i> Premium — {{ cours.prix|floatformat:0 }} FCFA
+                {% else %}
+                    <i class="fas fa-gift"></i> Gratuit
+                {% endif %}
+            </div>
         </div>
 
         <div class="course-card__actions">
+            <a href="{% url 'voir_cours' cours.id %}" class="course-card__btn course-card__btn--manage" title="Aperçu (vue étudiant)" style="background:linear-gradient(135deg,#1cc88a,#15a06e);">
+                <i class="fas fa-eye"></i> Aperçu
+            </a>
             <a href="{% url 'gerer_cours_enseignant' cours.id %}" class="course-card__btn course-card__btn--manage" title="Gérer">
                 <i class="fas fa-cog"></i> Gérer
             </a>

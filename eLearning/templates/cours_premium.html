@@ -286,6 +286,8 @@
     border: 0;
     border-radius: 14px;
     font-weight: 700;
+    font-family: inherit;
+    font-size: inherit;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -411,6 +413,16 @@
         </div>
       </div>
 
+      {% if messages %}
+      <div style="max-width:1200px; margin:0 auto 18px;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="border-radius:12px; font-weight:600;">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <div class="premium-cards-wrap">
         {% for cours in cours_premium %}
           <div class="premium-card" tabindex="0">
@@ -445,9 +457,22 @@
                 <div class="price-tag">
                   {{ cours.prix_mini|floatformat:0 }} <span>FCFA</span>
                 </div>
-                <a href="{% url 'detail_cours_premium' cours.id %}" class="btn-unlock {% if cours.debloque %}unlocked{% endif %}">
-                  {% if cours.debloque %}Accéder{% else %}Explorer{% endif %}
-                </a>
+                {% if cours.debloque %}
+                  <a href="{% url 'detail_cours_premium' cours.id %}" class="btn-unlock unlocked">
+                    <i class="fas fa-door-open"></i> Accéder
+                  </a>
+                {% elif cours.est_premium %}
+                  <form action="{% url 'acheter_cours_premium' cours.id %}" method="POST" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-unlock">
+                      <i class="fas fa-lock-open"></i> Acheter — {{ cours.prix_mini|floatformat:0 }} FCFA
+                    </button>
+                  </form>
+                {% else %}
+                  <a href="{% url 'detail_cours_premium' cours.id %}" class="btn-unlock">
+                    <i class="fas fa-eye"></i> Explorer
+                  </a>
+                {% endif %}
               </div>
             </div>
           </div>

@@ -1,139 +1,705 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block title %}Créer un Quiz Manuellement{% endblock %}
+{% block title %}Nouveau Quiz{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-card {
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    /* ── Layout ── */
+    .qz-wrap { display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 2rem; }
+
+    /* ── Section cards ── */
+    .qz-card {
+        background: #fff;
+        border: 1px solid rgba(19,62,63,0.15);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
-    .form-header {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        color: white;
-        border-radius: 16px 16px 0 0;
-        padding: 1.5rem;
+    .qz-card-head {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        padding: 1rem 1.5rem;
+        display: flex; align-items: center; gap: .6rem;
     }
-    .form-label {
-        font-weight: 600;
-        color: #4e73df;
-        margin-bottom: 0.5rem;
+    .qz-card-head h5 { color: #fff; font-weight: 800; margin: 0; font-size: .95rem; }
+    .qz-card-head i  { color: #FFC107; font-size: 1rem; }
+    .qz-card-head .badge-count {
+        margin-left: auto;
+        background: rgba(255,193,7,.2);
+        color: #FFC107;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: .75rem;
+        font-weight: 800;
     }
-    .form-control {
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e3e6f0;
-    }
-    .form-control:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 0.2rem rgba(78,115,223,0.1);
-    }
-    .btn-create {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 12px 24px;
+    .qz-card-body { padding: 1.25rem 1.5rem; }
+
+    /* ── Form fields ── */
+    .qz-label {
+        display: block;
         font-weight: 700;
-        transition: all 0.3s;
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #133e3f;
+        margin-bottom: .3rem;
     }
-    .btn-create:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(78,115,223,0.3);
-        color: white;
+    .qz-input, .qz-select, .qz-textarea {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: .65rem 1rem;
+        font-size: .9rem;
+        color: #1f2937;
+        background: #f9fafb;
+        transition: border-color .2s, box-shadow .2s;
     }
+    .qz-input:focus, .qz-select:focus, .qz-textarea:focus {
+        border-color: #133e3f;
+        box-shadow: 0 0 0 3px rgba(19,62,63,.1);
+        background: #fff;
+        outline: none;
+    }
+    .qz-textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Split panel ── */
+    .qz-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    @media (max-width: 991px) { .qz-split { grid-template-columns: 1fr; } }
+
+    /* ── Builder panel ── */
+    .qz-builder-head {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        padding: 1rem 1.5rem;
+        display: flex; align-items: center; gap: .6rem;
+        border-radius: 20px 20px 0 0;
+    }
+    .qz-builder-head h5 { color: #fff; font-weight: 800; margin: 0; font-size: .95rem; }
+    .qz-builder-head i  { color: #FFC107; }
+
+    /* ── Type tabs ── */
+    .qz-type-tabs { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    .qz-type-tab {
+        flex: 1; padding: .5rem; text-align: center;
+        border: 2px solid #e5e7eb; border-radius: 10px;
+        font-size: .8rem; font-weight: 700; color: #6b7280;
+        cursor: pointer; transition: all .2s;
+    }
+    .qz-type-tab.active { border-color: #133e3f; color: #133e3f; background: rgba(19,62,63,.06); }
+
+    /* ── Choices builder ── */
+    .qz-choices { display: flex; flex-direction: column; gap: .5rem; }
+    .qz-choice-row {
+        display: flex; align-items: center; gap: .6rem;
+        background: #f9fafb; border: 1px solid #e5e7eb;
+        border-radius: 10px; padding: .5rem .75rem;
+        transition: border-color .2s;
+    }
+    .qz-choice-row:focus-within { border-color: #133e3f; }
+    .qz-choice-row input[type="text"] {
+        flex: 1; border: none; background: transparent;
+        font-size: .88rem; color: #1f2937; outline: none;
+    }
+    .qz-choice-check { accent-color: #133e3f; width: 16px; height: 16px; cursor: pointer; }
+    .qz-choice-hint { font-size: .68rem; color: #9ca3af; margin-top: .25rem; }
+
+    /* ── Add question button ── */
+    .btn-add-q {
+        width: 100%; padding: .7rem; border-radius: 12px;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        color: #fff; font-weight: 700; font-size: .88rem;
+        border: none; cursor: pointer; transition: all .25s;
+        display: flex; align-items: center; justify-content: center; gap: .5rem;
+    }
+    .btn-add-q:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(19,62,63,.3); }
+    .btn-add-q i { color: #FFC107; }
+
+    /* ── Added questions mini-list ── */
+    .qz-q-list { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
+    .qz-q-chip {
+        display: flex; align-items: center; gap: .6rem;
+        background: #f3f4f6; border-radius: 10px;
+        padding: .5rem .75rem; font-size: .82rem;
+    }
+    .qz-q-chip .qz-q-num {
+        background: #133e3f; color: #FFC107;
+        border-radius: 6px; padding: 2px 7px;
+        font-size: .72rem; font-weight: 800; white-space: nowrap;
+    }
+    .qz-q-chip .qz-q-label { flex: 1; color: #1f2937; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .qz-q-chip .qz-q-del {
+        color: #dc2626; background: none; border: none;
+        cursor: pointer; font-size: .9rem; padding: 0 4px; flex-shrink: 0;
+    }
+
+    /* ── LIVE PREVIEW panel ── */
+    .qz-preview-panel {
+        background: #fff;
+        border: 1px solid rgba(19,62,63,.15);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,.05);
+        position: sticky;
+        top: 20px;
+    }
+    .qz-preview-head {
+        background: linear-gradient(135deg, #FFC107 0%, #e6ac00 100%);
+        padding: .85rem 1.25rem;
+        display: flex; align-items: center; gap: .6rem;
+    }
+    .qz-preview-head h5 { color: #133e3f; font-weight: 800; margin: 0; font-size: .9rem; }
+    .qz-preview-body { padding: 1rem 1.25rem; min-height: 200px; max-height: 70vh; overflow-y: auto; }
+
+    /* ── Preview question item (course-style format) ── */
+    .pv-empty {
+        text-align: center; padding: 2rem 1rem;
+        color: #9ca3af; font-size: .85rem;
+    }
+    .pv-empty i { font-size: 2rem; color: #d1d5db; display: block; margin-bottom: .5rem; }
+
+    .pv-question {
+        border: 1px solid rgba(19,62,63,.12);
+        border-left: 4px solid #133e3f;
+        border-radius: 12px;
+        padding: .9rem 1rem;
+        margin-bottom: .9rem;
+        background: #fcfcfc;
+        animation: pv-in .25s ease;
+    }
+    @keyframes pv-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .pv-q-meta {
+        display: flex; align-items: center; gap: .5rem;
+        margin-bottom: .55rem;
+    }
+    .pv-q-num {
+        background: #133e3f; color: #FFC107;
+        border-radius: 6px; padding: 2px 8px;
+        font-size: .7rem; font-weight: 800;
+    }
+    .pv-q-pts {
+        background: rgba(255,193,7,.15); color: #b8860b;
+        border-radius: 6px; padding: 2px 8px;
+        font-size: .7rem; font-weight: 700;
+    }
+    .pv-q-type {
+        margin-left: auto; font-size: .68rem; font-weight: 700;
+        color: #9ca3af; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .pv-q-text {
+        font-size: .88rem; font-weight: 600; color: #1f2937;
+        line-height: 1.5; margin-bottom: .6rem;
+        white-space: pre-wrap;
+    }
+    .pv-choice {
+        display: flex; align-items: center; gap: .5rem;
+        padding: .35rem .6rem; border-radius: 8px;
+        font-size: .82rem; color: #374151;
+        margin-bottom: .25rem;
+        border: 1px solid #f3f4f6;
+    }
+    .pv-choice.correct {
+        background: rgba(16,185,129,.08);
+        border-color: rgba(16,185,129,.25);
+        color: #065f46; font-weight: 700;
+    }
+    .pv-choice-bullet {
+        width: 18px; height: 18px; border-radius: 50%;
+        border: 2px solid #d1d5db;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .6rem; flex-shrink: 0;
+    }
+    .pv-choice.correct .pv-choice-bullet {
+        border-color: #10b981; background: #10b981; color: #fff;
+    }
+    .pv-open-box {
+        background: #f9fafb; border: 1px dashed #d1d5db;
+        border-radius: 8px; padding: .5rem .75rem;
+        font-size: .8rem; color: #9ca3af; font-style: italic;
+    }
+
+    /* ── Ressource optionnelle ── */
+    .ressource-toggle {
+        display: flex; align-items: center; gap: .75rem;
+        cursor: pointer; font-weight: 700; font-size: .9rem; color: #133e3f;
+        user-select: none;
+    }
+    .ressource-toggle i { color: #FFC107; }
+    .ressource-zone {
+        display: none;
+        margin-top: 1rem;
+        border: 2px dashed rgba(19,62,63,.25);
+        border-radius: 14px;
+        padding: 1.25rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        position: relative;
+    }
+    .ressource-zone:hover, .ressource-zone.dragover {
+        border-color: #133e3f;
+        background: rgba(19,62,63,.03);
+    }
+    .ressource-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .ressource-zone i { font-size: 1.75rem; color: rgba(19,62,63,.3); display: block; margin-bottom: .5rem; }
+    .ressource-zone .rz-label { font-size: .88rem; font-weight: 700; color: #133e3f; }
+    .ressource-zone .rz-hint { font-size: .75rem; color: #9ca3af; margin-top: .25rem; }
+    .ressource-zone .rz-chosen { font-size: .85rem; font-weight: 700; color: #133e3f; }
+
+    /* ── Footer buttons ── */
+    .qz-footer {
+        display: flex; justify-content: flex-end; align-items: center;
+        gap: .75rem; padding: 1rem 1.5rem;
+        border-top: 1px solid #f3f4f6;
+        background: #fafafa;
+    }
+    .btn-cancel {
+        padding: .55rem 1.4rem; border-radius: 50px;
+        border: 1.5px solid #d1d5db; color: #6b7280;
+        font-weight: 700; font-size: .88rem; background: #fff;
+        cursor: pointer; transition: all .2s; text-decoration: none;
+        display: inline-flex; align-items: center;
+    }
+    .btn-cancel:hover { border-color: #9ca3af; color: #374151; }
+    .btn-submit {
+        padding: .55rem 1.6rem; border-radius: 50px;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        color: #fff; font-weight: 700; font-size: .88rem;
+        border: none; cursor: pointer; transition: all .25s;
+        display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .btn-submit i { color: #FFC107; }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(19,62,63,.3); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* ── Dark mode ── */
+    body.dark-mode .qz-card,
+    body.dark-mode .qz-preview-panel { background: #1f2937; border-color: rgba(255,255,255,.1); }
+    body.dark-mode .qz-label { color: #FFC107; }
+    body.dark-mode .qz-input,
+    body.dark-mode .qz-select,
+    body.dark-mode .qz-textarea { background: #111827; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .qz-input:focus,
+    body.dark-mode .qz-select:focus,
+    body.dark-mode .qz-textarea:focus { border-color: #FFC107; box-shadow: 0 0 0 3px rgba(255,193,7,.15); }
+    body.dark-mode .qz-type-tab { border-color: #374151; color: #9ca3af; }
+    body.dark-mode .qz-type-tab.active { border-color: #FFC107; color: #FFC107; background: rgba(255,193,7,.08); }
+    body.dark-mode .qz-choice-row { background: #111827; border-color: #374151; }
+    body.dark-mode .qz-choice-row input[type="text"] { color: #f3f4f6; }
+    body.dark-mode .qz-q-chip { background: #111827; }
+    body.dark-mode .qz-q-chip .qz-q-label { color: #e5e7eb; }
+    body.dark-mode .pv-question { background: #111827; border-color: rgba(255,255,255,.08); border-left-color: #FFC107; }
+    body.dark-mode .pv-q-text { color: #e5e7eb; }
+    body.dark-mode .pv-choice { border-color: rgba(255,255,255,.08); color: #d1d5db; }
+    body.dark-mode .pv-open-box { background: #1a2332; border-color: #374151; }
+    body.dark-mode .ressource-zone { border-color: rgba(255,193,7,.25); }
+    body.dark-mode .ressource-zone:hover { background: rgba(255,193,7,.04); }
+    body.dark-mode .qz-footer { background: #1a2332; border-top-color: rgba(255,255,255,.08); }
+    body.dark-mode .btn-cancel { background: #1f2937; border-color: #374151; color: #9ca3af; }
+    body.dark-mode .btn-cancel:hover { border-color: #9ca3af; color: #e5e7eb; }
+    body.dark-mode .pv-q-num { background: #FFC107; color: #133e3f; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="form-card card">
-                <div class="form-header">
-                    <h4 class="mb-0"><i class="fas fa-edit mr-2"></i>Nouveau Quiz Manuel</h4>
-                    <p class="mb-0 opacity-75">Remplissez les informations de base avant d'ajouter des questions.</p>
+<form id="quizForm" method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+<input type="hidden" id="questionsJson" name="questions_json" value="[]">
+
+<div class="qz-wrap">
+
+    <!-- ── 1. Infos du quiz ── -->
+    <div class="qz-card">
+        <div class="qz-card-head">
+            <i class="fas fa-info-circle"></i>
+            <h5>Informations du quiz</h5>
+        </div>
+        <div class="qz-card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="qz-label">Titre du Quiz *</label>
+                    <input type="text" name="titre" class="qz-input" placeholder="Ex : Quiz sur la structure atomique" required>
                 </div>
-                <div class="card-body p-4">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-4">
-                            <label class="form-label">Titre du Quiz</label>
-                            <input type="text" name="titre" class="form-control" placeholder="Ex: Quiz sur la structure atomique" required>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Cours associé</label>
-                            <select name="cours" class="form-control" required>
-                                <option value="">Choisir un cours...</option>
-                                {% for cours in mes_cours %}
-                                    <option value="{{ cours.id }}">{{ cours.titre }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label">Durée estimée (minutes)</label>
-                                <input type="number" name="duree" class="form-control" placeholder="Ex: 15" required>
-                            </div>
-                            <div id="points-container" class="col-md-6 mb-4" style="display:none;">
-                                <label class="form-label">Points total (pour le fichier)</label>
-                                <input type="number" step="0.5" name="note_max" class="form-control" value="0">
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Type de correction</label>
-                            <select name="type_correction" class="form-control" required>
-                                <option value="manuelle">Correction Manuelle (par l'enseignant)</option>
-                                <option value="auto">Correction Automatique (par l'IA Gemini)</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Fichier du Quiz (Optionnel - PDF, Word...)</label>
-                            <div class="custom-file">
-                                <input type="file" name="fichier_quiz" class="custom-file-input" id="fichier_quiz" onchange="togglePoints(this)">
-                                <label class="custom-file-label" for="fichier_quiz">Charger un sujet complet</label>
-                            </div>
-                            <small class="text-muted">Si vous chargez un fichier, vous pourrez passer l'étape de création de questions individuelles.</small>
-                        </div>
-
-                        <div class="text-right">
-                            <a href="{% url 'liste_quiz_enseignant' %}" class="btn btn-light rounded-pill px-4 mr-2">Annuler</a>
-                            <button type="submit" class="btn-create" id="submit-btn">
-                                Étape suivante <i class="fas fa-arrow-right ml-2"></i>
-                            </button>
-                        </div>
-                    </form>
+                <div class="col-md-6 mb-3">
+                    <label class="qz-label">Cours associé *</label>
+                    <select name="cours" id="qz-cours-select" class="qz-select" required>
+                        <option value="">Choisir un cours…</option>
+                        {% for c in mes_cours %}
+                        <option value="{{ c.id }}" {% if cours_preselect == c.id|stringformat:"s" %}selected{% endif %}>{{ c.titre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="qz-label">Module associé (optionnel)</label>
+                    <select name="module" id="qz-module-select" class="qz-select">
+                        <option value="">— Aucun (quiz du cours entier) —</option>
+                        {% for m in mes_modules %}
+                        <option value="{{ m.id }}" data-cours="{{ m.cours_id }}">{{ m.titre }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Le quiz s'affichera sous ce module dans la page du cours.</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="qz-label">Durée estimée (minutes) *</label>
+                    <input type="number" name="duree" class="qz-input" placeholder="Ex : 30" min="1" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="qz-label">Type de correction *</label>
+                    <select name="type_correction" class="qz-select" required>
+                        <option value="manuelle">Correction Manuelle (par l'enseignant)</option>
+                        <option value="auto">Correction Automatique (IA Gemini)</option>
+                    </select>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- ── 2. Rédiger les questions ── -->
+    <div class="qz-split">
+
+        <!-- Builder -->
+        <div class="qz-card" style="border-radius:20px; overflow:hidden;">
+            <div class="qz-builder-head">
+                <i class="fas fa-pen-alt"></i>
+                <h5>Rédiger les questions</h5>
+                <span class="badge-count" id="counterBadge">0 question</span>
+            </div>
+            <div class="qz-card-body">
+
+                <!-- Type de question -->
+                <div class="mb-3">
+                    <label class="qz-label">Type de question</label>
+                    <div class="qz-type-tabs">
+                        <div class="qz-type-tab active" data-type="ouverte" onclick="setType('ouverte', this)">
+                            <i class="fas fa-align-left mr-1"></i> Ouverte
+                        </div>
+                        <div class="qz-type-tab" data-type="qcm" onclick="setType('qcm', this)">
+                            <i class="fas fa-list-ul mr-1"></i> QCM
+                        </div>
+                    </div>
+                    <input type="hidden" id="q_type" value="ouverte">
+                </div>
+
+                <!-- Énoncé -->
+                <div class="mb-3">
+                    <label class="qz-label">Énoncé de la question</label>
+                    <textarea id="q_text" class="qz-textarea" placeholder="Rédigez votre question ici…" oninput="liveUpdate()"></textarea>
+                </div>
+
+                <!-- Points -->
+                <div class="mb-3">
+                    <label class="qz-label">Points</label>
+                    <input type="number" id="q_points" class="qz-input" value="1" min="0.5" step="0.5" style="max-width:120px;" oninput="liveUpdate()">
+                </div>
+
+                <!-- Choix (QCM) -->
+                <div id="choicesSection" style="display:none;" class="mb-3">
+                    <label class="qz-label">Choix de réponses <span style="font-weight:400;text-transform:none;font-size:.75rem;color:#9ca3af;">(cochez la/les bonne(s) réponse(s))</span></label>
+                    <div class="qz-choices" id="choicesList">
+                        <!-- Généré par JS -->
+                    </div>
+                    <button type="button" onclick="addChoiceRow()" style="margin-top:.5rem;background:none;border:1px dashed rgba(19,62,63,.3);border-radius:8px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;color:#133e3f;cursor:pointer;width:100%;">
+                        <i class="fas fa-plus mr-1"></i> Ajouter un choix
+                    </button>
+                    <p class="qz-choice-hint">Laissez vides les choix inutilisés.</p>
+                </div>
+
+                <button type="button" class="btn-add-q" onclick="addQuestion()">
+                    <i class="fas fa-plus-circle"></i> Ajouter la question au quiz
+                </button>
+
+                <!-- Liste des questions ajoutées -->
+                <div class="qz-q-list" id="questionList"></div>
+            </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="qz-preview-panel">
+            <div class="qz-preview-head">
+                <i class="fas fa-eye" style="color:#133e3f;"></i>
+                <h5>Aperçu en temps réel</h5>
+            </div>
+            <div class="qz-preview-body" id="previewBody">
+                <div class="pv-empty" id="previewEmpty">
+                    <i class="fas fa-file-alt"></i>
+                    Les questions apparaîtront ici au fur et à mesure que vous les rédigez.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── 3. Ressource du sujet (optionnelle) ── -->
+    <div class="qz-card">
+        <div class="qz-card-body" style="padding:1rem 1.5rem;">
+            <div class="ressource-toggle" onclick="toggleRessource()">
+                <i class="fas fa-paperclip"></i>
+                <span>Ajouter une ressource du sujet <span style="font-size:.78rem;font-weight:400;color:#9ca3af;">(optionnel — PDF, ZIP, Word, Excel)</span></span>
+                <i class="fas fa-chevron-down ml-auto" id="ressourceChevron" style="font-size:.75rem;color:#9ca3af;transition:transform .2s;"></i>
+            </div>
+            <div class="ressource-zone" id="ressourceZone" ondragover="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+                <input type="file" name="ressource_sujet" id="ressourceFile" accept=".pdf,.zip,.doc,.docx,.xls,.xlsx" onchange="updateFileName(this)">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div class="rz-label" id="rzLabel">Glissez un fichier ici ou cliquez pour parcourir</div>
+                <div class="rz-hint">PDF · ZIP · Word · Excel — max 50 Mo</div>
+            </div>
+        </div>
+
+        <div class="qz-footer">
+            <a href="{% url 'liste_quiz_enseignant' %}" class="btn-cancel">Annuler</a>
+            <button type="submit" class="btn-submit" id="submitBtn" onclick="return prepareSubmit()">
+                <i class="fas fa-check-circle"></i> Créer le Quiz
+            </button>
+        </div>
+    </div>
+
+</div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    function togglePoints(input) {
-        const container = document.getElementById('points-container');
-        const btn = document.getElementById('submit-btn');
-        const fileName = input.files[0] ? input.files[0].name : "Charger un sujet complet";
-        input.nextElementSibling.innerText = fileName;
+/* ═══════════════════════════════════════
+   Cascade Cours → Module
+═══════════════════════════════════════ */
+(function () {
+    const coursSel  = document.getElementById('qz-cours-select');
+    const moduleSel = document.getElementById('qz-module-select');
+    if (!coursSel || !moduleSel) return;
+    const allOptions = Array.from(moduleSel.querySelectorAll('option[data-cours]'));
 
-        if (input.files && input.files[0]) {
-            container.style.display = 'block';
-            btn.innerHTML = 'Créer le Quiz-Fichier <i class="fas fa-check-circle ml-2"></i>';
-        } else {
-            container.style.display = 'none';
-            btn.innerHTML = 'Étape suivante <i class="fas fa-arrow-right ml-2"></i>';
-        }
+    function filterModules() {
+        const coursId = coursSel.value;
+        moduleSel.value = '';
+        allOptions.forEach(opt => {
+            opt.hidden = (opt.getAttribute('data-cours') !== coursId);
+        });
     }
-</script>
-                </div>
+    coursSel.addEventListener('change', filterModules);
+    filterModules(); // état initial (respecte un cours présélectionné)
+})();
+
+/* ═══════════════════════════════════════
+   État global
+═══════════════════════════════════════ */
+let questions   = [];
+let qCounter    = 0;
+let choiceCount = 4;
+
+/* ═══════════════════════════════════════
+   Type de question
+═══════════════════════════════════════ */
+function setType(type, el) {
+    document.querySelectorAll('.qz-type-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('q_type').value = type;
+    const cs = document.getElementById('choicesSection');
+    if (type === 'qcm') {
+        cs.style.display = 'block';
+        if (document.getElementById('choicesList').children.length === 0) {
+            for (let i = 0; i < 4; i++) addChoiceRow();
+        }
+    } else {
+        cs.style.display = 'none';
+    }
+    liveUpdate();
+}
+
+/* ═══════════════════════════════════════
+   Gestion des choix
+═══════════════════════════════════════ */
+function addChoiceRow() {
+    const list = document.getElementById('choicesList');
+    const i    = choiceCount++;
+    const div  = document.createElement('div');
+    div.className = 'qz-choice-row';
+    div.innerHTML = `
+        <input type="checkbox" class="qz-choice-check choice-correct" id="cc${i}">
+        <input type="text" class="choice-text" placeholder="Choix ${list.children.length + 1}…" oninput="liveUpdate()">
+        <button type="button" onclick="this.parentElement.remove(); liveUpdate();" style="background:none;border:none;color:#dc2626;font-size:.85rem;cursor:pointer;padding:0;flex-shrink:0;"><i class="fas fa-times"></i></button>`;
+    list.appendChild(div);
+    div.querySelector('.qz-choice-check').addEventListener('change', liveUpdate);
+}
+
+function getChoices() {
+    return Array.from(document.querySelectorAll('#choicesList .qz-choice-row')).map(row => ({
+        texte: row.querySelector('.choice-text').value.trim(),
+        est_correct: row.querySelector('.choice-correct').checked
+    })).filter(c => c.texte);
+}
+
+/* ═══════════════════════════════════════
+   Aperçu live d'une question en cours
+═══════════════════════════════════════ */
+function liveUpdate() {
+    renderPreview();
+}
+
+/* ═══════════════════════════════════════
+   Ajouter une question
+═══════════════════════════════════════ */
+function addQuestion() {
+    const text   = document.getElementById('q_text').value.trim();
+    const type   = document.getElementById('q_type').value;
+    const points = parseFloat(document.getElementById('q_points').value) || 1;
+    const choix  = type === 'qcm' ? getChoices() : [];
+
+    if (!text) { alert('Veuillez saisir l\'énoncé de la question.'); return; }
+    if (type === 'qcm' && choix.length < 2) { alert('Ajoutez au moins 2 choix pour une QCM.'); return; }
+
+    const q = { id: ++qCounter, texte: text, points, est_ouverte: type === 'ouverte', choix };
+    questions.push(q);
+
+    renderPreview();
+    renderQuestionList();
+    updateCounter();
+    resetForm();
+}
+
+/* ═══════════════════════════════════════
+   Supprimer une question
+═══════════════════════════════════════ */
+function deleteQuestion(id) {
+    questions = questions.filter(q => q.id !== id);
+    renderPreview();
+    renderQuestionList();
+    updateCounter();
+}
+
+/* ═══════════════════════════════════════
+   Reset formulaire builder
+═══════════════════════════════════════ */
+function resetForm() {
+    document.getElementById('q_text').value = '';
+    document.getElementById('q_points').value = '1';
+    document.getElementById('choicesList').innerHTML = '';
+    choiceCount = 0;
+    if (document.getElementById('q_type').value === 'qcm') {
+        for (let i = 0; i < 4; i++) addChoiceRow();
+    }
+}
+
+/* ═══════════════════════════════════════
+   Rendu aperçu (toutes les questions)
+═══════════════════════════════════════ */
+function renderPreview() {
+    const body    = document.getElementById('previewBody');
+    const empty   = document.getElementById('previewEmpty');
+    const liveText  = document.getElementById('q_text').value.trim();
+    const liveType  = document.getElementById('q_type').value;
+    const livePts   = parseFloat(document.getElementById('q_points').value) || 1;
+    const liveChoix = liveType === 'qcm' ? getChoices() : [];
+
+    // Build all saved + current draft
+    let all = [...questions];
+    if (liveText || (liveType === 'qcm' && liveChoix.length)) {
+        all.push({ id: 'draft', texte: liveText, points: livePts, est_ouverte: liveType === 'ouverte', choix: liveChoix, draft: true });
+    }
+
+    if (!all.length) {
+        empty && (empty.style.display = '');
+        body.querySelectorAll('.pv-question').forEach(el => el.remove());
+        return;
+    }
+    empty && (empty.style.display = 'none');
+
+    body.querySelectorAll('.pv-question').forEach(el => el.remove());
+
+    all.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'pv-question' + (q.draft ? ' pv-draft' : '');
+        if (q.draft) div.style.opacity = '.65';
+
+        let choicesHtml = '';
+        if (q.est_ouverte) {
+            choicesHtml = `<div class="pv-open-box"><i class="fas fa-pen mr-1"></i> Réponse ouverte (texte libre)</div>`;
+        } else {
+            choicesHtml = q.choix.map(c => `
+                <div class="pv-choice ${c.est_correct ? 'correct' : ''}">
+                    <span class="pv-choice-bullet">${c.est_correct ? '<i class="fas fa-check" style="font-size:.55rem;"></i>' : ''}</span>
+                    <span>${c.texte}</span>
+                </div>`).join('');
+            if (!choicesHtml) choicesHtml = `<div class="pv-open-box" style="font-style:normal;">Aucun choix saisi pour l'instant…</div>`;
+        }
+
+        const pts = q.points;
+        div.innerHTML = `
+            <div class="pv-q-meta">
+                <span class="pv-q-num">Q${idx + 1}</span>
+                <span class="pv-q-pts">${pts} pt${pts > 1 ? 's' : ''}</span>
+                <span class="pv-q-type">${q.est_ouverte ? '✏️ Ouverte' : '☑️ QCM'}${q.draft ? ' · brouillon' : ''}</span>
             </div>
-        </div>
-    </div>
-</div>
+            <div class="pv-q-text">${q.texte || '<span style="color:#9ca3af;font-style:italic;">Énoncé en cours…</span>'}</div>
+            ${choicesHtml}`;
+        body.appendChild(div);
+    });
+
+    body.scrollTop = body.scrollHeight;
+}
+
+/* ═══════════════════════════════════════
+   Liste compacte des questions sauvées
+═══════════════════════════════════════ */
+function renderQuestionList() {
+    const list = document.getElementById('questionList');
+    list.innerHTML = questions.map((q, i) => `
+        <div class="qz-q-chip">
+            <span class="qz-q-num">Q${i + 1}</span>
+            <span class="qz-q-label">${q.texte || '(sans énoncé)'}</span>
+            <span style="color:#9ca3af;font-size:.72rem;white-space:nowrap;">${q.points} pt${q.points > 1 ? 's' : ''}</span>
+            <button class="qz-q-del" onclick="deleteQuestion(${q.id})" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+        </div>`).join('');
+}
+
+function updateCounter() {
+    const n = questions.length;
+    document.getElementById('counterBadge').textContent = n + ' question' + (n > 1 ? 's' : '');
+}
+
+/* ═══════════════════════════════════════
+   Ressource optionnelle
+═══════════════════════════════════════ */
+function toggleRessource() {
+    const zone = document.getElementById('ressourceZone');
+    const chev = document.getElementById('ressourceChevron');
+    const open = zone.style.display === 'block';
+    zone.style.display = open ? 'none' : 'block';
+    chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function updateFileName(input) {
+    document.getElementById('rzLabel').textContent = input.files[0] ? input.files[0].name : 'Glissez un fichier ici ou cliquez pour parcourir';
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('ressourceZone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const input = document.getElementById('ressourceFile');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    updateFileName(input);
+}
+
+/* ═══════════════════════════════════════
+   Soumission du formulaire
+═══════════════════════════════════════ */
+function prepareSubmit() {
+    if (questions.length === 0) {
+        const ok = confirm('Aucune question n\'a été ajoutée. Créer le quiz sans questions ?');
+        if (!ok) return false;
+    }
+    document.getElementById('questionsJson').value = JSON.stringify(questions);
+    return true;
+}
+</script>
 {% endblock %}

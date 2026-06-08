@@ -240,6 +240,25 @@
     </div>
 </div>
 
+<!-- Rattachement à un module -->
+<div class="card shadow-sm rounded-lg mb-4 border-0">
+    <div class="card-body p-4">
+        <h5 class="font-weight-bold mb-3 text-primary"><i class="fas fa-cube mr-2"></i>Module associé</h5>
+        <form method="post" class="form-inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="set_module">
+            <select name="module" class="form-control mr-2 mb-2">
+                <option value="">— Aucun (quiz du cours entier) —</option>
+                {% for m in modules_du_cours %}
+                <option value="{{ m.id }}" {% if quiz.module_id == m.id %}selected{% endif %}>{{ m.titre }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 mb-2"><i class="fas fa-save mr-1"></i> Enregistrer</button>
+        </form>
+        <small class="text-muted">Le quiz s'affichera sous ce module dans la page du cours côté étudiant. Sans module, il apparaît dans « Quiz du cours ».</small>
+    </div>
+</div>
+
 {% if quiz.fichier_quiz %}
 <div class="card shadow-sm rounded-lg mb-4 border-0">
     <div class="card-body p-4">

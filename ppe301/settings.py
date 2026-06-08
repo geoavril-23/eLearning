@@ -143,5 +143,36 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'index'
 
 # === API Keys ==
-GEMINI_API_KEY    = os.environ.get('GEMINI_API_KEY', 'AIzaSyCNnhGL3VbImD1ICOA_kk-Fa_-3WrCRh74')
+# Les clés sont lues depuis le fichier .env (non commité, ignoré par Git)
+# ou, à défaut, depuis une variable d'environnement. Ne JAMAIS écrire une clé en clair ici.
+def _load_env_var(name):
+    env_path = BASE_DIR / '.env'
+    if env_path.exists():
+        for line in env_path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if line.startswith(f'{name}=') and not line.startswith('#'):
+                return line.split('=', 1)[1].strip().strip('"').strip("'")
+    return os.environ.get(name, '')
+
+GEMINI_API_KEY = _load_env_var('GEMINI_API_KEY')
+
+# PayGate Global (paiement mobile money TMoney / Flooz - Togo)
+PAYGATE_API_KEY = _load_env_var('PAYGATE_API_KEY')
+# Mettre PAYGATE_SIMULATION=True dans .env pour forcer la simulation locale (sans NIF)
+PAYGATE_SIMULATION = _load_env_var('PAYGATE_SIMULATION').lower() in ('true', '1', 'yes')
+
+# URL publique du site (ex. tunnel ngrok) utilisée pour construire les URL de
+# retour/callback envoyées à PayGate. À défaut, on retombe sur l'hôte de la requête.
+SITE_BASE_URL = _load_env_var('SITE_BASE_URL').rstrip('/')
+
+# Origines de confiance CSRF : nécessaire pour accepter les POST servis via HTTPS
+# (tunnel ngrok) et le retour de PayGate.
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.dev',
+    'https://*.ngrok-free.app',
+    'https://*.ngrok.io',
+    'https://jailhouse-jeeringly-stupor.ngrok-free.dev'
+]
+if SITE_BASE_URL.startswith('http'):
+    CSRF_TRUSTED_ORIGINS.append(SITE_BASE_URL)
 

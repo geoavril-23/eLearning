@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Mobile Money — Simulation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #283593 100%);
+            padding: 1rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .badge-sim {
+            display: inline-block;
+            background: #FFC107;
+            color: #333;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: .2rem .6rem;
+            border-radius: 50px;
+            letter-spacing: .5px;
+            margin-bottom: 1rem;
+        }
+        .logo-area {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo-area .icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto .75rem;
+            color: #fff; font-size: 1.6rem;
+        }
+        .logo-area h2 { font-size: 1.2rem; color: #1565c0; font-weight: 800; }
+        .logo-area p  { font-size: .8rem; color: #999; margin-top: .2rem; }
+        .amount-box {
+            background: #f0f4ff;
+            border: 2px solid #1565c0;
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .amount-box .label { font-size: .8rem; color: #666; text-transform: uppercase; letter-spacing: .5px; }
+        .amount-box .amount { font-size: 2rem; font-weight: 800; color: #1565c0; margin: .3rem 0; }
+        .amount-box .desc { font-size: .85rem; color: #555; }
+        .methods {
+            display: flex; gap: .75rem; margin-bottom: 1.5rem;
+        }
+        .method {
+            flex: 1; border: 2px solid #e0e0e0; border-radius: 10px;
+            padding: .6rem; text-align: center; font-size: .75rem; color: #555;
+        }
+        .method .dot {
+            width: 28px; height: 28px; border-radius: 50%;
+            margin: 0 auto .3rem; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #fff; font-size: .7rem;
+        }
+        .dot-tm { background: #e53935; }
+        .dot-fl { background: #43a047; }
+        .btn {
+            width: 100%; padding: .9rem; border: none; border-radius: 12px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: .75rem;
+            transition: opacity .2s;
+        }
+        .btn:hover { opacity: .88; }
+        .btn-confirm { background: #1565c0; color: #fff; }
+        .btn-cancel  { background: #fff; color: #c62828; border: 2px solid #c62828; }
+        .notice {
+            font-size: .75rem; color: #999; text-align: center; margin-top: .5rem;
+            line-height: 1.5;
+        }
+        form { margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="text-align:center">
+            <span class="badge-sim">MODE SIMULATION</span>
+        </div>
+
+        <div class="logo-area">
+            <div class="icon"><i class="fas fa-mobile-alt"></i></div>
+            <h2>PayGate Global</h2>
+            <p>Paiement Mobile Money sécurisé</p>
+        </div>
+
+        <div class="amount-box">
+            <div class="label">Montant à payer</div>
+            <div class="amount">{{ paiement.montant|floatformat:0 }} <span style="font-size:1rem">FCFA</span></div>
+            <div class="desc">
+                {% if paiement.type_paiement == 'achat_cours' and paiement.cours %}
+                    Achat cours : <strong>{{ paiement.cours.titre|truncatechars:50 }}</strong>
+                {% else %}
+                    Recharge de portefeuille
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="methods">
+            <div class="method">
+                <div class="dot dot-tm">T</div>
+                TMoney
+            </div>
+            <div class="method">
+                <div class="dot dot-fl">F</div>
+                Flooz
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'paygate_simulation_action' 'confirmer' %}">
+            {% csrf_token %}
+            <input type="hidden" name="ref" value="{{ paiement.identifier }}">
+            <button type="submit" class="btn btn-confirm">
+                <i class="fas fa-check-circle"></i>&nbsp; Confirmer le paiement
+            </button>
+        </form>
+
+        <form method="post" action="{% url 'paygate_simulation_action' 'annuler' %}">
+            {% csrf_token %}
+            <input type="hidden" name="ref" value="{{ paiement.identifier }}">
+            <button type="submit" class="btn btn-cancel">
+                <i class="fas fa-times-circle"></i>&nbsp; Annuler
+            </button>
+        </form>
+
+        <p class="notice">
+            Ceci est une simulation de paiement à des fins de test.<br>
+            Aucun vrai débit ne sera effectué.
+        </p>
+    </div>
+</body>
+</html>

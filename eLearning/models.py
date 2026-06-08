@@ -131,6 +131,7 @@ MATIERES_CHOICES = [
 
 class Cours(models.Model):
     titre = models.CharField(max_length=100)
+    titre_module = models.CharField(max_length=200, blank=True, default='')
     niveau = models.CharField(max_length=50)
     objectif = models.TextField()
     description = models.TextField()
@@ -210,6 +211,7 @@ class Module(models.Model):
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     ordre = models.PositiveIntegerField(default=0)
+    est_premium = models.BooleanField(default=False)
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -310,6 +312,25 @@ class ChapitreDebloque(models.Model):
         return f"{self.etudiant} - {self.chapitre.titre}"
 
 
+class ChapitreVu(models.Model):
+    """Trace les chapitres réellement consultés par un étudiant (suivi de progression).
+
+    Distinct de ChapitreDebloque qui, lui, correspond à un ACHAT de chapitre premium.
+    Ici on enregistre simplement qu'un étudiant a ouvert/étudié un chapitre.
+    """
+    etudiant = models.ForeignKey(Etudiant, on_delete=models.CASCADE, related_name='chapitres_vus')
+    chapitre = models.ForeignKey(Chapitre, on_delete=models.CASCADE, related_name='vues')
+    date_consultation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('etudiant', 'chapitre')
+        verbose_name = "Chapitre Vu"
+        verbose_name_plural = "Chapitres Vus"
+
+    def __str__(self):
+        return f"{self.etudiant} a consulté {self.chapitre.titre}"
+
+
 class Inscription(models.Model):
     STATUT_CHOICES = [
         ('en_attente', 'En attente'),
@@ -348,6 +369,14 @@ class Quiz(models.Model):
         Cours,
         on_delete=models.CASCADE,
         related_name='quiz'
+    )
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='quiz',
+        help_text="Module auquel ce quiz est rattaché (optionnel)."
     )
     fichier_quiz = models.FileField(upload_to='quizzes/', null=True, blank=True)
 
@@ -422,7 +451,7 @@ class Question(models.Model):
 
 class Choix(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choix')
-    texte = models.CharField(max_length=200)
+    texte = models.TextField()
     est_correct = models.BooleanField(default=False)
 
     def __str__(self):
@@ -521,6 +550,34 @@ class TransactionSimulee(models.Model):
 
     def __str__(self):
         return f"{self.type_transaction} - {self.montant} FCFA"
+
+
+class PaiementPayGate(models.Model):
+    """Suivi des paiements réels via l'API PayGate Global (TMoney / Flooz).
+
+    Sert à la fois aux recharges de portefeuille et aux achats directs de cours premium.
+    """
+    STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('paye', 'Payé'),
+        ('echoue', 'Échoué'),
+    ]
+    TYPE_CHOICES = [
+        ('recharge', 'Recharge du portefeuille'),
+        ('achat_cours', 'Achat de cours premium'),
+    ]
+    etudiant = models.ForeignKey(Etudiant, on_delete=models.CASCADE, related_name='paiements_paygate')
+    identifier = models.CharField(max_length=100, unique=True)  # notre identifiant unique envoyé à PayGate
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    type_paiement = models.CharField(max_length=20, choices=TYPE_CHOICES, default='recharge')
+    cours = models.ForeignKey(Cours, on_delete=models.SET_NULL, null=True, blank=True, related_name='paiements_paygate')
+    tx_reference = models.CharField(max_length=100, blank=True)  # référence retournée par PayGate
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_paiement = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"PayGate {self.identifier} - {self.montant} FCFA ({self.statut})"
 
 
 class LogActivite(models.Model):

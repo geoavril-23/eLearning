@@ -264,6 +264,12 @@
     .navbar-nav .nav-link.active {
       color: #FFC107 !important;
     }
+
+    /* Light-theme card borders */
+    .card {
+      border: 1px solid rgba(19, 62, 63, 0.15) !important;
+      border-radius: 16px !important;
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
@@ -330,6 +336,8 @@
       logo.classList.add('oo-logo--idle');
     })();
   </script>
+
+  {% block extra_js %}{% endblock %}
 </body>
 
 </html>

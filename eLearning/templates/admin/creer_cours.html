@@ -10,18 +10,21 @@
     .header-animated {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: white;
-        padding: 30px;
-        border-radius: 10px;
+        padding: 14px 32px;
+        border-radius: 50px;
         margin-bottom: 30px;
         text-align: center;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
-        overflow: hidden;
+        display: block;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .header-animated-text {
-        font-size: 28px;
+        font-size: 18px;
         font-weight: bold;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
         opacity: 0;
         animation: slideInDown 1s ease-out forwards;
     }
@@ -45,12 +48,12 @@
     }
 
     .form-control:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        border-color: #133e3f;
+        box-shadow: 0 0 0 0.2rem rgba(19, 62, 63, 0.2);
     }
 
     .btn-publish {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
         color: white;
         font-weight: 600;
         letter-spacing: 1px;
@@ -62,7 +65,7 @@
 
     .btn-publish:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+        box-shadow: 0 5px 15px rgba(19, 62, 63, 0.35);
         color: white;
     }
 
@@ -79,7 +82,7 @@
 
     body.dark-mode .form-control:focus {
         background-color: #1a1c23;
-        border-color: #4e73df;
+        border-color: #133e3f;
     }
 
     body.dark-mode .header-animated {
@@ -89,7 +92,7 @@
 
     .table-matiere-section {
         background-color: #f8f9fa;
-        border-left: 4px solid #4e73df;
+        border-left: 4px solid #133e3f;
         padding: 20px;
         border-radius: 5px;
         margin-bottom: 20px;
@@ -114,6 +117,32 @@
         border-color: #323545;
     }
 
+    .btn-toggle-entree {
+        position: absolute;
+        top: 10px;
+        right: 48px;
+        background: rgba(19,62,63,0.08);
+        color: #133e3f;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s, transform 0.25s;
+    }
+    .btn-toggle-entree.collapsed { transform: rotate(-90deg); }
+    .entree-body {
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        max-height: 2000px;
+        opacity: 1;
+    }
+    .entree-body.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
+
     .btn-remove-entree {
         position: absolute;
         top: 10px;
@@ -137,11 +166,11 @@
     }
 
     .btn-add-entree {
-        background-color: #4e73df;
+        background-color: #133e3f;
         color: white;
         border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
+        border-radius: 50px;
+        padding: 10px 24px;
         cursor: pointer;
         font-weight: bold;
         margin-top: 10px;
@@ -149,11 +178,11 @@
     }
 
     .btn-add-entree:hover {
-        background-color: #224abe;
+        background-color: #0f3435;
     }
 
     .entree-number {
-        background-color: #4e73df;
+        background-color: #133e3f;
         color: white;
         border-radius: 50%;
         width: 30px;
@@ -228,21 +257,25 @@
             <form action="{% url 'creer_cours_complet' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
-                <!-- 1) Titre du Cours -->
+                <!-- 1) Lier à un Cours existant (obligatoire) -->
                 <div class="form-group mb-4">
-                    <label for="titre" class="font-weight-bold">Titre du Cours <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="titre" name="titre" placeholder="Ex: Introduction à l'Algorithmique" required>
-                </div>
-
-                <!-- 2) Lier à un Cours existant (required) -->
-                <div class="form-group mb-4">
-                    <label for="cours_id" class="font-weight-bold">Lier à un Cours existant <span class="text-danger">*</span></label>
+                    <label for="cours_id" class="font-weight-bold">
+                        Cours <span class="text-danger">*</span>
+                        <span class="font-weight-normal text-muted small">(choisissez le cours auquel ajouter ce module)</span>
+                    </label>
                     <select name="cours_id" id="cours_id" class="form-control" required>
-                        <option value="" disabled selected>Sélectionner un cours...</option>
+                        <option value="">— Choisir un cours —</option>
                         {% for c in tous_les_cours %}
                             <option value="{{ c.id }}">{{ c.titre }}</option>
                         {% endfor %}
                     </select>
+                </div>
+
+                <!-- 2) Titre du module -->
+                <div class="form-group mb-4">
+                    <label for="titre_module" class="font-weight-bold">Titre du module <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titre_module" name="titre_module" placeholder="Ex: Maîtrisez les bases de la cryptographie symétrique" required>
+                    <small class="form-text text-muted">Nom du module qui regroupera les sections ci-dessous.</small>
                 </div>
 
                 <hr class="mb-4">
@@ -258,6 +291,9 @@
                         <!-- Les entrées seront ajoutées ici dynamiquement -->
                         <div class="entree-matiere" data-entree="0">
                             <div class="entree-number">1</div>
+                            <button type="button" class="btn-toggle-entree" onclick="toggleEntree(this)" title="Réduire / Agrandir">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
                             <button type="button" class="btn-remove-entree" onclick="removeEntree(0)">×</button>
 
                             <div class="form-group mb-3">
@@ -265,12 +301,14 @@
                                 <input type="text" class="form-control entree-titre" name="entree_titres" placeholder="Ex: Notions de base" required>
                             </div>
 
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
-                                <div class="editor-wrapper" data-editor="0">
-                                    <div class="entree-editor"></div>
+                            <div class="entree-body">
+                                <div class="form-group mb-0">
+                                    <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
+                                    <div class="editor-wrapper" data-editor="0">
+                                        <div class="entree-editor"></div>
+                                    </div>
+                                    <input type="hidden" class="entree-contenu" name="entree_contenus">
                                 </div>
-                                <input type="hidden" class="entree-contenu" name="entree_contenus">
                             </div>
                         </div>
                     </div>
@@ -347,6 +385,14 @@
             }
         });
         quillInstances[editorIndex] = quill;
+
+        // Synchronisation en temps réel : chaque frappe met à jour le champ caché
+        const wrapper = document.querySelector(`.editor-wrapper[data-editor="${editorIndex}"]`);
+        const hiddenInput = wrapper.parentNode.querySelector('.entree-contenu');
+        quill.on('text-change', function() {
+            hiddenInput.value = quill.root.innerHTML;
+        });
+
         return quill;
     }
 
@@ -356,6 +402,9 @@
         const entreeHTML = `
             <div class="entree-matiere" data-entree="${entreeCount}">
                 <div class="entree-number">${entreeCount + 1}</div>
+                <button type="button" class="btn-toggle-entree" onclick="toggleEntree(this)" title="Réduire / Agrandir">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
                 <button type="button" class="btn-remove-entree" onclick="removeEntree(${entreeCount})">×</button>
 
                 <div class="form-group mb-3">
@@ -363,18 +412,26 @@
                     <input type="text" class="form-control entree-titre" name="entree_titres" placeholder="Ex: Notions avancées" required>
                 </div>
 
-                <div class="form-group mb-0">
-                    <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
-                    <div class="editor-wrapper" data-editor="${entreeCount}">
-                        <div class="entree-editor"></div>
+                <div class="entree-body">
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Contenu <span class="text-danger">*</span></label>
+                        <div class="editor-wrapper" data-editor="${entreeCount}">
+                            <div class="entree-editor"></div>
+                        </div>
+                        <input type="hidden" class="entree-contenu" name="entree_contenus">
                     </div>
-                    <input type="hidden" class="entree-contenu" name="entree_contenus">
                 </div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', entreeHTML);
         initQuillEditor(entreeCount);
         updateEntreeNumbers();
+    }
+
+    function toggleEntree(btn) {
+        const body = btn.closest('.entree-matiere').querySelector('.entree-body');
+        body.classList.toggle('collapsed');
+        btn.classList.toggle('collapsed');
     }
 
     function removeEntree(index) {
@@ -400,43 +457,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         initQuillEditor(0);
 
-        // Avant de soumettre le formulaire, sauvegarder tous les contenus
+        // Avant soumission : copier le HTML Quill dans chaque champ caché entree_contenus
         document.querySelector('form').addEventListener('submit', function(e) {
-            const entrees = document.querySelectorAll('.entree-matiere');
-            const titres = [];
-            const contenus = [];
-
-            entrees.forEach((entree, idx) => {
-                const titre = entree.querySelector('.entree-titre').value;
+            document.querySelectorAll('.entree-matiere').forEach(function(entree) {
                 const editorIndex = entree.querySelector('.editor-wrapper').getAttribute('data-editor');
                 const contenu = quillInstances[editorIndex] ? quillInstances[editorIndex].root.innerHTML : '';
-
-                titres.push(titre);
-                contenus.push(contenu);
-            });
-
-            // Créer les champs cachés pour soumettre les données
-            const form = this;
-
-            // Supprimer les anciens champs cachés
-            form.querySelectorAll('input[name="entree_titre_final"]').forEach(el => el.remove());
-            form.querySelectorAll('input[name="entree_contenu_final"]').forEach(el => el.remove());
-
-            // Ajouter les nouveaux champs cachés
-            titres.forEach((titre, idx) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'entree_titre_final';
-                input.value = titre;
-                form.appendChild(input);
-            });
-
-            contenus.forEach((contenu, idx) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'entree_contenu_final';
-                input.value = contenu;
-                form.appendChild(input);
+                entree.querySelector('.entree-contenu').value = contenu;
             });
         });
     });

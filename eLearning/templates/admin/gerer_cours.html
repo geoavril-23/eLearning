@@ -94,8 +94,8 @@
 }
 
 .editor-split-view .form-control:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    border-color: #133e3f;
+    box-shadow: 0 0 0 0.2rem rgba(19, 62, 63, 0.2);
 }
 
 .quill-editor-split {
@@ -196,6 +196,20 @@
                                 <span class="badge badge-success"><i class="fas fa-gift"></i> Gratuit</span>
                             {% endif %}
                         </div>
+
+                        <!-- Réglage rapide du statut premium du cours -->
+                        <form method="post" action="{% url 'modifier_premium_cours' cours.id %}" class="form-inline mt-3 p-2" style="background:rgba(254,201,19,.08);border-radius:8px;">
+                            {% csrf_token %}
+                            <div class="custom-control custom-switch mr-3 mb-2">
+                                <input type="checkbox" class="custom-control-input" id="cours_premium_quick" name="est_premium" {% if cours.est_premium %}checked{% endif %}>
+                                <label class="custom-control-label font-weight-bold" for="cours_premium_quick">Cours Premium</label>
+                            </div>
+                            <div class="input-group input-group-sm mr-2 mb-2" style="max-width:170px;">
+                                <input type="number" name="prix" class="form-control" value="{{ cours.prix|floatformat:0 }}" min="0" placeholder="Prix">
+                                <div class="input-group-append"><span class="input-group-text">FCFA</span></div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-warning mb-2"><i class="fas fa-save mr-1"></i> Enregistrer le statut</button>
+                        </form>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-book fa-2x text-gray-300"></i>
@@ -206,33 +220,85 @@
     </div>
 </div>
 
-<!-- Split View Editor -->
-<div class="row mb-4">
-    <div class="col-lg-12">
-        <h4 class="font-weight-bold text-dark mb-3"><i class="fas fa-edit mr-2"></i>Éditeur de Contenu</h4>
 
-        {% if modules or chapitres_sans_module %}
-        <div class="editor-split-view" id="editor-split-container">
-            <!-- Sidebar TOC -->
-            <div class="sidebar-toc" id="editor-toc">
-                <h5><i class="fas fa-book mr-1"></i>Chapitres</h5>
-                <div id="toc-content"></div>
+<!-- Formulaire d'édition complète (style "créer cours", pré-rempli) -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between" style="background: rgba(19,62,63,0.04); cursor:pointer;" data-toggle="collapse" data-target="#collapseEditComplet">
+                <h6 class="m-0 font-weight-bold" style="color:#133e3f;">
+                    <i class="fas fa-edit mr-2" style="color:#FFC107;"></i>Modifier le cours (formulaire complet)
+                </h6>
+                <i class="fas fa-chevron-down text-muted"></i>
             </div>
+            <div id="collapseEditComplet" class="collapse show">
+                <div class="card-body">
+                    <form action="{% url 'modifier_cours_complet' cours.id %}" method="POST" id="form-edit-complet">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="font-weight-bold">Nom du cours <span class="text-danger">*</span></label>
+                            <input type="text" name="titre" class="form-control" value="{{ cours.titre }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Titre du module</label>
+                            <input type="text" name="titre_module" class="form-control" value="{{ cours.titre_module }}" placeholder="Ex: Maîtrisez les bases de la cryptographie symétrique">
+                            <small class="form-text text-muted">Phrase descriptive du module (différente du nom du cours).</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Objectif du cours</label>
+                            <textarea name="objectif" class="form-control" rows="2" style="resize:vertical;">{{ cours.objectif }}</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <div class="custom-control custom-switch mt-4">
+                                    <input type="checkbox" class="custom-control-input" id="ed_premium" name="est_premium" {% if cours.est_premium %}checked{% endif %}>
+                                    <label class="custom-control-label font-weight-bold" for="ed_premium">Cours Premium</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Prix (FCFA)</label>
+                                <input type="number" name="prix" class="form-control" value="{{ cours.prix|default:0 }}" min="0">
+                            </div>
+                        </div>
 
-            <!-- Editor Content -->
-            <div class="editor-content" id="editor-content">
-                <div class="editor-empty-state">
-                    <i class="fas fa-arrow-left" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
-                    <p>Sélectionnez un chapitre à gauche pour l'éditer</p>
+                        <hr>
+                        <h6 class="font-weight-bold mb-3" style="color:#133e3f;"><i class="fas fa-book mr-2"></i>Sections du cours</h6>
+                        <div id="ed-sections">
+                            {% for chap in chapitres_sans_module %}
+                            <div class="ed-section card mb-3" style="border:1px solid #e3e6f0;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge badge-secondary">Section {{ forloop.counter }}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ed-remove-section" title="Retirer cette section du formulaire"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    <input type="hidden" name="entree_ids" value="{{ chap.id }}">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Titre de la section <span class="text-danger">*</span></label>
+                                        <input type="text" name="entree_titres" class="form-control" value="{{ chap.titre }}" required>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Contenu</label>
+                                        <div class="ed-editor" style="background:#fff;">{{ chap.contenu|safe }}</div>
+                                        <input type="hidden" name="entree_contenus" class="ed-contenu">
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted small" id="ed-empty-hint">Aucune section pour l'instant. Ajoutez-en une ci-dessous.</p>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="ed-add-section">
+                            <i class="fas fa-plus mr-1"></i> Ajouter une section
+                        </button>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle mr-2"></i>
-            Aucun chapitre pour le moment. Ajoutez un module et un chapitre ci-dessous.
-        </div>
-        {% endif %}
     </div>
 </div>
 
@@ -248,10 +314,16 @@
                     <h6 class="m-0 font-weight-bold text-dark d-flex align-items-center">
                         <i class="fas fa-folder text-warning mr-2"></i>
                         Module {{ forloop.counter }} : {{ mod.titre }}
+                        {% if mod.est_premium %}
+                        <span class="badge badge-warning ml-2" style="background-color:#fec913;color:#111;"><i class="fas fa-crown"></i> Premium</span>
+                        {% endif %}
                     </h6>
                     <div class="d-flex align-items-center">
+                        <a href="{% url 'basculer_module_premium' mod.id %}" class="btn btn-sm {% if mod.est_premium %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2" onclick="event.stopPropagation();" title="Activer/désactiver le premium pour ce module">
+                            <i class="fas fa-crown"></i> {% if mod.est_premium %}Premium activé{% else %}Rendre premium{% endif %}
+                        </a>
                         <button type="button" class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#ajouterChapitreModal{{ mod.id }}" onclick="event.stopPropagation();">
-                            <i class="fas fa-plus"></i> Ajouter un chapitre
+                            <i class="fas fa-plus"></i> Ajouter une section
                         </button>
                         <a href="{% url 'supprimer_module' mod.id %}" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); return confirm('Supprimer ce module et tous ses chapitres ?')" title="Supprimer le module">
                             <i class="fas fa-trash"></i>
@@ -273,7 +345,7 @@
                                     <div class="d-flex w-100 justify-content-between align-items-start">
                                         <div>
                                             <h6 class="mb-1 font-weight-bold text-gray-800">
-                                                <span class="badge badge-secondary mr-2">Chapitre {{ chap.ordre }}</span>
+                                                <span class="badge badge-secondary mr-2">Section {{ chap.ordre }}</span>
                                                 {{ chap.titre }}
                                                 {% if chap.est_premium %}
                                                     <span class="badge badge-warning ml-2" style="background-color: #fec913; color: #111;"><i class="fas fa-crown"></i> Premium ({{ chap.prix }} FCFA)</span>
@@ -321,7 +393,7 @@
                                                 <a href="{{ chap.lien_youtube }}" target="_blank" class="btn btn-sm btn-outline-danger mr-2" title="Voir la vidéo"><i class="fab fa-youtube"></i> Vidéo</a>
                                             {% endif %}
                                             <button class="btn btn-sm btn-outline-primary mr-2" data-toggle="modal" data-target="#modifierChapitreModal{{ chap.id }}"><i class="fas fa-edit"></i></button>
-                                            <a href="{% url 'supprimer_chapitre_cours' chap.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ce chapitre ?')"><i class="fas fa-trash"></i></a>
+                                            <a href="{% url 'supprimer_chapitre_cours' chap.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer cette section ?')"><i class="fas fa-trash"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -343,7 +415,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group">
-                                                        <label class="font-weight-bold">Titre du chapitre <span class="text-danger">*</span></label>
+                                                        <label class="font-weight-bold">Titre de la section <span class="text-danger">*</span></label>
                                                         <input type="text" name="titre" class="form-control" value="{{ chap.titre }}" required>
                                                     </div>
                                                     <div class="form-group">
@@ -381,7 +453,7 @@
                                     </div>
                                 </div>
                             {% empty %}
-                                <p class="text-muted text-center my-4">Aucun chapitre dans ce module.</p>
+                                <p class="text-muted text-center my-4">Aucune section dans ce module.</p>
                             {% endfor %}
                         </div>
                     </div>
@@ -398,14 +470,14 @@
                             <input type="hidden" name="contenu" class="quill-hidden-input">
                             <input type="hidden" name="ordre" value="{{ mod.chapitres.count|add:1 }}">
                             <div class="modal-header">
-                                <h5 class="modal-title">Nouveau Chapitre - {{ mod.titre }}</h5>
+                                <h5 class="modal-title">Nouvelle Section - {{ mod.titre }}</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">Titre du chapitre <span class="text-danger">*</span></label>
+                                    <label class="font-weight-bold">Titre de la section <span class="text-danger">*</span></label>
                                     <input type="text" name="titre" class="form-control" required>
                                 </div>
                                 <div class="form-group">
@@ -451,37 +523,6 @@
             </div>
         {% endif %}
         
-        <!-- Add Module form -->
-        <div class="card shadow-sm mb-4" style="border-left: 4px solid #1cc88a; border-radius: 8px;">
-            <div class="card-header py-3 bg-light">
-                <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-plus-circle mr-2"></i>＋ Ajouter un module</h6>
-            </div>
-            <div class="card-body">
-                <form action="{% url 'ajouter_module' cours.id %}" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="form-group col-md-5">
-                            <label class="font-weight-bold">Titre du module <span class="text-danger">*</span></label>
-                            <input type="text" name="titre" class="form-control" placeholder="Ex: Les bases de la matière" required>
-                        </div>
-                        <div class="form-group col-md-5">
-                            <label class="font-weight-bold">Description</label>
-                            <input type="text" name="description" class="form-control" placeholder="Ex: Introduction générale aux concepts clés">
-                        </div>
-                        <div class="form-group col-md-2">
-                            <label class="font-weight-bold">Ordre</label>
-                            <input type="number" name="ordre" class="form-control" value="{{ modules.count|add:1 }}">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold">Ajouter une ressource (optionnel)</label>
-                        <input type="file" name="ressource" class="form-control-file" accept=".pdf,.txt,.doc,.docx,.ppt,.pptx">
-                        <small class="form-text text-muted">Formats acceptés : .pdf, .txt, .doc, .docx, .ppt, .pptx uniquement.</small>
-                    </div>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-plus mr-1"></i> Créer le module</button>
-                </form>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -524,10 +565,29 @@
     <div class="col-lg-6 mb-4">
         <div class="card shadow-sm mb-4 h-100">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-light">
-                <h6 class="m-0 font-weight-bold text-info"><i class="fas fa-question-circle mr-2"></i>Quiz associés</h6>
-                <a href="{% url 'creer_quiz_manuel' %}?cours_id={{ cours.id }}" class="btn btn-sm btn-info">
-                    <i class="fas fa-plus"></i> Créer Quiz
-                </a>
+                <h6 class="m-0 font-weight-bold" style="color:#133e3f;"><i class="fas fa-question-circle mr-2" style="color:#FFC107;"></i>Quiz associés</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm dropdown-toggle" type="button" id="dropdownCréerQuiz" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                        style="background:linear-gradient(135deg,#133e3f 0%,#0f3435 100%);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-weight:700;font-size:.8rem;">
+                        <i class="fas fa-plus mr-1" style="color:#FFC107;"></i> Créer Quiz
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="dropdownCréerQuiz"
+                        style="border-radius:14px;border:1px solid rgba(19,62,63,.15);padding:.4rem;min-width:220px;">
+                        <a class="dropdown-item rounded-lg py-2" href="{% url 'creer_quiz_manuel' %}?cours_id={{ cours.id }}"
+                            style="font-weight:700;font-size:.85rem;color:#133e3f;border-radius:10px;">
+                            <i class="fas fa-pencil-alt mr-2" style="color:#133e3f;width:16px;"></i>
+                            Manuel
+                            <div style="font-size:.73rem;font-weight:400;color:#6b7280;margin-top:1px;">Rédiger les questions soi-même</div>
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item rounded-lg py-2" href="{% url 'generer_quiz_ia' %}?cours_id={{ cours.id }}"
+                            style="font-weight:700;font-size:.85rem;color:#133e3f;border-radius:10px;">
+                            <i class="fas fa-robot mr-2" style="color:#FFC107;width:16px;"></i>
+                            Automatique par IA
+                            <div style="font-size:.73rem;font-weight:400;color:#6b7280;margin-top:1px;">Généré par Gemini en quelques secondes</div>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 {% if quiz_list %}
@@ -538,7 +598,7 @@
                                 <strong class="text-dark">{{ qz.titre }}</strong><br>
                                 <small class="text-muted">{{ qz.questions.count }} questions | {{ qz.note_max }} pts</small>
                             </div>
-                            <a href="{% url 'detail_quiz_enseignant' qz.id %}" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'detail_quiz_enseignant' qz.id %}" class="btn btn-sm" style="border:1.5px solid #133e3f;color:#133e3f;border-radius:20px;font-size:.75rem;" onmouseover="this.style.background='#133e3f';this.style.color='#FFC107'" onmouseout="this.style.background='';this.style.color='#133e3f'"><i class="fas fa-eye"></i></a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -644,8 +704,8 @@ function initializeSplitViewEditor() {
         if (!titleEl) return;
 
         var fullText = titleEl.textContent;
-        // Extract just the chapter title (skip the "Chapitre N" badge)
-        var titleMatch = fullText.match(/Chapitre\s+\d+\s+(.+?)(?:\s*Premium|\s*Gratuit|$)/);
+        // Extract just the chapter title (skip the "Section N" / "Chapitre N" badge)
+        var titleMatch = fullText.match(/(?:Section|Chapitre)\s+\d+\s+(.+?)(?:\s*Premium|\s*Gratuit|$)/);
         var titre = titleMatch ? titleMatch[1].trim() : fullText.trim();
 
         // Find the hidden edit button to get the chapitre ID
@@ -738,8 +798,8 @@ function initializeSplitViewEditor() {
             // Initialize Quill if not done
             if (!quillEditor) {
                 var editorHTML = '<div class="form-group">' +
-                    '<label class="font-weight-bold">Titre du chapitre</label>' +
-                    '<input type="text" id="editor-titre" class="form-control" placeholder="Titre du chapitre">' +
+                    '<label class="font-weight-bold">Titre de la section</label>' +
+                    '<input type="text" id="editor-titre" class="form-control" placeholder="Titre de la section">' +
                     '</div>' +
                     '<div class="form-group">' +
                     '<label class="font-weight-bold">Contenu</label>' +
@@ -832,5 +892,70 @@ function saveChapitreContent(chap) {
         btn.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
     });
 }
+
+// ── Formulaire d'édition complète (style "créer cours", pré-rempli) ──
+document.addEventListener('DOMContentLoaded', function() {
+    var edToolbar = [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['code-block', 'blockquote'],
+        ['clean']
+    ];
+    var edEditors = [];
+
+    function edInit(container) {
+        var q = new Quill(container, { theme: 'snow', modules: { toolbar: edToolbar } });
+        var hidden = container.parentNode.querySelector('.ed-contenu');
+        hidden.value = q.root.innerHTML;
+        q.on('text-change', function() { hidden.value = q.root.innerHTML; });
+        edEditors.push({ q: q, hidden: hidden });
+    }
+
+    document.querySelectorAll('#ed-sections .ed-editor').forEach(edInit);
+
+    var addBtn = document.getElementById('ed-add-section');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            var hint = document.getElementById('ed-empty-hint');
+            if (hint) hint.remove();
+            var wrap = document.createElement('div');
+            wrap.className = 'ed-section card mb-3';
+            wrap.style.border = '1px solid #e3e6f0';
+            wrap.innerHTML =
+                '<div class="card-body">' +
+                  '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                    '<span class="badge badge-secondary">Nouvelle section</span>' +
+                    '<button type="button" class="btn btn-sm btn-outline-danger ed-remove-section"><i class="fas fa-times"></i></button>' +
+                  '</div>' +
+                  '<input type="hidden" name="entree_ids" value="">' +
+                  '<div class="form-group">' +
+                    '<label class="font-weight-bold">Titre de la section <span class="text-danger">*</span></label>' +
+                    '<input type="text" name="entree_titres" class="form-control" required>' +
+                  '</div>' +
+                  '<div class="form-group mb-0">' +
+                    '<label class="font-weight-bold">Contenu</label>' +
+                    '<div class="ed-editor" style="background:#fff;"></div>' +
+                    '<input type="hidden" name="entree_contenus" class="ed-contenu">' +
+                  '</div>' +
+                '</div>';
+            document.getElementById('ed-sections').appendChild(wrap);
+            edInit(wrap.querySelector('.ed-editor'));
+        });
+    }
+
+    // Retirer une section du formulaire (ne supprime pas en base tant qu'on n'enregistre pas)
+    document.getElementById('ed-sections').addEventListener('click', function(e) {
+        var btn = e.target.closest('.ed-remove-section');
+        if (btn) btn.closest('.ed-section').remove();
+    });
+
+    var form = document.getElementById('form-edit-complet');
+    if (form) {
+        form.addEventListener('submit', function() {
+            edEditors.forEach(function(e) { e.hidden.value = e.q.root.innerHTML; });
+        });
+    }
+});
 </script>
 {% endblock %}

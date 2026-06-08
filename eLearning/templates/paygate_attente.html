@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification du paiement…</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1cc88a 0%, #133e3f 100%);
+            color: #fff;
+            padding: 1rem;
+        }
+        .card {
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.25);
+            backdrop-filter: blur(14px);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .spinner {
+            width: 64px; height: 64px;
+            border: 6px solid rgba(255,255,255,0.25);
+            border-top-color: #FFC107;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h1 { font-size: 1.4rem; margin-bottom: .6rem; }
+        p  { opacity: .9; line-height: 1.6; font-size: .95rem; }
+        .montant { color: #FFC107; font-weight: 800; }
+        .countdown { font-size: .8rem; opacity: .7; margin-top: 1rem; }
+        .btn {
+            display: inline-block; margin-top: 1.5rem; padding: .7rem 1.6rem;
+            background: #FFC107; color: #133e3f; border-radius: 50px;
+            font-weight: 700; text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="spinner" id="spinner"></div>
+        <h1 id="title">Vérification du paiement…</h1>
+        <p id="msg">
+            Nous confirmons votre recharge de <span class="montant">{{ paiement.montant|floatformat:0 }} FCFA</span>
+            auprès de PayGate. Si une demande s'affiche sur votre téléphone (TMoney / Flooz), validez-la.
+        </p>
+        <div class="countdown" id="countdown"></div>
+        <a href="{% url 'paiements' %}" class="btn" id="btn-retour" style="display:none;">Retour aux paiements</a>
+    </div>
+
+    <script>
+        const ref = "{{ ref|escapejs }}";
+        const statutUrl = "{% url 'paygate_statut_json' %}?ref=" + encodeURIComponent(ref);
+        const retourUrl = "{% url 'paygate_retour' %}?ref=" + encodeURIComponent(ref);
+        const paiementsUrl = "{% url 'paiements' %}";
+
+        let essais = 0;
+        const MAX_ESSAIS = 20;       // ~20 x 4s = ~80s de vérification
+        const INTERVALLE = 4000;
+
+        function terminer(message, succes) {
+            document.getElementById('spinner').style.display = succes ? 'none' : 'none';
+            document.getElementById('title').textContent = succes ? 'Paiement confirmé !' : 'En attente de confirmation';
+            document.getElementById('msg').innerHTML = message;
+            document.getElementById('countdown').textContent = '';
+            document.getElementById('btn-retour').style.display = 'inline-block';
+        }
+
+        async function verifier() {
+            essais++;
+            try {
+                const r = await fetch(statutUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                if (data.statut === 'paye') {
+                    // On repasse par la page de retour pour afficher le message de succès puis la liste.
+                    window.location.href = retourUrl;
+                    return;
+                }
+                if (data.statut === 'echoue') {
+                    window.location.href = retourUrl;
+                    return;
+                }
+            } catch (e) { /* on réessaie */ }
+
+            if (essais >= MAX_ESSAIS) {
+                terminer(
+                    "Le paiement n'est pas encore confirmé. Si vous avez validé sur votre téléphone, "
+                    + "votre solde sera crédité dès la confirmation de PayGate. Vous pouvez recharger cette page plus tard.",
+                    false
+                );
+                return;
+            }
+            document.getElementById('countdown').textContent =
+                'Nouvelle vérification dans quelques secondes… (' + essais + '/' + MAX_ESSAIS + ')';
+            setTimeout(verifier, INTERVALLE);
+        }
+
+        setTimeout(verifier, 2000);
+    </script>
+</body>
+</html>

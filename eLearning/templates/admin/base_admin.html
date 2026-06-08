@@ -115,6 +115,31 @@
             color: var(--oe-dark) !important;
         }
 
+        /* ── 8b. btn-info / btn-secondary : remplace le cyan Bootstrap ── */
+        .btn-info, .btn-secondary {
+            background-color: var(--oe-dark) !important;
+            border-color:     var(--oe-dark) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+        }
+        .btn-info:hover, .btn-secondary:hover {
+            background-color: var(--oe-gold) !important;
+            border-color:     var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
+        }
+        .btn-info:focus, .btn-info:active,
+        .btn-secondary:focus, .btn-secondary:active {
+            background-color: var(--oe-gold) !important;
+            border-color:     var(--oe-gold) !important;
+            color: var(--oe-dark) !important;
+            box-shadow: 0 0 0 0.2rem rgba(255,193,7,0.35) !important;
+        }
+        /* bg-info / bg-primary → teal */
+        .bg-info  { background-color: var(--oe-dark) !important; }
+        .border-info { border-color: var(--oe-gold) !important; }
+        /* modal-header bg-primary */
+        .modal-header.bg-primary { background-color: var(--oe-dark) !important; }
+
         /* ── 8. Scroll-to-top button ─────────────────────────── */
         a.scroll-to-top {
             background-color: var(--oe-dark) !important;
@@ -142,6 +167,20 @@
         body.dark-mode .bg-white { background-color: #242632 !important; }
         body.dark-mode .topbar { background-color: #242632 !important; border-bottom: 1px solid #323545; }
         body.dark-mode .sidebar { background-color: #1a1c23 !important; }
+        /* ── Light-mode sidebar : teal au lieu du bleu SB Admin ── */
+        body:not(.dark-mode) .sidebar {
+            background: linear-gradient(180deg, #133e3f 0%, #0a2425 100%) !important;
+        }
+        body:not(.dark-mode) .sidebar .nav-item .nav-link {
+            color: rgba(255,255,255,0.75) !important;
+        }
+        body:not(.dark-mode) .sidebar .nav-item .nav-link:hover,
+        body:not(.dark-mode) .sidebar .nav-item.active .nav-link {
+            color: #FFC107 !important;
+        }
+        body:not(.dark-mode) .sidebar-brand { color: #FFC107 !important; }
+        body:not(.dark-mode) .sidebar-divider { border-top-color: rgba(255,255,255,0.15) !important; }
+        body:not(.dark-mode) .sidebar .sidebar-heading { color: rgba(255,255,255,0.4) !important; }
 
         /* ── Navbar icons : noir en clair, blanc en sombre ──────── */
         .topbar .nav-link i,
@@ -185,9 +224,58 @@
         body.dark-mode .text-gray-700, [data-theme="dark"] .text-gray-700, .dark-theme .text-gray-700 {
             color: #ffffff !important;
         }
+        /* ── Light-mode: text-primary → teal (pas bleu Bootstrap) ──────── */
+        body:not(.dark-mode) .text-primary { color: #133e3f !important; }
+        /* ── All modes: bg-primary → teal ────────────────────────────── */
+        .bg-primary { background-color: #133e3f !important; }
+        /* ── Light-mode: border-left-primary → teal ──────────────────── */
+        body:not(.dark-mode) .border-left-primary { border-left-color: #133e3f !important; }
+
+        /* ── Light-mode : tout texte gris → noir lisible ──────────────────
+           Cible les classes utilitaires Bootstrap/SB-Admin et les valeurs
+           grises courantes. body:not(.dark-mode) évite tout conflit sombre. */
+        body:not(.dark-mode) .text-muted,
+        body:not(.dark-mode) .text-secondary,
+        body:not(.dark-mode) .text-gray-100,
+        body:not(.dark-mode) .text-gray-200,
+        body:not(.dark-mode) .text-gray-300,
+        body:not(.dark-mode) .text-gray-400,
+        body:not(.dark-mode) .text-gray-500,
+        body:not(.dark-mode) .text-gray-600,
+        body:not(.dark-mode) .text-gray-700 {
+            color: #1a1a1a !important;
+        }
+        /* Éléments <small> et <span> souvent colorés en gris par les templates */
+        body:not(.dark-mode) small,
+        body:not(.dark-mode) .small {
+            color: #1a1a1a !important;
+        }
+
         /* ── Fix 1: Chart cards border radius ── */
         .card { border-radius: 24px !important; overflow: hidden !important; }
         .chart-card { border-radius: 24px !important; overflow: hidden !important; }
+
+        /* ── Light-mode teal border — all card variants, all pages ──
+           Uses body:not(.dark-mode) so it NEVER fires in dark mode,
+           and !important wins over page-level light-gray borders.      */
+        body:not(.dark-mode) .card,
+        body:not(.dark-mode) .p-card,
+        body:not(.dark-mode) .stat-panel,
+        body:not(.dark-mode) .stat-card,
+        body:not(.dark-mode) .result-card,
+        body:not(.dark-mode) .course-card,
+        body:not(.dark-mode) .quiz-card,
+        body:not(.dark-mode) .live-card,
+        body:not(.dark-mode) .chapter-card,
+        body:not(.dark-mode) .conversation-card,
+        body:not(.dark-mode) .info-card,
+        body:not(.dark-mode) .quiz-form-card,
+        body:not(.dark-mode) .question-card,
+        body:not(.dark-mode) .quiz-info-card,
+        body:not(.dark-mode) .form-card,
+        body:not(.dark-mode) .book-card {
+            border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        }
 
         /* ── Fix 2: Mobile responsiveness ── */
         #sidebarToggleMobile {

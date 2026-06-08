@@ -173,32 +173,6 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-panel border-left-info">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="panel-title">Réussite Quiz</div>
-                    <div class="panel-value">{{ stats.reussite_quiz|default:"0" }}%</div>
-                </div>
-                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
-                    <i class="fas fa-medal"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-panel border-left-warning">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="panel-title">Questions en attente</div>
-                    <div class="panel-value">{{ stats.questions_attente|default:"0" }}</div>
-                </div>
-                <div class="icon-circle" style="background: rgba(254, 201, 19, 0.1); color: #fec913;">
-                    <i class="fas fa-comments"></i>
-                </div>
-            </div>
-        </div>
-    </div>
 
     {% else %}
     <!-- Student Cards - Équilibrés -->
@@ -233,7 +207,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <div class="panel-title">Temps Apprentissage</div>
-                    <div class="panel-value">{{ stats.temps|default:"0" }}</div>
+                    <div class="panel-value" id="tempsApprentissage">{{ stats.temps|default:"0h" }}</div>
                 </div>
                 <div class="icon-circle" style="background: rgba(254, 201, 19, 0.1); color: #fec913;">
                     <i class="fas fa-clock"></i>
@@ -244,8 +218,36 @@
     {% endif %}
 </div>
 
+
 {% endblock content %}
 
 {% block extra_js %}
 <!-- Charts removed as per user request -->
+<script>
+    // Temps d'apprentissage réel : somme de tout le temps suivi (pages de cours, etc.)
+    // Les sessions sont enregistrées par time_tracker.js dans localStorage ('oo_time_sessions').
+    (function () {
+        const el = document.getElementById('tempsApprentissage');
+        if (!el) return;
+
+        let sessions = [];
+        try { sessions = JSON.parse(localStorage.getItem('oo_time_sessions')) || []; }
+        catch (e) { sessions = []; }
+
+        const totalSec = sessions.reduce((acc, s) => acc + (s.seconds || 0), 0);
+
+        // On n'écrase la valeur serveur que si un temps réel a été mesuré.
+        if (totalSec > 0) {
+            el.textContent = fmtTemps(totalSec);
+        }
+
+        function fmtTemps(sec) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            if (h > 0) return m > 0 ? `${h}h ${m}min` : `${h}h`;
+            if (m > 0) return `${m}min`;
+            return `${sec}s`;
+        }
+    })();
+</script>
 {% endblock %}

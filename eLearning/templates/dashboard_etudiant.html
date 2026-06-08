@@ -597,6 +597,18 @@
         border-color: rgba(255, 255, 255, 0.18) !important;
     }
 
+    /* ── Light-mode : fond blanc solide, le glass ne fonctionne que sur fond sombre ── */
+    body:not(.dark-mode) .oe-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+    }
+    body:not(.dark-mode) .oe-card::before {
+        display: none !important;
+    }
+
     .oe-stat {
         background: linear-gradient(135deg, rgba(19, 62, 63, 0.08) 0%, rgba(255, 193, 7, 0.08) 100%) !important;
         backdrop-filter: blur(8px) !important;
@@ -646,68 +658,108 @@
         background: #ffffff;
         border: 1px solid #e5e7eb;
         border-radius: 20px;
-        padding: 1.1rem 1.5rem;
+        padding: 1rem 1.5rem;
         margin-bottom: 1.5rem;
         display: flex;
-        align-items: center;
-        gap: 1.5rem;
+        align-items: stretch;
+        gap: 1.25rem;
         flex-wrap: wrap;
         box-shadow: 0 2px 12px rgba(19,62,63,0.07);
     }
 
+    /* Bloc gauche — session live */
     .tt-live {
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-width: 110px;
+        justify-content: center;
+        min-width: 120px;
+        padding-right: 1.25rem;
+        border-right: 1px solid #e5e7eb;
     }
 
     .tt-clock {
-        font-size: 1.7rem;
+        font-size: 1.75rem;
         font-weight: 900;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         color: #133e3f;
         font-variant-numeric: tabular-nums;
         line-height: 1;
     }
 
     .tt-live-label {
-        font-size: 0.62rem;
+        font-size: 0.6rem;
         text-transform: uppercase;
         letter-spacing: 0.6px;
         color: #9ca3af;
-        margin-top: 0.2rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
     }
 
-    .tt-divider {
-        width: 1px;
-        height: 48px;
-        background: #e5e7eb;
+    .tt-live-dot {
+        width: 6px; height: 6px;
+        background: #1cc88a;
+        border-radius: 50%;
+        animation: tt-pulse 1.5s ease-in-out infinite;
         flex-shrink: 0;
     }
 
-    .tt-history {
-        flex: 1;
-        min-width: 200px;
+    @keyframes tt-pulse {
+        0%,100% { opacity: 1; transform: scale(1); }
+        50%      { opacity: 0.5; transform: scale(0.7); }
     }
 
-    .tt-filters {
+    /* Bloc droit — sélecteur + stats */
+    .tt-stats {
+        flex: 1;
+        min-width: 220px;
         display: flex;
-        gap: 0.4rem;
-        margin-bottom: 0.5rem;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .tt-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         flex-wrap: wrap;
     }
 
+    .tt-select {
+        flex: 1;
+        min-width: 140px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #1f2937;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 4px 8px;
+        background: #f9fafb;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .tt-select:focus { border-color: #133e3f; }
+
+    .tt-filters {
+        display: flex;
+        gap: 0.3rem;
+    }
+
     .tt-filter-btn {
-        padding: 2px 10px;
-        font-size: 0.65rem;
+        padding: 3px 10px;
+        font-size: 0.63rem;
         font-weight: 700;
         border-radius: 20px;
         border: 1px solid #e5e7eb;
         background: transparent;
         color: #6b7280;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.18s;
+        white-space: nowrap;
     }
 
     .tt-filter-btn.active,
@@ -717,14 +769,34 @@
         border-color: #133e3f;
     }
 
-    .tt-total-label { font-size: 0.68rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.4px; }
-    .tt-total-val   { font-size: 1.1rem; font-weight: 800; color: #133e3f; }
+    /* Résultat */
+    .tt-result {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
 
-    body.dark-mode .tt-widget       { background: #1f2937; border-color: #374151; box-shadow: none; }
-    body.dark-mode .tt-clock        { color: #FFC107; }
-    body.dark-mode .tt-divider      { background: #374151; }
-    body.dark-mode .tt-total-val    { color: #FFC107; }
-    body.dark-mode .tt-filter-btn   { border-color: #374151; color: #9ca3af; }
+    .tt-result-val {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #133e3f;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tt-result-label {
+        font-size: 0.68rem;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    /* Dark mode */
+    body.dark-mode .tt-widget      { background: #1f2937; border-color: #374151; box-shadow: none; }
+    body.dark-mode .tt-live        { border-right-color: #374151; }
+    body.dark-mode .tt-clock       { color: #FFC107; }
+    body.dark-mode .tt-result-val  { color: #FFC107; }
+    body.dark-mode .tt-select      { background: #111827; border-color: #374151; color: #f3f4f6; }
+    body.dark-mode .tt-filter-btn  { border-color: #374151; color: #9ca3af; }
     body.dark-mode .tt-filter-btn.active,
     body.dark-mode .tt-filter-btn:hover { background: #133e3f; color: #fff; border-color: #133e3f; }
 </style>
@@ -736,18 +808,28 @@
     <div class="tt-widget">
         <div class="tt-live">
             <div class="tt-clock" id="tt-clock-dash">00:00:00</div>
-            <div class="tt-live-label"><i class="fas fa-circle" style="color:#1cc88a;font-size:0.5rem;"></i> Session en cours</div>
-        </div>
-        <div class="tt-divider"></div>
-        <div class="tt-history">
-            <div class="tt-filters">
-                <button class="tt-filter-btn active" data-period="day">Aujourd'hui</button>
-                <button class="tt-filter-btn" data-period="week">Semaine</button>
-                <button class="tt-filter-btn" data-period="month">Mois</button>
-                <button class="tt-filter-btn" data-period="year">Année</button>
+            <div class="tt-live-label">
+                <span class="tt-live-dot"></span> Session en cours
             </div>
-            <div class="tt-total-label">Temps total passé sur le dashboard</div>
-            <div class="tt-total-val" id="tt-total-dash">—</div>
+        </div>
+        <div class="tt-stats">
+            <div class="tt-controls">
+                <select class="tt-select" id="tt-cours-select">
+                    <option value="all">Tous les cours</option>
+                    {% for ins in mes_inscriptions %}
+                    <option value="cours_{{ ins.cours.id }}">{{ ins.cours.titre }}</option>
+                    {% endfor %}
+                </select>
+                <div class="tt-filters">
+                    <button class="tt-filter-btn active" data-period="day">Aujourd'hui</button>
+                    <button class="tt-filter-btn" data-period="week">Semaine</button>
+                    <button class="tt-filter-btn" data-period="month">Mois</button>
+                </div>
+            </div>
+            <div class="tt-result">
+                <span class="tt-result-val" id="tt-total-dash">—</span>
+                <span class="tt-result-label">d'apprentissage</span>
+            </div>
         </div>
     </div>
 
@@ -927,17 +1009,35 @@
 <script>
 (function () {
     document.documentElement.dataset.trackerPage = 'dashboard';
-    TimeTracker.init(
-        document.getElementById('tt-clock-dash'),
-        document.getElementById('tt-total-dash')
-    );
+
+    const clockEl  = document.getElementById('tt-clock-dash');
+    const totalEl  = document.getElementById('tt-total-dash');
+    const selectEl = document.getElementById('tt-cours-select');
+
+    // Start the live clock; pass null so built-in refreshTotal does nothing
+    TimeTracker.init(clockEl, null);
+
+    function updateTotal() {
+        const period = document.querySelector('.tt-filter-btn.active')?.dataset.period || 'day';
+        const key = selectEl ? selectEl.value : 'all';
+        const secs = (key === 'all')
+            ? TimeTracker.totalAllCours(period)
+            : TimeTracker.totalForKey(key, period);
+        totalEl.textContent = secs > 0 ? TimeTracker.fmt(secs) : '—';
+    }
+
+    updateTotal();
+    setInterval(updateTotal, 1000);
+
     document.querySelectorAll('.tt-filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.tt-filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            TimeTracker.onFilterChange(this.dataset.period);
+            updateTotal();
         });
     });
+
+    if (selectEl) selectEl.addEventListener('change', updateTotal);
 })();
 </script>
 {% endblock %}

@@ -117,6 +117,15 @@
         color: #FFC107 !important;
     }
 
+    /* ── Light-mode : stat-card fond blanc solide ── */
+    body:not(.dark-mode) .stat-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(19, 62, 63, 0.18) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+    }
+
     /* Sections */
     .section-title {
         font-size: 1.35rem;
@@ -252,6 +261,46 @@
     body.dark-mode .cours-dark-card .progress-text,
     body.dark-mode .cours-dark-card .progress-text * {
         color: #94a3b8 !important;
+    }
+
+    /* ── Light-mode : cours-dark-card fond blanc, textes sombres ── */
+    body:not(.dark-mode) .cours-dark-card {
+        background: #ffffff !important;
+        border: 2px solid rgba(19, 62, 63, 0.18) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+    }
+    body:not(.dark-mode) .cours-dark-card:hover {
+        border-color: rgba(19, 62, 63, 0.40) !important;
+        box-shadow: 0 10px 32px rgba(19, 62, 63, 0.14) !important;
+        transform: translateY(-4px);
+    }
+    body:not(.dark-mode) .cours-dark-card-title {
+        color: #133e3f !important;
+    }
+    body:not(.dark-mode) .cours-dark-card-header {
+        border-bottom-color: rgba(19, 62, 63, 0.10) !important;
+    }
+    body:not(.dark-mode) .cours-statut-badge {
+        background: rgba(19, 62, 63, 0.08) !important;
+        color: #133e3f !important;
+    }
+    body:not(.dark-mode) .cours-dark-card .meta-item,
+    body:not(.dark-mode) .cours-dark-card .meta-item span,
+    body:not(.dark-mode) .cours-dark-card .meta-item * {
+        color: #4b5563 !important;
+    }
+    body:not(.dark-mode) .cours-dark-card .meta-item i {
+        color: #FFC107 !important;
+    }
+    body:not(.dark-mode) .cours-meta {
+        border-bottom-color: rgba(19, 62, 63, 0.10) !important;
+    }
+    body:not(.dark-mode) .cours-dark-card .progress-text,
+    body:not(.dark-mode) .cours-dark-card .progress-text * {
+        color: #6b7280 !important;
+    }
+    body:not(.dark-mode) .progress-bar {
+        background: rgba(19, 62, 63, 0.08) !important;
     }
 
     .progress-bar {
@@ -841,10 +890,6 @@
                             <span>Inscrit le {{ ins.date_inscription|date:"d/m/Y" }}</span>
                         </div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: {{ ins.progression }}%"></div>
-                    </div>
-                    <div class="progress-text">Progression : {{ ins.progression }}%</div>
                     <a href="{% url 'voir_cours' ins.cours.id %}" class="btn-voir-cours">
                         <i class="fas fa-play"></i> Voir le cours
                     </a>
@@ -895,78 +940,9 @@
     {% endif %}
 </div>
 
-<!-- Mes cours Premium -->
-{% if inscriptions_premium %}
-<div class="premium-section">
-    <h2 class="section-title">
-        <i class="fas fa-crown"></i>
-        Mes cours Premium
-    </h2>
-
-    <div class="premium-cards-grid">
-        {% for ins in inscriptions_premium %}
-        <div class="premium-card">
-            <div class="premium-card-liquid"></div>
-            <div class="premium-card-content">
-                {% if ins.est_paye %}
-                <div class="premium-badge-pay paid">
-                    <i class="fas fa-check-circle"></i> Déjà payé
-                </div>
-                {% else %}
-                <div class="premium-badge-pay">
-                    <i class="fas fa-lock"></i> À débloquer
-                </div>
-                {% endif %}
-
-                <h3 class="premium-cours-titre">{{ ins.cours.titre }}</h3>
-
-                {% if ins.est_paye %}
-                <div class="premium-prix">
-                    <span class="premium-prix-value">✓</span>
-                    <span class="premium-prix-label">Accès complet</span>
-                </div>
-                {% else %}
-                <div class="premium-prix">
-                    <span class="premium-prix-value">{{ ins.cours.prix|default:"0" }}</span>
-                    <span class="premium-prix-label">FCFA</span>
-                </div>
-                {% endif %}
-
-                <p class="premium-description">{{ ins.cours.description|truncatewords:20 }}</p>
-
-                <div class="premium-meta">
-                    {% if ins.cours.categorie %}
-                    <div class="premium-meta-item">
-                        <i class="fas fa-tag"></i>
-                        <span>{{ ins.cours.categorie.nom }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="premium-meta-item">
-                        <i class="fas fa-layer-group"></i>
-                        <span>Niveau {{ ins.cours.niveau }}</span>
-                    </div>
-                    <div class="premium-meta-item">
-                        <i class="fas fa-user-tie"></i>
-                        <span>{{ ins.cours.enseignant.nom }} {{ ins.cours.enseignant.prenom }}</span>
-                    </div>
-                </div>
-
-                <div class="premium-actions">
-                    <a href="{% url 'voir_cours' ins.cours.id %}" class="btn-premium-action primary">
-                        <i class="fas fa-play"></i> Voir le cours
-                    </a>
-                    {% if not ins.est_paye %}
-                    <a href="#" class="btn-premium-action secondary">
-                        <i class="fas fa-credit-card"></i> Payer
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
+<!-- Section "Mes cours Premium" supprimée : tous les cours (gratuits + premium) sont
+     désormais affichés ensemble dans "Mes cours" ci-dessus, sans distinction.
+     La distinction premium/débloqué se fait dans la page du cours, au niveau des modules. -->
 
 <!-- Nouveaux cours suggérés -->
 {% if nouveaux_cours %}
