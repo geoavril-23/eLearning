@@ -24,8 +24,8 @@
 
     /* Left border styles for premium look */
     .stat-panel.border-left-primary { border-left: 6px solid #133e3f !important; }
-    .stat-panel.border-left-success { border-left: 6px solid #1cc88a !important; }
-    .stat-panel.border-left-info { border-left: 6px solid #36b9cc !important; }
+    .stat-panel.border-left-success { border-left: 6px solid #4ecdc4 !important; }
+    .stat-panel.border-left-info { border-left: 6px solid #4ecdc4 !important; }
     .stat-panel.border-left-warning { border-left: 6px solid #fec913 !important; }
     .stat-panel.border-left-danger { border-left: 6px solid #e74a3b !important; }
 
@@ -36,7 +36,7 @@
     }
     body.dark-mode .stat-panel.border-left-primary { border-left: 6px solid #fec913 !important; }
     body.dark-mode .stat-panel.border-left-success { border-left: 6px solid #2ecc71 !important; }
-    body.dark-mode .stat-panel.border-left-info { border-left: 6px solid #3498db !important; }
+    body.dark-mode .stat-panel.border-left-info { border-left: 6px solid #4ecdc4 !important; }
     body.dark-mode .stat-panel.border-left-warning { border-left: 6px solid #fec913 !important; }
     body.dark-mode .stat-panel.border-left-danger { border-left: 6px solid #e74a3b !important; }
 
@@ -112,7 +112,7 @@
                     <div class="panel-title">Cours Publiés</div>
                     <div class="panel-value">{{ stats.total_courses|default:"0" }}</div>
                 </div>
-                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
+                <div class="icon-circle" style="background: rgba(19, 62, 63, 0.1); color: #133e3f;">
                     <i class="fas fa-book"></i>
                 </div>
             </div>
@@ -125,7 +125,7 @@
                     <div class="panel-title">Engagement</div>
                     <div class="panel-value">{{ stats.engagement|default:"0" }}%</div>
                 </div>
-                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
+                <div class="icon-circle" style="background: rgba(78, 205, 196, 0.1); color: #4ecdc4;">
                     <i class="fas fa-chart-line"></i>
                 </div>
             </div>
@@ -167,7 +167,7 @@
                     <div class="panel-title">Total Apprenants</div>
                     <div class="panel-value">{{ stats.total_eleves|default:"0" }}</div>
                 </div>
-                <div class="icon-circle" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;">
+                <div class="icon-circle" style="background: rgba(19, 62, 63, 0.1); color: #133e3f;">
                     <i class="fas fa-user-graduate"></i>
                 </div>
             </div>
@@ -196,7 +196,7 @@
                     <div class="panel-title">Moyenne Quiz</div>
                     <div class="panel-value">{{ stats.moyenne|default:"0" }}/20</div>
                 </div>
-                <div class="icon-circle" style="background: rgba(54, 185, 204, 0.1); color: #36b9cc;">
+                <div class="icon-circle" style="background: rgba(78, 205, 196, 0.1); color: #4ecdc4;">
                     <i class="fas fa-pen-nib"></i>
                 </div>
             </div>

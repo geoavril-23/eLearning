@@ -26,9 +26,9 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         padding: 1.5rem;
         margin-bottom: 2rem;
-        border-left: 4px solid #1cc88a;
+        border-left: 4px solid #133e3f;
     }
-    
+
     .content-box {
         background: #f8f9fc;
         border: 1px solid #e3e6f0;
@@ -36,7 +36,7 @@
         padding: 1.5rem;
         margin-bottom: 2rem;
     }
-    
+
     .grading-box {
         background: white;
         border-radius: 12px;
@@ -44,7 +44,7 @@
         padding: 2rem;
         border: 1px solid #e3e6f0;
     }
-    
+
     .answer-item {
         background: white;
         border-radius: 8px;
@@ -53,6 +53,16 @@
         border-left: 3px solid #133e3f;
         box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
+
+    /* Dark mode */
+    body.dark-mode .page-header { border-bottom-color: #374151; }
+    body.dark-mode .page-header h1 { color: #FFC107; }
+    body.dark-mode .student-info-card { background: #1f2937; box-shadow: none; border-left-color: #FFC107; }
+    body.dark-mode .student-info-card .border-right { border-right-color: #374151 !important; }
+    body.dark-mode .content-box { background: #111827; border-color: #374151; }
+    body.dark-mode .grading-box { background: #1f2937; border-color: #374151; box-shadow: none; }
+    body.dark-mode .answer-item { background: #111827; border-left-color: #FFC107; }
+    body.dark-mode .badge-light { background-color: #374151 !important; color: #d1d5db !important; border-color: #4a5568 !important; }
 </style>
 {% endblock %}
 

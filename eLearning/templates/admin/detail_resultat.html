@@ -12,21 +12,21 @@
 
     .detail-header {
         background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
-        border-radius: 20px;
-        padding: 2rem 2.5rem;
-        margin-bottom: 2rem;
+        border-radius: 14px;
+        padding: 1.1rem 1.5rem;
+        margin-bottom: 1.5rem;
         color: #fff;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 0.75rem;
     }
 
     .detail-header h1 {
-        font-size: 1.6rem;
-        font-weight: 900;
-        margin: 0 0 0.4rem 0;
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin: 0 0 0.25rem 0;
         color: #fff;
     }
 
@@ -229,6 +229,38 @@
     body.dark-mode .answer-chip.my-wrong   { background: #7f1d1d; color: #fca5a5; }
     body.dark-mode .answer-chip.good       { background: #166534; color: #86efac; }
     body.dark-mode .answer-chip.my-open    { background: #0c4a6e; color: #7dd3fc; }
+
+    /* Boîte attente correction */
+    .attente-box {
+        text-align: center;
+        padding: 2.5rem 2rem;
+    }
+    .attente-box .attente-icon {
+        font-size: 3rem;
+        color: var(--gold);
+        margin-bottom: 1rem;
+        opacity: 0.8;
+        animation: pulse-clock 2s ease-in-out infinite;
+    }
+    @keyframes pulse-clock {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50%       { transform: scale(1.08); opacity: 1; }
+    }
+    .attente-box h3 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--teal);
+        margin-bottom: 0.6rem;
+    }
+    .attente-box p {
+        font-size: 0.87rem;
+        color: #6b7280;
+        line-height: 1.7;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    body.dark-mode .attente-box h3 { color: var(--gold); }
+    body.dark-mode .attente-box p  { color: #9ca3af; }
 </style>
 {% endblock %}
 
@@ -266,7 +298,19 @@
 <div class="questions-section">
     <h2><i class="fas fa-file-alt"></i> Mon travail</h2>
 
-    {% if soumission.fichier_reponse %}
+    {% if soumission.quiz.type_correction == 'manuelle' and not soumission.est_corrige %}
+    {# Correction manuelle non encore faite → aucune indication #}
+    <div class="attente-box">
+        <div class="attente-icon"><i class="fas fa-hourglass-half"></i></div>
+        <h3>En attente de correction</h3>
+        <p>
+            Votre travail a été soumis avec succès le {{ soumission.date_soumission|date:"d/m/Y" }}.<br>
+            L'enseignant va examiner votre copie et vous attribuer une note.<br>
+            <strong>Aucune indication ne sera affichée avant la correction.</strong>
+        </p>
+    </div>
+
+    {% elif soumission.fichier_reponse %}
     <div class="fichier-box">
         <i class="fas fa-file-word fichier-icon"></i>
         <div>

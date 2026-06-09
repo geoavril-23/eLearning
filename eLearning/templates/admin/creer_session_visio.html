@@ -7,37 +7,40 @@
 <style>
     .form-container {
         background: white;
-        border-radius: 20px;
-        padding: 2.5rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        max-width: 800px;
+        border-radius: 16px;
+        padding: 1.75rem 2rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        max-width: 720px;
         margin: 0 auto;
     }
 
     .form-header {
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.5rem;
     }
 
     .icon-box {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-size: 1.8rem;
-        margin: 0 auto 1rem;
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        color: #FFC107;
+        font-size: 1.25rem;
+        margin: 0 auto 0.75rem;
+        box-shadow: 0 6px 16px rgba(19, 62, 63, 0.25);
     }
+
+    .form-header h2 { font-size: 1.3rem; }
+    .form-header p { font-size: 0.88rem; }
 
     .form-group label {
         font-weight: 700;
-        color: #4a5568;
-        margin-bottom: 0.6rem;
-        font-size: 0.9rem;
+        color: #133e3f;
+        margin-bottom: 0.5rem;
+        font-size: 0.82rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -50,14 +53,9 @@
         transition: all 0.3s;
     }
 
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    }
-
     .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        color: #FFC107;
         border: none;
         border-radius: 12px;
         padding: 14px;
@@ -70,31 +68,39 @@
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        color: white;
+        box-shadow: 0 8px 25px rgba(19, 62, 63, 0.40);
+        color: #FFC107;
     }
 
     .info-card {
-        background: #f0f4ff;
+        background: rgba(19,62,63,0.06);
         border-radius: 12px;
         padding: 1rem;
         margin-bottom: 2rem;
         display: flex;
         gap: 15px;
         align-items: center;
-        border-left: 5px solid #667eea;
+        border-left: 5px solid #133e3f;
     }
 
     .info-card i {
-        color: #667eea;
+        color: #133e3f;
         font-size: 1.5rem;
     }
 
     .info-card p {
         margin: 0;
         font-size: 0.9rem;
-        color: #4c51bf;
+        color: #133e3f;
     }
+
+    /* Dark mode */
+    body.dark-mode .form-container { background: #1f2937; box-shadow: none; }
+    body.dark-mode .form-group label { color: #4ecdc4; }
+    body.dark-mode .info-card { background: rgba(78,205,196,0.08); border-left-color: #4ecdc4; }
+    body.dark-mode .info-card i { color: #4ecdc4; }
+    body.dark-mode .info-card p { color: #9ca3af; }
+    body.dark-mode .form-header h2 { color: #FFC107 !important; }
 </style>
 {% endblock %}
 

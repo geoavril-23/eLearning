@@ -5,123 +5,373 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --oo-teal: #133e3f;
+        --oo-gold: #FFC107;
+    }
+
+    .oe-page-title {
+        color: #133e3f;
+    }
+    body.dark-mode .oe-page-title {
+        color: #FFC107 !important;
+    }
+
+    /* ── Solde chip ── */
+    .solde-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 1rem;
+        background: rgba(19,62,63,0.07);
+        border: 1px solid rgba(19,62,63,0.18);
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #133e3f;
+    }
+    .solde-chip i { color: #FFC107; }
+    body.dark-mode .solde-chip {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.90);
+    }
+
+    /* ── Grid ── */
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    /* ── Book card — glass in dark, solid in light ── */
     .book-card {
-        transition: transform 0.3s, box-shadow 0.3s;
-        border: none;
-        border-radius: 15px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.08) 100%);
+        border: 1px solid rgba(255,255,255,0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.15);
         overflow: hidden;
-        height: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
     }
+
     .book-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        transform: translateY(-6px);
+        box-shadow: 0 28px 70px rgba(0,0,0,0.20), inset 0 0 18px rgba(255,255,255,0.18);
+        border-color: rgba(255,193,7,0.35);
     }
+
+    body:not(.dark-mode) .book-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(19,62,63,0.18) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.07) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body:not(.dark-mode) .book-card:hover {
+        box-shadow: 0 10px 32px rgba(19,62,63,0.14) !important;
+        border-color: rgba(19,62,63,0.35) !important;
+    }
+
+    /* ── Book cover ── */
     .book-cover {
-        height: 250px;
-        background-color: #f8f9fc;
+        height: 190px;
+        background: rgba(19,62,63,0.06);
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    body.dark-mode .book-cover {
+        background: rgba(255,255,255,0.06);
     }
     .book-cover img {
-        max-height: 100%;
-        max-width: 100%;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
     }
-    .book-badge {
+    .book-cover-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        opacity: 0.45;
+    }
+    .book-cover-placeholder i {
+        font-size: 2.2rem;
+        color: #133e3f;
+    }
+    body.dark-mode .book-cover-placeholder i { color: #FFC107; }
+    .book-cover-placeholder span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #6b7280;
+    }
+    body.dark-mode .book-cover-placeholder span { color: rgba(255,255,255,0.55); }
+
+    /* ── Badge overlay ── */
+    .book-badge-overlay {
         position: absolute;
         top: 10px;
         right: 10px;
         z-index: 2;
     }
-    .price-tag {
-        font-size: 1.25rem;
+    .badge-premium {
+        background: linear-gradient(135deg, #FFC107, #e6ac00);
+        color: #133e3f;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.28rem 0.65rem;
+        border-radius: 50px;
+        display: inline-block;
+    }
+    .badge-acquis {
+        background: linear-gradient(135deg, #133e3f, #0f3435);
+        color: #FFC107;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.28rem 0.65rem;
+        border-radius: 50px;
+        display: inline-block;
+    }
+    .badge-gratuit {
+        background: rgba(19,62,63,0.12);
+        color: #133e3f;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.28rem 0.65rem;
+        border-radius: 50px;
+        border: 1px solid rgba(19,62,63,0.25);
+        display: inline-block;
+    }
+    body.dark-mode .badge-gratuit {
+        background: rgba(78,205,196,0.18);
+        color: #4ecdc4;
+        border-color: rgba(78,205,196,0.35);
+    }
+
+    /* ── Card body ── */
+    .book-body {
+        padding: 1rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        gap: 0.4rem;
+    }
+
+    .book-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+        line-height: 1.3;
+    }
+    body:not(.dark-mode) .book-title { color: #133e3f !important; }
+
+    .book-author {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--oo-gold);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    body:not(.dark-mode) .book-author { color: #b8860b !important; }
+
+    .book-desc {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.75);
+        line-height: 1.4;
+        flex: 1;
+        margin-top: 0.2rem;
+    }
+    body:not(.dark-mode) .book-desc { color: #4b5563 !important; }
+
+    /* ── Footer row ── */
+    .book-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.1rem 1rem;
+        border-top: 1px solid rgba(255,255,255,0.10);
+        flex-shrink: 0;
+        gap: 0.5rem;
+    }
+    body:not(.dark-mode) .book-footer {
+        border-top-color: rgba(19,62,63,0.10) !important;
+    }
+
+    .book-price {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #FFC107;
+    }
+    body:not(.dark-mode) .book-price { color: #133e3f !important; }
+
+    .book-price small {
+        font-size: 0.7rem;
+        font-weight: 600;
+        opacity: 0.75;
+    }
+
+    /* ── Action buttons ── */
+    .btn-book {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.45rem 1rem;
+        border: none;
+        border-radius: 10px;
         font-weight: 700;
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-book-read {
+        background: linear-gradient(135deg, #133e3f 0%, #0f3435 100%);
+        color: #FFC107;
+        box-shadow: 0 4px 12px rgba(19,62,63,0.25);
+    }
+    .btn-book-read:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(19,62,63,0.35);
+        color: #FFC107;
+        text-decoration: none;
+    }
+    .btn-book-buy {
+        background: linear-gradient(135deg, #FFC107 0%, #e6ac00 100%);
+        color: #133e3f;
+        box-shadow: 0 4px 12px rgba(255,193,7,0.25);
+    }
+    .btn-book-buy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255,193,7,0.35);
         color: #133e3f;
     }
-    .btn-buy {
-        border-radius: 25px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+
+    /* ── Empty state ── */
+    .books-empty {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.08) 100%);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
     }
+    body:not(.dark-mode) .books-empty {
+        background: #ffffff !important;
+        border: 1px solid rgba(19,62,63,0.18) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .books-empty i {
+        font-size: 2.8rem;
+        color: var(--oo-gold);
+        opacity: 0.45;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    .books-empty h4 {
+        color: #ffffff;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+    }
+    body:not(.dark-mode) .books-empty h4 { color: #133e3f !important; }
+    .books-empty p { color: rgba(255,255,255,0.78); }
+    body:not(.dark-mode) .books-empty p { color: #4b5563 !important; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-    <!-- Page Heading -->
+    <!-- Page heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-book-reader text-primary mr-2"></i>Bibliothèque Numérique
+        <h1 class="h3 mb-0 oe-page-title">
+            <i class="fas fa-book-reader mr-2" style="color: var(--oo-gold);"></i>Bibliothèque Numérique
         </h1>
-        <div class="text-right">
-            <span class="badge badge-light p-2 shadow-sm">
-                <i class="fas fa-wallet mr-1 text-primary"></i> Mon Solde : <strong>{{ user.etudiant.solde|floatformat:0 }} FCFA</strong>
-            </span>
-        </div>
+        <span class="solde-chip">
+            <i class="fas fa-wallet"></i>
+            Mon Solde : <strong>{{ user.etudiant.solde|floatformat:0 }} FCFA</strong>
+        </span>
     </div>
 
-    <div class="row">
+    {% if livres %}
+    <div class="books-grid">
         {% for livre in livres %}
-        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-            <div class="card book-card shadow-sm">
-                <div class="book-cover">
-                    {% if livre.couverture %}
-                        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
-                    {% else %}
-                        <div class="text-center p-4">
-                            <i class="fas fa-book fa-4x text-gray-300 mb-3"></i>
-                            <p class="small text-muted">Pas de couverture</p>
-                        </div>
-                    {% endif %}
-                    
-                    {% if livre.id in livres_achetes %}
-                        <span class="badge badge-success book-badge"><i class="fas fa-check-circle mr-1"></i>Déjà acquis</span>
-                    {% elif livre.est_premium %}
-                        <span class="badge badge-warning book-badge"><i class="fas fa-crown mr-1"></i>Premium</span>
-                    {% endif %}
-                </div>
-                
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold text-dark mb-1">{{ livre.titre }}</h5>
-                    <p class="text-muted small mb-3">Par {{ livre.auteur }}</p>
-                    
-                    <p class="card-text small text-gray-600 mb-4">
-                        {{ livre.description|truncatechars:100 }}
-                    </p>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="price-tag">
-                            {% if livre.prix == 0 %}Gratuit{% else %}{{ livre.prix|floatformat:0 }} <small>FCFA</small>{% endif %}
-                        </div>
-                        
-                        {% if livre.id in livres_achetes %}
-                            <a href="{{ livre.lien_externe|default:'#' }}" target="_blank" class="btn btn-primary btn-sm btn-buy">
-                                <i class="fas fa-external-link-alt mr-1"></i> Lire
-                            </a>
-                        {% else %}
-                            <form action="{% url 'acheter_livre' livre.id %}" method="POST">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-primary btn-sm btn-buy">
-                                    <i class="fas fa-shopping-cart mr-1"></i> Acheter
-                                </button>
-                            </form>
-                        {% endif %}
+        <div class="book-card">
+
+            <!-- Cover -->
+            <div class="book-cover">
+                {% if livre.couverture %}
+                    <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
+                {% else %}
+                    <div class="book-cover-placeholder">
+                        <i class="fas fa-book-open"></i>
+                        <span>Pas de couverture</span>
                     </div>
+                {% endif %}
+                <div class="book-badge-overlay">
+                    {% if livre.id in livres_achetes %}
+                        <span class="badge-acquis"><i class="fas fa-check-circle mr-1"></i>Acquis</span>
+                    {% elif livre.est_premium %}
+                        <span class="badge-premium"><i class="fas fa-crown mr-1"></i>Premium</span>
+                    {% else %}
+                        <span class="badge-gratuit"><i class="fas fa-gift mr-1"></i>Gratuit</span>
+                    {% endif %}
                 </div>
             </div>
-        </div>
-        {% empty %}
-        <div class="col-12 text-center py-5">
-            <i class="fas fa-books fa-5x text-gray-200 mb-4"></i>
-            <h3>La bibliothèque est vide pour le moment</h3>
-            <p class="text-muted">Revenez bientôt pour découvrir de nouveaux ouvrages !</p>
+
+            <!-- Body -->
+            <div class="book-body">
+                <h3 class="book-title">{{ livre.titre }}</h3>
+                <div class="book-author">Par {{ livre.auteur }}</div>
+                <p class="book-desc">{{ livre.description|truncatechars:95 }}</p>
+            </div>
+
+            <!-- Footer -->
+            <div class="book-footer">
+                <div class="book-price">
+                    {% if livre.prix == 0 %}
+                        <span style="font-size:0.85rem;">Gratuit</span>
+                    {% else %}
+                        {{ livre.prix|floatformat:0 }} <small>FCFA</small>
+                    {% endif %}
+                </div>
+
+                {% if livre.id in livres_achetes %}
+                    <a href="{{ livre.lien_externe|default:'#' }}" target="_blank" class="btn-book btn-book-read">
+                        <i class="fas fa-external-link-alt"></i> Lire
+                    </a>
+                {% else %}
+                    <form action="{% url 'acheter_livre' livre.id %}" method="POST" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-book btn-book-buy">
+                            <i class="fas fa-shopping-cart"></i> Acheter
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
         </div>
         {% endfor %}
     </div>
+
+    {% else %}
+    <div class="books-empty">
+        <i class="fas fa-book-open"></i>
+        <h4>Bibliothèque vide pour le moment</h4>
+        <p>Revenez bientôt pour découvrir de nouveaux ouvrages !</p>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

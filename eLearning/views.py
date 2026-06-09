@@ -363,44 +363,59 @@ def dashboard_admin(request):
     if not request.user.is_administrateur:
         messages.error(request, 'Accès refusé. Réservé aux administrateurs.')
         return redirect('index')
-    
-    from django.db.models import Sum
+
+    from django.db.models import Sum, Q
     from django.utils import timezone
-    
-    mois_en_cours = timezone.now().month
-    annee_en_cours = timezone.now().year
-    
+
+    maintenant = timezone.now()
+    mois_en_cours = maintenant.month
+    annee_en_cours = maintenant.year
+    trente_jours = maintenant - timezone.timedelta(days=30)
+
     total_users = User.objects.count()
     total_courses = Cours.objects.count()
+
+    # Revenus du mois : achats de cours, chapitres et livres via le portefeuille
+    # (les paiements PayGate créent aussi une TransactionSimulee, donc déjà inclus)
     revenu_mois = TransactionSimulee.objects.filter(
         type_transaction__in=['achat_cours', 'achat_chapitre', 'achat_livre'],
         date_transaction__month=mois_en_cours,
         date_transaction__year=annee_en_cours
     ).aggregate(total=Sum('montant'))['total'] or 0
-    
+
+    # Engagement : % d'étudiants actifs dans les 30 derniers jours
+    # (actif = a consulté au moins 1 chapitre OU soumis au moins 1 quiz)
+    total_etudiants = Etudiant.objects.count()
+    etudiants_actifs = Etudiant.objects.filter(
+        Q(chapitres_vus__date_consultation__gte=trente_jours) |
+        Q(soumissions__date_soumission__gte=trente_jours)
+    ).distinct().count()
+    engagement = round((etudiants_actifs / total_etudiants) * 100) if total_etudiants > 0 else 0
+
     import calendar
     activite_labels = []
     activite_data = []
-    
+
     for i in range(5, -1, -1):
-        d = timezone.now() - timezone.timedelta(days=i*30)
+        d = maintenant - timezone.timedelta(days=i*30)
         m = d.month
         y = d.year
         count = User.objects.filter(date_joined__month=m, date_joined__year=y).count()
         activite_data.append(count)
         mois_nom = calendar.month_abbr[m]
         activite_labels.append(mois_nom)
-    
+
     context = {
         'stats': {
             'total_users': total_users,
             'total_courses': total_courses,
             'revenu_mois': revenu_mois,
+            'engagement': engagement,
         },
         'activite_labels': activite_labels,
         'activite_data': activite_data,
     }
-    
+
     return render(request, 'admin/index.html', context)
 
 @login_required
@@ -1048,6 +1063,62 @@ def paygate_simulation(request):
 
 
 @login_required
+def paygate_simulation_envoyer_otp(request):
+    """Génère un OTP, l'enregistre en session, et tente d'envoyer un SMS via TextBelt."""
+    if request.method != 'POST' or not request.user.is_etudiant:
+        return JsonResponse({'status': 'error'}, status=400)
+
+    import random
+
+    ref = request.POST.get('ref', '')
+    telephone = request.POST.get('telephone', '').replace(' ', '')
+    operateur = request.POST.get('operateur', 'tmoney')
+
+    paiement = PaiementPayGate.objects.filter(
+        identifier=ref, etudiant=request.user.etudiant, statut='en_attente'
+    ).first()
+
+    if not paiement:
+        return JsonResponse({'status': 'error', 'message': 'Transaction introuvable.'}, status=404)
+
+    otp = str(random.randint(100000, 999999))
+    request.session[f'paygate_otp_{ref}'] = otp
+    request.session.modified = True
+
+    numero_complet = f'+228{telephone}'
+    montant_str = int(paiement.montant)
+    operateur_nom = 'T-Money' if operateur == 'tmoney' else 'Flooz'
+    sms_texte = (
+        f"[OpenEdu] Code de confirmation : {otp}\n"
+        f"Paiement {operateur_nom} de {montant_str} FCFA.\n"
+        f"Valable 10 min. Ne partagez pas ce code."
+    )
+
+    sms_envoye = False
+    try:
+        import requests as _req
+        resp = _req.post(
+            'https://textbelt.com/text',
+            data={'phone': numero_complet, 'message': sms_texte, 'key': 'textbelt'},
+            timeout=10,
+        )
+        result = resp.json()
+        sms_envoye = bool(result.get('success', False))
+    except Exception:
+        sms_envoye = False
+
+    if not sms_envoye:
+        print(f'[PAYGATE SIM] OTP pour {numero_complet} : {otp}')
+
+    return JsonResponse({
+        'status': 'ok',
+        'sms_envoye': sms_envoye,
+        'numero': numero_complet,
+        'otp_dev': otp if not sms_envoye else None,
+    })
+
+
+@login_required
 def paygate_simulation_action(request, action):
     """Confirme ou annule un paiement simulé (action = 'confirmer' ou 'annuler')."""
     if request.method != 'POST' or not request.user.is_etudiant:
@@ -1065,6 +1136,18 @@ def paygate_simulation_action(request, action):
     from django.utils import timezone as _tz
 
     if action == 'confirmer':
+        # Vérifier l'OTP si une session existe pour cette transaction
+        session_key = f'paygate_otp_{identifier}'
+        otp_attendu = request.session.get(session_key)
+        if otp_attendu:
+            otp_fourni = request.POST.get('otp', '').strip()
+            if otp_fourni != otp_attendu:
+                messages.error(request, "Code OTP incorrect. Veuillez réessayer.")
+                dest = 'mes_courses' if paiement.type_paiement == 'achat_cours' else 'paiements'
+                return redirect(reverse('paygate_simulation') + f'?ref={identifier}')
+            del request.session[session_key]
+            request.session.modified = True
+
         ref = f'SIM-{uuid.uuid4().hex[:10].upper()}'
         paiement.statut = 'paye'
         paiement.tx_reference = ref
@@ -2463,15 +2546,24 @@ def mes_quiz_etudiant(request):
         messages.error(request, 'Accès réservé aux étudiants.')
         return redirect('dashboard')
 
-    # Récupérer les ID des cours où l'étudiant est inscrit (statut = validée)
+    etudiant = request.user.etudiant
+
+    # IDs des cours inscrits (non annulés)
     cours_inscrits_ids = Inscription.objects.filter(
-        etudiant=request.user.etudiant
+        etudiant=etudiant
     ).exclude(statut='annulee').values_list('cours_id', flat=True)
 
-    # Récupérer les quiz associés à ces cours
+    # IDs des quiz déjà soumis par cet étudiant
+    quiz_deja_soumis_ids = SoumissionQuiz.objects.filter(
+        etudiant=etudiant
+    ).values_list('quiz_id', flat=True)
+
+    # Quiz disponibles : liés aux cours inscrits, pas encore soumis, sans doublons
     quiz_disponibles = Quiz.objects.filter(
         cours_id__in=cours_inscrits_ids
-    ).select_related('cours', 'cours__enseignant', 'cours__categorie').order_by('-id')
+    ).exclude(
+        id__in=quiz_deja_soumis_ids
+    ).select_related('cours', 'cours__enseignant', 'cours__categorie').distinct().order_by('-id')
 
     return render(request, 'admin/quiz_etudiant.html', {'quiz_disponibles': quiz_disponibles})
 
@@ -2932,9 +3024,25 @@ def mes_chapitres_debloques(request):
     if not request.user.is_etudiant:
         messages.error(request, "Accès réservé aux étudiants.")
         return redirect('dashboard')
-        
-    deblocages = ChapitreDebloque.objects.filter(etudiant=request.user.etudiant).select_related('chapitre', 'chapitre__cours').order_by('-date_deblocage')
-    return render(request, 'admin/mes_chapitres_debloques.html', {'deblocages': deblocages})
+
+    etudiant = request.user.etudiant
+
+    # Chapitres individuels achetés (via solde portefeuille)
+    deblocages = ChapitreDebloque.objects.filter(etudiant=etudiant).select_related(
+        'chapitre', 'chapitre__cours'
+    ).order_by('-date_deblocage')
+
+    # Cours premium entiers payés (via PayGate)
+    cours_premium_payes = Inscription.objects.filter(
+        etudiant=etudiant,
+        cours__est_premium=True,
+        est_paye=True,
+    ).select_related('cours').prefetch_related('cours__chapitres').order_by('-date_inscription')
+
+    return render(request, 'admin/mes_chapitres_debloques.html', {
+        'deblocages': deblocages,
+        'cours_premium_payes': cours_premium_payes,
+    })
 
 @login_required
 def fetch_notifications(request):

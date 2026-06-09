@@ -30,6 +30,7 @@ urlpatterns = [
     path('dashboard/etudiant/paygate/statut/', views.paygate_statut_json, name='paygate_statut_json'),
     path('paygate/callback/', views.paygate_callback, name='paygate_callback'),
     path('dashboard/etudiant/paygate/simulation/', views.paygate_simulation, name='paygate_simulation'),
+    path('dashboard/etudiant/paygate/simulation/otp/', views.paygate_simulation_envoyer_otp, name='paygate_simulation_envoyer_otp'),
     path('dashboard/etudiant/paygate/simulation/<str:action>/', views.paygate_simulation_action, name='paygate_simulation_action'),
     path('dashboard/bibliotheque/', views.liste_livres, name='liste_livres'),
     path('dashboard/etudiant/acheter-livre/<int:livre_id>/', views.acheter_livre, name='acheter_livre'),

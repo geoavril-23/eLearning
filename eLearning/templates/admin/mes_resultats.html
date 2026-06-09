@@ -10,14 +10,14 @@
         --oo-gold: #FFC107;
     }
 
-    /* ── Glass card with float + liquid border (style contact/register) ── */
+    /* ── Glass card with float + liquid border ── */
     .result-card {
         position: relative;
         background: #ffffff;
         border: 1px solid #e5e7eb;
-        border-radius: 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: all 0.35s ease;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        transition: all 0.3s ease;
         overflow: hidden;
         animation: oo-float-res 4.8s ease-in-out infinite;
     }
@@ -90,7 +90,7 @@
         box-shadow: 0 30px 80px rgba(0,0,0,0.20), inset 0 0 20px rgba(255,255,255,0.20);
     }
 
-    .result-card.status-corrected { border-left: 3px solid #1cc88a; }
+    .result-card.status-corrected { border-left: 3px solid #133e3f; }
     .result-card.status-pending   { border-left: 3px solid var(--oo-gold); }
 
     .result-card .card-body { position: relative; z-index: 2; }

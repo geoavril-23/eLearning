@@ -36,9 +36,12 @@
         letter-spacing: 0.5px;
     }
 
-    .status-avenir { background: #e3f2fd; color: #1976d2; }
+    .status-avenir  { background: rgba(19,62,63,0.10); color: #133e3f; }
     .status-encours { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; animation: pulse 2s infinite; }
     .status-termine { background: #f5f5f5; color: #757575; }
+    body.dark-mode .status-avenir  { background: rgba(78,205,196,0.15); color: #4ecdc4; }
+    body.dark-mode .status-encours { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
+    body.dark-mode .status-termine { background: #374151; color: #9ca3af; }
 
     @keyframes pulse {
         0% { opacity: 1; }
@@ -151,6 +154,12 @@
         font-size: 0.9rem;
         margin: 0;
     }
+
+    body.dark-mode .live-card { background: #1f2937; }
+    body.dark-mode .live-title { color: #FFC107; }
+    body.dark-mode .live-info { color: #9ca3af; }
+    body.dark-mode .btn-delete { background: rgba(239,68,68,0.12); color: #fca5a5; }
+    body.dark-mode .btn-delete:hover { background: rgba(239,68,68,0.22); color: #fca5a5; }
 
     body.dark-mode .header-section {
         background: #1f2937;
