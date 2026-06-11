@@ -211,6 +211,19 @@
         background-color: #242632;
         border-color: #323545;
     }
+
+    /* ── Thème clair : forcer le texte saisi en NOIR lisible ──
+       Les champs et l'éditeur Quill utilisaient un gris par défaut. */
+    body:not(.dark-mode) .form-control,
+    body:not(.dark-mode) select,
+    body:not(.dark-mode) textarea,
+    body:not(.dark-mode) .entree-titre,
+    body:not(.dark-mode) .ql-editor,
+    body:not(.dark-mode) .ql-editor p,
+    body:not(.dark-mode) .ql-editor li,
+    body:not(.dark-mode) .ql-editor span {
+        color: #1a1a1a !important;
+    }
 </style>
 {% endblock %}
 

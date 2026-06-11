@@ -13,8 +13,30 @@ from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import google.generativeai as genai
 import os
+import requests
+
+
+def _gemini_generer_json(prompt, model='gemini-flash-latest', timeout=60):
+    """Appelle l'API REST de Gemini directement (sans la librairie
+    `google.generativeai`, dépréciée et extrêmement lente à importer sur Windows).
+    Retourne le texte brut de la réponse, censé être du JSON valide.
+    Lève une exception en cas d'erreur HTTP ou de réponse vide."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json"},
+    }
+    response = requests.post(
+        url,
+        params={"key": settings.GEMINI_API_KEY},
+        json=body,
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
 
 # Vues de base
 def index(request):
@@ -1868,17 +1890,8 @@ FORMAT JSON REQUIS (respecte exactement cette structure) :
 }}"""
 
         try:
-            # ── Appel à Gemini (Google) ──
-            # On force le transport 'rest' pour éviter les erreurs gRPC/404 sur Windows
-            genai.configure(api_key=settings.GEMINI_API_KEY, transport='rest')
-            model = genai.GenerativeModel('gemini-flash-latest')
-            
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-
-            response_text = response.text.strip()
+            # ── Appel à Gemini (Google) via l'API REST directe ──
+            response_text = _gemini_generer_json(prompt)
             quiz_data = json.loads(response_text)
 
             # ── Créer le Quiz, ses Questions et Choix dans une transaction ──
@@ -2631,9 +2644,6 @@ def soumettre_quiz(request, id):
     if quiz.type_correction == 'auto':
         # --- CORRECTION AUTOMATIQUE PAR IA ---
         try:
-            genai.configure(api_key=settings.GEMINI_API_KEY, transport='rest')
-            model = genai.GenerativeModel('gemini-flash-latest')
-            
             prompt = f"""Tu es un professeur sévère mais juste.
 Évalue le travail d'un étudiant pour le quiz "{quiz.titre}".
 La note maximale est de {quiz.note_max}.
@@ -2650,8 +2660,7 @@ Travail de l'étudiant (Réponses JSON ou nom de fichier joint) : {reponses_qcm 
   "commentaires": "Bon travail dans l'ensemble. Les concepts X et Y sont bien compris. Attention à Z."
 }
 """
-            response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
-            resultat = json.loads(response.text.strip())
+            resultat = json.loads(_gemini_generer_json(prompt))
             
             soumission.note_obtenue = resultat.get('note', 0)
             soumission.commentaires = resultat.get('commentaires', "Évaluation générée par IA.")
