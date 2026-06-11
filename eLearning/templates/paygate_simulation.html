@@ -46,6 +46,11 @@
         .pg-amount-bar .label { font-size: .75rem; color: #666; }
         .pg-amount-bar .amount { font-size: 1.4rem; font-weight: 700; color: #003580; }
         .pg-amount-bar .desc { font-size: .72rem; color: #888; margin-top: 2px; }
+        .sim-badge {
+            font-size: .62rem; background: #FFD700; color: #333;
+            padding: 2px 7px; border-radius: 10px; font-weight: 700;
+            letter-spacing: .3px; display: inline-block;
+        }
         .pg-body { padding: 20px; }
         .pg-body h3 { font-size: .85rem; color: #333; margin-bottom: 14px; font-weight: 600; }
         .pg-operators { display: flex; gap: 10px; margin-bottom: 18px; }
@@ -82,53 +87,22 @@
         }
         .pg-btn:hover { background: #002060; }
         .pg-btn:disabled { background: #999; cursor: not-allowed; }
-        .pg-footer {
-            border-top: 1px solid #eee; padding: 10px 20px;
-            font-size: .68rem; color: #aaa; text-align: center;
+        .pg-btn-cancel {
+            width: 100%; background: none; border: none;
+            color: #888; font-size: .78rem; cursor: pointer;
+            padding: 8px; margin-top: 6px;
         }
-        .pg-footer a { color: #003580; text-decoration: none; }
-        /* Écran d'attente */
-        #pg-waiting {
-            display: none; text-align: center; padding: 30px 20px;
-        }
-        .pg-spinner {
-            width: 52px; height: 52px; border: 5px solid #e0e0e0;
-            border-top-color: #003580; border-radius: 50%;
-            margin: 0 auto 18px; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #pg-waiting h3 { font-size: .95rem; color: #003580; margin-bottom: 8px; }
-        #pg-waiting p  { font-size: .8rem; color: #666; line-height: 1.5; }
-        /* Écran OTP */
-        #pg-otp-section { display: none; padding: 20px; }
-        #pg-otp-section h3 { font-size: .9rem; color: #003580; margin-bottom: 10px; font-weight: 700; }
-        #pg-otp-section p { font-size: .8rem; color: #555; margin-bottom: 16px; line-height: 1.5; }
-        .otp-input-wrap {
-            display: flex; gap: 8px; justify-content: center; margin-bottom: 14px;
-        }
-        .otp-digit {
-            width: 44px; height: 52px; border: 2px solid #ccc; border-radius: 6px;
-            font-size: 1.4rem; font-weight: 700; text-align: center; color: #003580;
-            outline: none; transition: border-color .2s;
-        }
-        .otp-digit:focus { border-color: #003580; }
-        .otp-resend { font-size: .72rem; color: #888; text-align: center; margin-top: 8px; }
-        .otp-resend a { color: #003580; cursor: pointer; text-decoration: underline; }
-        .dev-otp-box {
-            background: #fff8e1; border: 1px dashed #FFC107; border-radius: 6px;
-            padding: 10px 14px; font-size: .78rem; color: #555; margin-bottom: 12px;
-        }
-        .dev-otp-box strong { color: #e53935; font-size: 1.1rem; letter-spacing: 4px; }
-        .sim-badge {
-            font-size: .62rem; background: #FFD700; color: #333;
-            padding: 2px 7px; border-radius: 10px; font-weight: 700;
-            letter-spacing: .3px; display: inline-block; margin-bottom: 8px;
-        }
+        .pg-btn-cancel:hover { color: #c00; }
         .pg-error-msg {
             background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c;
             border-radius: 6px; padding: 8px 12px; font-size: .78rem; margin-top: 10px;
             display: none;
         }
+        .pg-footer {
+            border-top: 1px solid #eee; padding: 10px 20px;
+            font-size: .68rem; color: #aaa; text-align: center;
+        }
+        .pg-footer a { color: #003580; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -160,110 +134,65 @@
         <span class="sim-badge">SIMULATION</span>
     </div>
 
-    <!-- Étape 1 : Formulaire numéro de téléphone -->
-    <div class="pg-body" id="pg-form-section">
+    <!-- Formulaire -->
+    <div class="pg-body">
         <h3>Choisissez votre moyen de paiement</h3>
 
         <div class="pg-operators">
-            <label class="pg-op selected" id="op-tmoney">
-                <input type="radio" name="op" value="tmoney" checked onchange="selectOp('tmoney')">
+            <label class="pg-op selected" id="op-tmoney" onclick="selectOp('tmoney')">
+                <input type="radio" name="op" value="tmoney" checked>
                 <div class="op-logo tm-logo">T</div>
                 <div class="op-name">T-Money</div>
             </label>
-            <label class="pg-op" id="op-flooz">
-                <input type="radio" name="op" value="flooz" onchange="selectOp('flooz')">
+            <label class="pg-op" id="op-flooz" onclick="selectOp('flooz')">
+                <input type="radio" name="op" value="flooz">
                 <div class="op-logo fl-logo">F</div>
                 <div class="op-name">Flooz</div>
             </label>
         </div>
 
         <div class="pg-field">
-            <label>Numéro de téléphone Mobile Money</label>
+            <label id="pg-phone-label">Numéro de téléphone T-Money</label>
             <div class="pg-phone-wrap">
                 <div class="pg-phone-prefix">🇹🇬 +228</div>
                 <input type="tel" id="telephone" placeholder="90 00 00 00"
                        maxlength="11" pattern="[0-9 ]{8,11}"
                        oninput="formatPhone(this)">
             </div>
-            <div class="pg-hint" id="pg-hint">Entrez le numéro T-Money associé à votre compte.</div>
+            <div class="pg-hint">Entrez le numéro associé à votre compte.</div>
         </div>
 
-        <button type="button" class="pg-btn" id="pg-submit" onclick="demanderOTP()">
-            Recevoir le code — {{ paiement.montant|floatformat:0 }} FCFA
-        </button>
-        <div class="pg-error-msg" id="pg-err-step1"></div>
+        <div class="pg-error-msg" id="pg-err"></div>
 
-        <!-- Annuler -->
-        <form method="post" action="{% url 'paygate_simulation_action' 'annuler' %}" style="margin-top:10px">
+        <!-- Confirmer directement — pas de code OTP -->
+        <form id="pg-confirm-form" method="post" action="{% url 'paygate_simulation_action' 'confirmer' %}">
             {% csrf_token %}
             <input type="hidden" name="ref" value="{{ paiement.identifier }}">
-            <button type="submit" style="width:100%;background:none;border:none;color:#888;font-size:.78rem;cursor:pointer;padding:6px;">
-                ✕ Annuler le paiement
+            <button type="button" class="pg-btn" onclick="confirmer()">
+                Confirmer le paiement — {{ paiement.montant|floatformat:0 }} FCFA
             </button>
         </form>
-    </div>
 
-    <!-- Étape intermédiaire : envoi SMS en cours -->
-    <div id="pg-waiting">
-        <div class="pg-spinner"></div>
-        <h3>Envoi du code en cours…</h3>
-        <p>Connexion au réseau <strong id="pg-op-name">T-Money</strong>…</p>
-    </div>
-
-    <!-- Étape 2 : Saisie du code OTP -->
-    <div id="pg-otp-section">
-        <h3>✉️ Code de confirmation</h3>
-        <p id="pg-otp-desc">Un code à 6 chiffres a été envoyé au <strong id="pg-tel-display"></strong>.</p>
-
-        <!-- Boîte dev : affichée si SMS non envoyé -->
-        <div class="dev-otp-box" id="pg-dev-box" style="display:none;">
-            📲 SMS non envoyé (limite gratuite atteinte).<br>
-            Votre code de test : <strong id="pg-dev-otp"></strong>
-        </div>
-
-        <div class="otp-input-wrap" id="otp-inputs">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d0">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d1">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d2">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d3">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d4">
-            <input class="otp-digit" type="tel" maxlength="1" inputmode="numeric" id="d5">
-        </div>
-
-        <div class="pg-error-msg" id="pg-err-otp"></div>
-        <div class="otp-resend">
-            Pas reçu ? <a onclick="renvoyerCode()">Renvoyer le code</a>
-        </div>
-
-        <!-- Formulaire final de confirmation -->
-        <form id="pg-otp-form" method="post" action="{% url 'paygate_simulation_action' 'confirmer' %}">
+        <!-- Annuler -->
+        <form method="post" action="{% url 'paygate_simulation_action' 'annuler' %}">
             {% csrf_token %}
             <input type="hidden" name="ref" value="{{ paiement.identifier }}">
-            <input type="hidden" name="telephone" id="otp-tel-hidden">
-            <input type="hidden" name="operateur" id="otp-op-hidden">
-            <input type="hidden" name="otp" id="otp-value-hidden">
-            <button type="submit" class="pg-btn" id="pg-confirm-btn" disabled>
-                Confirmer le paiement
-            </button>
+            <button type="submit" class="pg-btn-cancel">✕ Annuler le paiement</button>
         </form>
     </div>
 
     <div class="pg-footer">
-        Sécurisé par <a href="#">PayGate Global</a> &nbsp;·&nbsp; <a href="#">Confidentialité</a> &nbsp;·&nbsp; <a href="#">Aide</a>
+        Sécurisé par <a href="#">PayGate Global</a> &nbsp;·&nbsp;
+        <a href="#">Confidentialité</a> &nbsp;·&nbsp; <a href="#">Aide</a>
     </div>
 </div>
 
 <script>
-const REF = '{{ paiement.identifier }}';
-let currentOp = 'tmoney';
-
 function selectOp(op) {
-    currentOp = op;
     document.getElementById('op-tmoney').classList.toggle('selected', op === 'tmoney');
     document.getElementById('op-flooz').classList.toggle('selected', op === 'flooz');
-    document.getElementById('pg-hint').textContent = op === 'tmoney'
-        ? 'Entrez le numéro T-Money associé à votre compte.'
-        : 'Entrez le numéro Flooz associé à votre compte.';
+    document.getElementById('pg-phone-label').textContent =
+        op === 'tmoney' ? 'Numéro de téléphone T-Money' : 'Numéro de téléphone Flooz';
 }
 
 function formatPhone(input) {
@@ -273,87 +202,16 @@ function formatPhone(input) {
     input.value = v;
 }
 
-function showError(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
-}
-function hideError(id) {
-    document.getElementById(id).style.display = 'none';
-}
-
-function demanderOTP() {
-    const tel = document.getElementById('telephone').value.replace(/\s/g,'');
-    if (tel.length < 8) { showError('pg-err-step1', 'Entrez un numéro valide (8 chiffres minimum).'); return; }
-    hideError('pg-err-step1');
-
-    document.getElementById('pg-form-section').style.display = 'none';
-    document.getElementById('pg-waiting').style.display = 'block';
-    document.getElementById('pg-op-name').textContent = currentOp === 'tmoney' ? 'T-Money' : 'Flooz';
-
-    const formData = new FormData();
-    formData.append('ref', REF);
-    formData.append('telephone', tel);
-    formData.append('operateur', currentOp);
-    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-    fetch('{% url "paygate_simulation_envoyer_otp" %}', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(r => r.json())
-    .then(data => {
-        document.getElementById('pg-waiting').style.display = 'none';
-        document.getElementById('pg-otp-section').style.display = 'block';
-
-        document.getElementById('pg-tel-display').textContent = '+228 ' + document.getElementById('telephone').value;
-        document.getElementById('otp-tel-hidden').value = tel;
-        document.getElementById('otp-op-hidden').value = currentOp;
-
-        if (data.sms_envoye) {
-            document.getElementById('pg-otp-desc').innerHTML =
-                'Un SMS a été envoyé au <strong>+228 ' + document.getElementById('telephone').value + '</strong>.<br>Saisissez le code reçu.';
-        } else {
-            document.getElementById('pg-dev-box').style.display = 'block';
-            document.getElementById('pg-dev-otp').textContent = data.otp_dev || '------';
-        }
-
-        document.getElementById('d0').focus();
-    })
-    .catch(() => {
-        document.getElementById('pg-waiting').style.display = 'none';
-        document.getElementById('pg-form-section').style.display = 'block';
-        showError('pg-err-step1', 'Erreur de connexion. Réessayez.');
-    });
-}
-
-// Navigation entre les 6 cases OTP
-document.querySelectorAll('.otp-digit').forEach(function(input, idx) {
-    input.addEventListener('input', function() {
-        this.value = this.value.replace(/\D/g,'').slice(0,1);
-        if (this.value && idx < 5) document.getElementById('d' + (idx+1)).focus();
-        checkOTP();
-    });
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Backspace' && !this.value && idx > 0)
-            document.getElementById('d' + (idx-1)).focus();
-    });
-});
-
-function checkOTP() {
-    let code = '';
-    for (let i = 0; i < 6; i++) code += document.getElementById('d'+i).value;
-    document.getElementById('otp-value-hidden').value = code;
-    document.getElementById('pg-confirm-btn').disabled = (code.length < 6);
-}
-
-function renvoyerCode() {
-    for (let i = 0; i < 6; i++) document.getElementById('d'+i).value = '';
-    document.getElementById('pg-confirm-btn').disabled = true;
-    document.getElementById('pg-dev-box').style.display = 'none';
-    document.getElementById('pg-otp-section').style.display = 'none';
-    document.getElementById('pg-form-section').style.display = 'block';
-    document.getElementById('telephone').focus();
+function confirmer() {
+    const tel = document.getElementById('telephone').value.replace(/\s/g, '');
+    const err = document.getElementById('pg-err');
+    if (tel.length < 8) {
+        err.textContent = 'Entrez un numéro valide (8 chiffres minimum).';
+        err.style.display = 'block';
+        return;
+    }
+    err.style.display = 'none';
+    document.getElementById('pg-confirm-form').submit();
 }
 </script>
 </body>
