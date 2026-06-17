@@ -81,6 +81,34 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {% if activites.has_other_pages %}
+                <nav class="d-flex justify-content-center mt-3">
+                    <ul class="pagination">
+                        {% if activites.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ activites.previous_page_number }}">&laquo;</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        {% endif %}
+
+                        {% for num in activites.paginator.page_range %}
+                        <li class="page-item {% if activites.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if activites.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ activites.next_page_number }}">&raquo;</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -92,58 +120,118 @@
 <!-- Page level plugins -->
 <script src="{% static 'admin/vendor/chart.js/Chart.min.js' %}"></script>
 <script>
-    // Configuration Chart.js Engagement (Line)
+    // Configuration Chart.js Engagement (Line) — données en minutes
     var ctx = document.getElementById("engagementChart");
+    var tempsData = {{ temps_data|safe }};
     var myLineChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: {{ jours_labels|safe }},
         datasets: [{
-      label: "Heures",
+          label: "Minutes",
           lineTension: 0.3,
           backgroundColor: "rgba(19, 62, 63, 0.08)",
           borderColor: "rgba(19, 62, 63, 1)",
-          pointRadius: 3,
+          pointRadius: 4,
           pointBackgroundColor: "rgba(19, 62, 63, 1)",
           pointBorderColor: "#ffffff",
-          pointHoverRadius: 5,
+          pointHoverRadius: 6,
           pointHoverBackgroundColor: "#FFC107",
           pointHoverBorderColor: "rgba(19, 62, 63, 1)",
           pointHitRadius: 10,
           pointBorderWidth: 2,
-          data: {{ temps_data|safe }},
+          data: tempsData,
         }],
       },
       options: {
         maintainAspectRatio: false,
         layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
         scales: {
-          xAxes: [{ gridLines: { display: false, drawBorder: false } }],
-          yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10, beginAtZero: true } }],
+          xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { fontColor: "#858796" } }],
+          yAxes: [{
+            ticks: {
+              maxTicksLimit: 6,
+              padding: 10,
+              beginAtZero: true,
+              stepSize: 30,
+              callback: function(value) {
+                if (value >= 60) return (value / 60).toFixed(1) + 'h';
+                return value + 'min';
+              }
+            },
+            gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2] }
+          }],
         },
-        legend: { display: false }
+        legend: { display: false },
+        tooltips: {
+          callbacks: {
+            label: function(item) {
+              var v = item.yLabel;
+              if (v >= 60) return (v / 60).toFixed(1) + 'h d\'apprentissage';
+              return v + ' min d\'apprentissage';
+            }
+          }
+        }
       }
     });
 
-    // Configuration Chart.js Réussite (Pie)
+    // Configuration Chart.js Réussite (Doughnut)
     var ctx2 = document.getElementById("reussitePieChart");
-    var myPieChart = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: ["Succès", "Moyen", "Échec"],
-        datasets: [{
-          data: {{ reussite_data|safe }},
-          backgroundColor: ['#133e3f', '#FFC107', '#4ecdc4'],
-          hoverBackgroundColor: ['#1a5556', '#e6ac00', '#38b2ac'],
-          hoverBorderColor: "rgba(234, 236, 244, 1)",
-        }],
-      },
-      options: {
-        maintainAspectRatio: false,
-        tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
-        legend: { display: false },
-        cutoutPercentage: 80,
-      },
-    });
+    var reussiteRaw = {{ reussite_data|safe }};
+    var totalReussite = reussiteRaw.reduce(function(a,b){ return a+b; }, 0);
+
+    if (totalReussite === 0) {
+      // Aucune évaluation corrigée : afficher un anneau gris placeholder
+      var myPieChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ["Aucune donnée"],
+          datasets: [{ data: [1], backgroundColor: ['#e0e0e0'], hoverBackgroundColor: ['#d0d0d0'], borderWidth: 0 }],
+        },
+        options: {
+          maintainAspectRatio: false,
+          legend: { display: false },
+          cutoutPercentage: 80,
+          tooltips: { callbacks: { label: function() { return 'Aucune évaluation corrigée'; } } }
+        }
+      });
+    } else {
+      var myPieChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ["Succès (≥70%)", "Moyen (50-69%)", "Échec (<50%)"],
+          datasets: [{
+            data: reussiteRaw,
+            backgroundColor: ['#133e3f', '#FFC107', '#4ecdc4'],
+            hoverBackgroundColor: ['#1a5556', '#e6ac00', '#38b2ac'],
+            borderWidth: 2,
+            borderColor: '#ffffff',
+          }],
+        },
+        options: {
+          maintainAspectRatio: false,
+          tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: true,
+            caretPadding: 10,
+            callbacks: {
+              label: function(item, data) {
+                var label = data.labels[item.index];
+                var val = data.datasets[0].data[item.index];
+                var pct = totalReussite > 0 ? Math.round(val / totalReussite * 100) : 0;
+                return label + ' : ' + val + ' (' + pct + '%)';
+              }
+            }
+          },
+          legend: { display: false },
+          cutoutPercentage: 75,
+        },
+      });
+    }
 </script>
 {% endblock %}

@@ -184,14 +184,14 @@
     .btn-retour-page {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 16px;
-        font-size: 0.78rem;
-        font-weight: 700;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
         background: rgba(255,255,255,0.15);
         color: #fff;
         border: 1px solid rgba(255,255,255,0.35);
-        border-radius: 50px;
+        border-radius: 50%;
         text-decoration: none;
         transition: all 0.2s;
     }
@@ -282,8 +282,8 @@
             <div class="label">Note obtenue</div>
         </div>
         {% endif %}
-        <a href="{% url 'mes_resultats_etudiant' %}" class="btn-retour-page">
-            <i class="fas fa-arrow-left"></i> Retour
+        <a href="{% url 'mes_resultats_etudiant' %}" class="btn-retour-page" title="Retour">
+            <i class="fas fa-arrow-left"></i>
         </a>
     </div>
 </div>

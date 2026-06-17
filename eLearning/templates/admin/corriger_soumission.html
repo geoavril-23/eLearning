@@ -108,8 +108,8 @@
                     <i class="fas fa-file-word fa-4x text-primary mb-3"></i>
                     <h4 class="text-gray-800 mb-2">Fichier de réponse fourni</h4>
                     <p class="text-muted mb-4">{{ soumission.fichier_reponse.name|slice:"17:" }}</p>
-                    <a href="{{ soumission.fichier_reponse.url }}" class="btn btn-primary rounded-pill px-4 shadow-sm" download target="_blank">
-                        <i class="fas fa-download mr-2"></i> Télécharger et lire la copie
+                    <a href="{{ soumission.fichier_reponse.url }}" class="btn-tbl" download target="_blank">
+                        <i class="fas fa-download"></i> Télécharger et lire la copie
                     </a>
                 </div>
             {% elif questions_info %}
@@ -155,8 +155,8 @@
                     <textarea class="form-control" name="commentaires" rows="5" placeholder="Saisissez vos observations pour aider l'étudiant à progresser..." required></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-success btn-lg btn-block rounded-pill shadow-sm font-weight-bold">
-                    <i class="fas fa-save mr-2"></i> Enregistrer la correction
+                <button type="submit" class="btn-tbl w-100" style="justify-content:center;padding:8px 16px;font-size:0.85rem;border-radius:8px;">
+                    <i class="fas fa-save"></i> Enregistrer la correction
                 </button>
             </form>
         </div>

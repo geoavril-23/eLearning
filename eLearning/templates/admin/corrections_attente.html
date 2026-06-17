@@ -29,6 +29,9 @@
         margin: 0 auto;
     }
 
+    /* btn-evaluer est maintenant la classe globale btn-tbl dans base_admin.html */
+    .btn-evaluer { /* alias local pour compatibilité */ }
+
     /* Dark mode */
     body.dark-mode .page-header { border-bottom-color: #374151; }
     body.dark-mode .page-header h1 { color: #FFC107; }
@@ -76,8 +79,8 @@
                         <td><span class="badge badge-info">{{ soumission.quiz.cours.titre }}</span></td>
                         <td>{{ soumission.date_soumission|date:"d M Y, H:i" }}</td>
                         <td>
-                            <a href="{% url 'corriger_soumission' soumission.id %}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                                <i class="fas fa-edit mr-1"></i> Évaluer
+                            <a href="{% url 'corriger_soumission' soumission.id %}" class="btn-tbl">
+                                <i class="fas fa-pen"></i> Évaluer
                             </a>
                         </td>
                     </tr>

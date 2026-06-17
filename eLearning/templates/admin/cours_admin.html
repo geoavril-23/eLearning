@@ -60,16 +60,16 @@
                             </td>
                             <td>{{ cours.date_publication|date:"d/m/Y" }}</td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-circle btn-sm" 
-                                        data-toggle="modal" 
-                                        data-target="#modalEditCours" 
+                                <button class="btn-tbl-icon"
+                                        data-toggle="modal"
+                                        data-target="#modalEditCours"
                                         onclick="fillEditModal('{{ cours.id }}', '{{ cours.titre|escapejs }}', '{{ cours.description|escapejs }}', '{{ cours.prix }}', '{{ cours.est_premium|yesno:'on,off' }}', '{{ cours.categorie.id }}', '{% if cours.image %}{{ cours.image.url }}{% endif %}')"
                                         title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-circle btn-sm" 
-                                        data-toggle="modal" 
-                                        data-target="#modalDeleteCours" 
+                                <button class="btn-tbl-icon-danger"
+                                        data-toggle="modal"
+                                        data-target="#modalDeleteCours"
                                         onclick="setDeleteCours('{{ cours.id }}', '{{ cours.titre|escapejs }}')"
                                         title="Supprimer">
                                     <i class="fas fa-trash"></i>

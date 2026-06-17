@@ -66,7 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Etudiant(User):
     niveau = models.CharField(max_length=50, blank=True)
     etablissement = models.CharField(max_length=100, blank=True)
-    solde = models.DecimalField(max_digits=10, decimal_places=2, default=50000.00)
+    solde = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     class Meta:
         verbose_name = "Étudiant"
@@ -487,6 +487,7 @@ class Notification(models.Model):
     TYPE_CHOICES = [
         ('nouveau_cours', 'Nouveau cours dans votre domaine'),
         ('nouvelle_ressource', 'Nouvelle ressource sur votre cours'),
+        ('quiz_corrige', 'Quiz corrigé automatiquement'),
     ]
     destinataire = models.ForeignKey(
         User,

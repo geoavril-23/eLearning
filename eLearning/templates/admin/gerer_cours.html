@@ -171,8 +171,8 @@
     <h1 class="h3 mb-0 text-gray-800">
         <i class="fas fa-cogs text-primary mr-2"></i>Gérer le cours : {{ cours.titre }}
     </h1>
-    <a href="{% url 'mes_cours_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-        <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Retour
+    <a href="{% url 'mes_cours_enseignant' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm" title="Retour" style="border-radius:50px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;padding:0;">
+        <i class="fas fa-arrow-left fa-sm text-white-50"></i>
     </a>
 </div>
 
@@ -318,17 +318,17 @@
                         <span class="badge badge-warning ml-2" style="background-color:#fec913;color:#111;"><i class="fas fa-crown"></i> Premium</span>
                         {% endif %}
                     </h6>
-                    <div class="d-flex align-items-center">
-                        <a href="{% url 'basculer_module_premium' mod.id %}" class="btn btn-sm {% if mod.est_premium %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2" onclick="event.stopPropagation();" title="Activer/désactiver le premium pour ce module">
+                    <div class="d-flex align-items-center" style="gap:0.4rem;flex-wrap:nowrap;">
+                        <a href="{% url 'basculer_module_premium' mod.id %}" class="btn btn-sm {% if mod.est_premium %}btn-warning{% else %}btn-outline-warning{% endif %}" onclick="event.stopPropagation();" title="Activer/désactiver le premium pour ce module" style="border-radius:50px;">
                             <i class="fas fa-crown"></i> {% if mod.est_premium %}Premium activé{% else %}Rendre premium{% endif %}
                         </a>
-                        <button type="button" class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#ajouterChapitreModal{{ mod.id }}" onclick="event.stopPropagation();">
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#ajouterChapitreModal{{ mod.id }}" onclick="event.stopPropagation();" style="border-radius:50px;">
                             <i class="fas fa-plus"></i> Ajouter une section
                         </button>
-                        <a href="{% url 'supprimer_module' mod.id %}" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); return confirm('Supprimer ce module et tous ses chapitres ?')" title="Supprimer le module">
+                        <a href="{% url 'supprimer_module' mod.id %}" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); return confirm('Supprimer ce module et tous ses chapitres ?')" title="Supprimer le module" style="border-radius:50px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;">
                             <i class="fas fa-trash"></i>
                         </a>
-                        <i class="fas fa-chevron-down ml-3 text-muted"></i>
+                        <i class="fas fa-chevron-down ml-2 text-muted"></i>
                     </div>
                 </div>
                 

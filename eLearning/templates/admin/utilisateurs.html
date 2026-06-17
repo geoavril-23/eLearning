@@ -66,16 +66,16 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-circle btn-sm" 
-                                        data-toggle="modal" 
-                                        data-target="#modalEditUser" 
+                                <button class="btn-tbl-icon"
+                                        data-toggle="modal"
+                                        data-target="#modalEditUser"
                                         onclick="fillEditModal('{{ user.id }}', '{{ user.nom }}', '{{ user.prenom }}', '{{ user.email }}', '{{ user.role }}')"
                                         title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-circle btn-sm" 
-                                        data-toggle="modal" 
-                                        data-target="#modalDeleteUser" 
+                                <button class="btn-tbl-icon-danger"
+                                        data-toggle="modal"
+                                        data-target="#modalDeleteUser"
                                         onclick="setDeleteUser('{{ user.id }}', '{{ user.email }}')"
                                         title="Supprimer">
                                     <i class="fas fa-trash"></i>

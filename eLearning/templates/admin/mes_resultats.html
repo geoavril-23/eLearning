@@ -337,6 +337,35 @@
         </div>
         {% endfor %}
     </div>
+
+    {% if soumissions.has_other_pages %}
+    <nav class="d-flex justify-content-center mt-3">
+        <ul class="pagination">
+            {% if soumissions.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ soumissions.previous_page_number }}">&laquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in soumissions.paginator.page_range %}
+            <li class="page-item {% if soumissions.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if soumissions.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ soumissions.next_page_number }}">&raquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
     {% else %}
     <div class="empty-res">
         <i class="fas fa-clipboard-check fa-4x mb-3"></i>

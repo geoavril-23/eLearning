@@ -507,7 +507,7 @@
 
         <!-- Colonne droite : Stats uniquement, même hauteur que gauche -->
         <div class="profil-right">
-            {% if not request.user.is_enseignant %}
+            {% if request.user.is_etudiant %}
             <div class="p-card">
                 <div class="p-card-header">
                     <i class="fas fa-chart-bar"></i>
@@ -518,6 +518,10 @@
                         <div class="stat-chip">
                             <div class="stat-chip-val">{{ stats.temps_passe|default:"0h" }}</div>
                             <div class="stat-chip-label">Temps d'étude</div>
+                        </div>
+                        <div class="stat-chip">
+                            <div class="stat-chip-val">{{ stats.nb_inscrits|default:"0" }}</div>
+                            <div class="stat-chip-label">Cours inscrits</div>
                         </div>
                         <div class="stat-chip">
                             <div class="stat-chip-val">{{ stats.cours_termines|default:"0" }}</div>
@@ -533,7 +537,7 @@
                     </div>
                     {% endfor %}
                     {% else %}
-                    <p style="font-size:0.82rem;color:#9ca3af;text-align:center;padding:1rem 0;margin:0;">Aucun cours en progression.</p>
+                    <p style="font-size:0.82rem;color:#9ca3af;text-align:center;padding:1rem 0;margin:0;">Aucun cours inscrit pour le moment.</p>
                     {% endif %}
                 </div>
             </div>

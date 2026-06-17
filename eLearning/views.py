@@ -17,6 +17,21 @@ import os
 import requests
 
 
+def _get_client_ip(request):
+    x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded:
+        return x_forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+
+def _log(request, user, action):
+    LogActivite.objects.create(
+        utilisateur=user,
+        action=action,
+        ip_address=_get_client_ip(request),
+    )
+
+
 def _gemini_generer_json(prompt, model='gemini-flash-latest', timeout=60):
     """Appelle l'API REST de Gemini directement (sans la librairie
     `google.generativeai`, dépréciée et extrêmement lente à importer sur Windows).
@@ -82,6 +97,7 @@ def admin_login(request):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
+            _log(request, user, "Connexion réussie")
             return get_dashboard_redirect(user)
         else:
             messages.error(request, 'Identifiants invalides')
@@ -143,6 +159,7 @@ def admin_register(request):
                 )
             
             login(request, user)
+            _log(request, user, f"Inscription en tant que {role}")
             messages.success(request, "Inscription réussie !")
             return get_dashboard_redirect(user)
 
@@ -183,7 +200,7 @@ def dashboard_etudiant_view(request):
 
     if not request.user.is_etudiant:
         messages.error(request, 'Accès refusé. Réservé aux étudiants.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     etudiant = request.user.etudiant
     
@@ -282,7 +299,7 @@ def dashboard_etudiant_view(request):
 def dashboard_enseignant(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé. Réservé aux enseignants.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     enseignant = request.user.enseignant
     
@@ -384,7 +401,7 @@ def dashboard_enseignant(request):
 def dashboard_admin(request):
     if not request.user.is_administrateur:
         messages.error(request, 'Accès refusé. Réservé aux administrateurs.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     from django.db.models import Sum, Q
     from django.utils import timezone
@@ -397,20 +414,30 @@ def dashboard_admin(request):
     total_users = User.objects.count()
     total_courses = Cours.objects.count()
 
-    # Revenus du mois : achats de cours, chapitres et livres via le portefeuille
-    # (les paiements PayGate créent aussi une TransactionSimulee, donc déjà inclus)
-    revenu_mois = TransactionSimulee.objects.filter(
+    # Revenus du mois — achats via portefeuille (solde)
+    revenu_wallet = TransactionSimulee.objects.filter(
         type_transaction__in=['achat_cours', 'achat_chapitre', 'achat_livre'],
         date_transaction__month=mois_en_cours,
         date_transaction__year=annee_en_cours
     ).aggregate(total=Sum('montant'))['total'] or 0
 
+    # Revenus du mois — paiements PayGate confirmés
+    revenu_paygate = PaiementPayGate.objects.filter(
+        statut='paye',
+        date_paiement__month=mois_en_cours,
+        date_paiement__year=annee_en_cours
+    ).aggregate(total=Sum('montant'))['total'] or 0
+
+    revenu_mois = revenu_wallet + revenu_paygate
+
     # Engagement : % d'étudiants actifs dans les 30 derniers jours
-    # (actif = a consulté au moins 1 chapitre OU soumis au moins 1 quiz)
+    # (actif = a consulté un chapitre OU soumis un quiz OU s'est inscrit OU connecté)
     total_etudiants = Etudiant.objects.count()
     etudiants_actifs = Etudiant.objects.filter(
         Q(chapitres_vus__date_consultation__gte=trente_jours) |
-        Q(soumissions__date_soumission__gte=trente_jours)
+        Q(soumissions__date_soumission__gte=trente_jours) |
+        Q(inscriptions__date_inscription__gte=trente_jours) |
+        Q(last_login__gte=trente_jours)
     ).distinct().count()
     engagement = round((etudiants_actifs / total_etudiants) * 100) if total_etudiants > 0 else 0
 
@@ -565,12 +592,15 @@ def profil(request):
             pourcentage = calculer_progression(etudiant, insc.cours)
             if pourcentage == 100:
                 nb_termines += 1
+            else:
+                # Tous les cours non terminés (y compris 0%) sont affichés
+                if pourcentage > 70:
+                    css_class = "bg-success"
+                elif pourcentage > 30:
+                    css_class = "bg-warning"
+                else:
+                    css_class = "bg-danger"
 
-            if 0 < pourcentage < 100: # On n'affiche que les cours réellement entamés (1-99%)
-                css_class = "bg-danger"
-                if pourcentage > 70: css_class = "bg-success"
-                elif pourcentage > 30: css_class = "bg-warning"
-                
                 progression_reelle.append({
                     'cours': insc.cours,
                     'pourcentage': pourcentage,
@@ -578,6 +608,7 @@ def profil(request):
                 })
         
         stats['cours_termines'] = nb_termines
+        stats['nb_inscrits'] = inscriptions.count()
 
     context = {
         'historique': historique_page,
@@ -1231,26 +1262,82 @@ def suivi_activite(request):
     
     reussite_data = [succes, moyen, echec]
 
-    # Temps d'apprentissage par jour de la semaine en cours
+    # Temps d'apprentissage (en minutes) par jour de la semaine en cours
+    # ChapitreVu = 30 min, ChapitreDebloque = 120 min, SoumissionQuiz = 15 min
     today = timezone.now().date()
-    start_of_week = today - timedelta(days=today.weekday()) # Monday
+    start_of_week = today - timedelta(days=today.weekday())
     jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
     temps_par_jour = []
-    
+
     for i in range(7):
         current_day = start_of_week + timedelta(days=i)
-        # on compte 2h par chapitre débloqué ce jour-là
-        deblocages = ChapitreDebloque.objects.filter(date_deblocage__date=current_day).count()
-        temps_par_jour.append(deblocages * 2)
+        vus       = ChapitreVu.objects.filter(date_consultation__date=current_day).count()
+        debloques = ChapitreDebloque.objects.filter(date_deblocage__date=current_day).count()
+        quizzes   = SoumissionQuiz.objects.filter(date_soumission__date=current_day).count()
+        temps_par_jour.append(vus * 30 + debloques * 120 + quizzes * 15)
 
-    # Dernières activités (LogActivite)
-    dernieres_activites = LogActivite.objects.all().select_related('utilisateur')[:15]
+    # Dernières activités : LogActivite + données existantes des autres modèles
+    from collections import namedtuple
+    Activite = namedtuple('Activite', ['utilisateur', 'action', 'date_action', 'ip_address'])
+
+    activites_raw = []
+
+    # 1. Vrais logs (avec IP)
+    for log in LogActivite.objects.select_related('utilisateur').order_by('-date_action')[:50]:
+        activites_raw.append(Activite(
+            utilisateur=log.utilisateur,
+            action=log.action,
+            date_action=log.date_action,
+            ip_address=log.ip_address or '—',
+        ))
+
+    # 2. Soumissions de quiz (historique)
+    for s in SoumissionQuiz.objects.select_related('etudiant', 'quiz').order_by('-date_soumission')[:30]:
+        activites_raw.append(Activite(
+            utilisateur=s.etudiant,
+            action=f"Soumission du quiz « {s.quiz.titre} »",
+            date_action=s.date_soumission,
+            ip_address='—',
+        ))
+
+    # 3. Inscriptions aux cours
+    for insc in Inscription.objects.select_related('etudiant', 'cours').order_by('-date_inscription')[:30]:
+        activites_raw.append(Activite(
+            utilisateur=insc.etudiant,
+            action=f"Inscription au cours « {insc.cours.titre} »",
+            date_action=insc.date_inscription,
+            ip_address='—',
+        ))
+
+    # 4. Chapitres débloqués
+    for cd in ChapitreDebloque.objects.select_related('etudiant', 'chapitre').order_by('-date_deblocage')[:20]:
+        activites_raw.append(Activite(
+            utilisateur=cd.etudiant,
+            action=f"Chapitre débloqué : « {cd.chapitre.titre} »",
+            date_action=cd.date_deblocage,
+            ip_address='—',
+        ))
+
+    # Trier par date décroissante — tout ramener en datetime timezone-aware
+    from datetime import datetime as _dt, date as _date, timezone as _tz_mod
+
+    def _to_aware_dt(d):
+        if isinstance(d, _dt):
+            return d if d.tzinfo else d.replace(tzinfo=_tz_mod.utc)
+        if isinstance(d, _date):
+            return _dt(d.year, d.month, d.day, tzinfo=_tz_mod.utc)
+        return _dt.min.replace(tzinfo=_tz_mod.utc)
+
+    dernieres_activites = sorted(activites_raw, key=lambda a: _to_aware_dt(a.date_action), reverse=True)[:20]
+
+    paginator = Paginator(dernieres_activites, 5)
+    activites_page = paginator.get_page(request.GET.get('page'))
 
     context = {
         'reussite_data': json.dumps(reussite_data),
         'jours_labels': json.dumps(jours),
         'temps_data': json.dumps(temps_par_jour),
-        'activites': dernieres_activites,
+        'activites': activites_page,
     }
     return render(request, 'admin/suivi_activite.html', context)
 
@@ -1267,7 +1354,7 @@ def get_dashboard_redirect(user):
 def creer_cours_complet(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé. Réservé aux enseignants.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     if request.method == 'POST':
         try:
@@ -1344,7 +1431,7 @@ def creer_cours_complet(request):
 def mes_cours_enseignant(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé. Réservé aux enseignants.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     # Tous les cours sont gérables par l'enseignant (plateforme mono-équipe).
     mes_cours = Cours.objects.all().select_related('categorie').order_by('titre')
@@ -1354,7 +1441,7 @@ def mes_cours_enseignant(request):
 def gerer_cours_enseignant(request, cours_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     enseignant = request.user.enseignant
 
@@ -1392,7 +1479,7 @@ def modifier_cours_complet(request, cours_id):
     """Édition style 'créer cours' : met à jour le cours et ses sections (chapitres sans module)."""
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     cours = get_object_or_404(Cours, id=cours_id)
 
@@ -1436,7 +1523,7 @@ def modifier_cours_complet(request, cours_id):
 def ajouter_module(request, cours_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     cours = get_object_or_404(Cours, id=cours_id)
     if request.method == 'POST':
@@ -1477,7 +1564,7 @@ def ajouter_module(request, cours_id):
 def supprimer_module(request, module_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     module = get_object_or_404(Module, id=module_id)
     cours_id = module.cours.id
@@ -1494,7 +1581,7 @@ def basculer_module_premium(request, module_id):
     """Active/désactive le statut premium d'un module (réservé à l'enseignant)."""
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     module = get_object_or_404(Module, id=module_id)
     module.est_premium = not module.est_premium
@@ -1509,7 +1596,7 @@ def modifier_premium_cours(request, cours_id):
     """Réglage rapide du statut premium + prix d'un cours (depuis la page Gérer)."""
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     cours = get_object_or_404(Cours, id=cours_id)
     if request.method == 'POST':
@@ -1528,7 +1615,7 @@ def modifier_premium_cours(request, cours_id):
 def ajouter_chapitre_cours(request, cours_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     cours = get_object_or_404(Cours, id=cours_id)
     
@@ -1588,7 +1675,7 @@ def ajouter_chapitre_cours(request, cours_id):
 def modifier_chapitre_cours(request, chapitre_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     cours_id = chapitre.cours.id
@@ -1637,7 +1724,7 @@ def modifier_chapitre_cours(request, chapitre_id):
 def supprimer_chapitre_cours(request, chapitre_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     cours_id = chapitre.cours.id
@@ -1654,7 +1741,7 @@ def supprimer_chapitre_cours(request, chapitre_id):
 def ajouter_ressource_cours(request, cours_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     cours = get_object_or_404(Cours, id=cours_id)
     
@@ -1681,7 +1768,7 @@ def ajouter_ressource_cours(request, cours_id):
 def supprimer_ressource_cours(request, ressource_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     ressource = get_object_or_404(RessourceCours, id=ressource_id)
     cours_id = ressource.cours.id
@@ -1698,7 +1785,7 @@ def supprimer_ressource_cours(request, ressource_id):
 def ajouter_ressource_chapitre(request, chapitre_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     chapitre = get_object_or_404(Chapitre, id=chapitre_id)
     if request.method == 'POST':
@@ -1729,7 +1816,7 @@ def ajouter_ressource_chapitre(request, chapitre_id):
 def supprimer_ressource_chapitre(request, ressource_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
         
     ressource = get_object_or_404(RessourceChapitre, id=ressource_id)
     cours_id = ressource.chapitre.cours.id
@@ -1746,7 +1833,7 @@ def supprimer_ressource_chapitre(request, ressource_id):
 def modifier_cours_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     cours = get_object_or_404(Cours, id=id)
     
@@ -1803,7 +1890,7 @@ def modifier_cours_enseignant(request, id):
 def supprimer_cours_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     
     cours = get_object_or_404(Cours, id=id)
     cours.delete()
@@ -1819,7 +1906,7 @@ def supprimer_cours_enseignant(request, id):
 def liste_quiz_enseignant(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     quiz_list = Quiz.objects.all().select_related('cours').order_by('-id')
     return render(request, 'admin/liste_quiz.html', {'quiz_list': quiz_list})
 
@@ -1828,7 +1915,7 @@ def liste_quiz_enseignant(request):
 def generer_quiz_ia(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     # Récupérer TOUS les cours de la base + leurs modules (pour le menu déroulant en cascade)
     mes_cours = Cours.objects.all().order_by('titre')
@@ -1940,7 +2027,7 @@ FORMAT JSON REQUIS (respecte exactement cette structure) :
 def creer_quiz_manuel(request):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     if request.method == 'POST':
         import json as _json
@@ -2007,7 +2094,7 @@ def creer_quiz_manuel(request):
 def ajouter_question_quiz(request, quiz_id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
 
     quiz = get_object_or_404(Quiz, id=quiz_id)
 
@@ -2067,7 +2154,7 @@ def ajouter_question_quiz(request, quiz_id):
 def detail_quiz_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     quiz = get_object_or_404(Quiz, id=id)
 
     # Rattacher / détacher le quiz d'un module
@@ -2091,7 +2178,7 @@ def detail_quiz_enseignant(request, id):
 def supprimer_quiz_enseignant(request, id):
     if not request.user.is_enseignant:
         messages.error(request, 'Accès refusé.')
-        return redirect('index')
+        return get_dashboard_redirect(request.user)
     quiz = get_object_or_404(Quiz, id=id)
     quiz.delete()
     messages.success(request, 'Quiz supprimé avec succès.')
@@ -2446,7 +2533,7 @@ def voir_cours(request, cours_id):
             apercu_prof = True
         else:
             messages.error(request, 'Accès réservé aux étudiants.')
-            return redirect('index')
+            return get_dashboard_redirect(request.user)
 
     inscription = None
     if est_etudiant:
@@ -2616,8 +2703,15 @@ def soumettre_quiz(request, id):
     if request.method != 'POST':
         return redirect('detail_quiz_etudiant', id=id)
 
-    quiz = get_object_or_404(Quiz, id=id)
     etudiant = request.user.etudiant
+    cours_inscrits_ids = Inscription.objects.filter(
+        etudiant=etudiant
+    ).exclude(statut='annulee').values_list('cours_id', flat=True)
+
+    quiz = Quiz.objects.filter(id=id, cours_id__in=cours_inscrits_ids).first()
+    if quiz is None:
+        messages.error(request, "Ce quiz n'existe pas ou vous n'y avez pas accès.")
+        return redirect('mes_quiz_etudiant')
 
     # Vérifier si l'étudiant a déjà soumis
     if SoumissionQuiz.objects.filter(quiz=quiz, etudiant=etudiant).exists():
@@ -2640,6 +2734,7 @@ def soumettre_quiz(request, id):
         fichier_reponse=fichier_reponse,
         reponses_qcm=json.dumps(reponses_qcm) if reponses_qcm else None
     )
+    _log(request, etudiant, f"Soumission du quiz « {quiz.titre} »")
 
     if quiz.type_correction == 'auto':
         # --- CORRECTION AUTOMATIQUE PAR IA ---
@@ -2668,16 +2763,21 @@ Travail de l'étudiant (Réponses JSON ou nom de fichier joint) : {reponses_qcm 
             soumission.corrige_par_ia = True
             soumission.save()
 
+            Notification.objects.create(
+                destinataire=etudiant,
+                type_notif='quiz_corrige',
+                cours=quiz.cours,
+            )
             messages.success(request, "Votre note s'affichera dans 'Mes résultats', allez consulter.")
         except Exception as e:
             # En cas d'erreur de l'IA, on bascule en correction manuelle par sécurité
             messages.warning(request, f"Erreur lors de l'auto-correction de l'IA. Le professeur corrigera manuellement. ({str(e)})")
             soumission.est_corrige = False
             soumission.save()
-            messages.success(request, "Votre note s'affichera dans vos résultats dès que l'enseignant aura finalisé la correction.")
+            messages.success(request, "Votre quiz a bien été soumis. Le professeur corrigera manuellement.")
     else:
-        # --- CORRECTION MANUELLE ---
-        messages.success(request, "Votre note s'affichera dans vos résultats dès que l'enseignant aura finalisé la correction.")
+        # --- CORRECTION MANUELLE : pas de notification envoyée ---
+        messages.success(request, "Votre quiz a bien été soumis. Vous serez informé dès que l'enseignant aura corrigé.")
 
     return redirect('mes_resultats_etudiant')
 
@@ -2688,10 +2788,10 @@ def mes_resultats_etudiant(request):
         messages.error(request, 'Accès réservé aux étudiants.')
         return redirect('dashboard')
         
-    soumissions = SoumissionQuiz.objects.filter(etudiant=request.user.etudiant).select_related('quiz', 'quiz__cours').order_by('-date_soumission')
-    
-    # Préparer les données pour l'affichage (QCM)
-    for soumission in soumissions:
+    soumissions_qs = SoumissionQuiz.objects.filter(etudiant=request.user.etudiant).select_related('quiz', 'quiz__cours').order_by('-date_soumission')
+
+    soumissions_list = list(soumissions_qs)
+    for soumission in soumissions_list:
         soumission.questions_info = []
         if soumission.reponses_qcm:
             try:
@@ -2699,14 +2799,11 @@ def mes_resultats_etudiant(request):
                 questions = soumission.quiz.questions.all()
                 for q in questions:
                     rep_etudiant = reponses_dict.get(f'question_{q.id}', 'Non répondu')
-                    
-                    # Chercher la bonne réponse (s'il y en a une définie)
                     bonne_reponse = ""
                     if not q.est_ouverte:
                         correct_choix = q.choix.filter(est_correct=True).first()
                         if correct_choix:
                             bonne_reponse = correct_choix.texte
-                            
                     soumission.questions_info.append({
                         'question': q.texte,
                         'reponse_etudiant': rep_etudiant,
@@ -2715,8 +2812,11 @@ def mes_resultats_etudiant(request):
                     })
             except json.JSONDecodeError:
                 pass
-                
-    return render(request, 'admin/mes_resultats.html', {'soumissions': soumissions})
+
+    paginator = Paginator(soumissions_list, 4)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'admin/mes_resultats.html', {'soumissions': page_obj})
 
 
 @login_required
@@ -3036,10 +3136,10 @@ def mes_chapitres_debloques(request):
 
     etudiant = request.user.etudiant
 
-    # Chapitres individuels achetés (via solde portefeuille)
-    deblocages = ChapitreDebloque.objects.filter(etudiant=etudiant).select_related(
-        'chapitre', 'chapitre__cours'
-    ).order_by('-date_deblocage')
+    # Modules débloqués : tous les modules dont au moins un chapitre a été débloqué
+    modules_debloques = Module.objects.filter(
+        chapitres__deblocages__etudiant=etudiant
+    ).distinct().select_related('cours').order_by('cours__titre', 'ordre')
 
     # Cours premium entiers payés (via PayGate)
     cours_premium_payes = Inscription.objects.filter(
@@ -3049,7 +3149,7 @@ def mes_chapitres_debloques(request):
     ).select_related('cours').prefetch_related('cours__chapitres').order_by('-date_inscription')
 
     return render(request, 'admin/mes_chapitres_debloques.html', {
-        'deblocages': deblocages,
+        'modules_debloques': modules_debloques,
         'cours_premium_payes': cours_premium_payes,
     })
 

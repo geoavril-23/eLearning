@@ -388,59 +388,29 @@
 </div>
 {% endif %}
 
-{# ── Section 2 : Chapitres individuels achetés ── #}
-{% if deblocages %}
+{# ── Section 2 : Modules débloqués ── #}
+{% if modules_debloques %}
 {% if cours_premium_payes %}
 <div class="section-label">
-    <i class="fas fa-puzzle-piece"></i> Chapitres individuels débloqués
+    <i class="fas fa-puzzle-piece"></i> Modules débloqués
 </div>
 {% endif %}
 <div class="chapter-grid">
-    {% for deb in deblocages %}
+    {% for mod in modules_debloques %}
     <div class="chapter-card">
         <div class="chapter-liquid-border"></div>
-        <div class="chapter-card-content">
-            <div class="chapter-header">
-                <span class="chapter-badge">
-                    <i class="fas fa-crown"></i> Premium
-                </span>
-                <i class="fas fa-unlock-alt chapter-unlock-icon"></i>
+        <div class="chapter-card-content" style="display:flex;flex-direction:column;justify-content:space-between;min-height:110px;">
+
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
+                <i class="fas fa-unlock-alt" style="color:#16a34a;font-size:1rem;flex-shrink:0;"></i>
+                <h4 class="chapter-title" style="margin:0;font-size:1rem;">{{ mod.titre }}</h4>
             </div>
 
-            <h4 class="chapter-title">{{ deb.chapitre.titre }}</h4>
-
-            <div class="course-info">
-                <i class="fas fa-book"></i>
-                <a href="{% url 'detail_cours_premium' deb.chapitre.cours.id %}">
-                    {{ deb.chapitre.cours.titre }}
+            <div style="margin-top:auto;padding-top:0.6rem;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:0.4rem;">
+                <i class="fas fa-book" style="color:#133e3f;font-size:0.75rem;flex-shrink:0;"></i>
+                <a href="{% url 'detail_cours_premium' mod.cours.id %}" style="font-size:0.78rem;font-weight:700;color:#133e3f;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    {{ mod.cours.titre }}
                 </a>
-            </div>
-
-            <div class="unlocked-info">
-                <i class="fas fa-calendar-check"></i>
-                <span>Débloqué le {{ deb.date_deblocage|date:"d/m/Y à H:i" }}</span>
-            </div>
-
-            <div class="chapter-actions">
-                {% if deb.chapitre.lien_youtube %}
-                <a href="{{ deb.chapitre.lien_youtube }}" class="btn-action-chapter btn-video" target="_blank">
-                    <i class="fab fa-youtube"></i> <span>Vidéo</span>
-                </a>
-                {% else %}
-                <button class="btn-action-chapter btn-disabled" disabled>
-                    <i class="fas fa-video-slash"></i> <span>Pas de vidéo</span>
-                </button>
-                {% endif %}
-
-                {% if deb.chapitre.ressource %}
-                <a href="{{ deb.chapitre.ressource.url }}" class="btn-action-chapter btn-document" target="_blank">
-                    <i class="fas fa-file-pdf"></i> <span>Document</span>
-                </a>
-                {% else %}
-                <button class="btn-action-chapter btn-disabled" disabled>
-                    <i class="fas fa-file-slash"></i> <span>Pas de doc</span>
-                </button>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -449,7 +419,7 @@
 {% endif %}
 
 {# ── État vide (rien du tout) ── #}
-{% if not deblocages and not cours_premium_payes %}
+{% if not modules_debloques and not cours_premium_payes %}
 <div class="empty-state">
     <i class="fas fa-lock-open"></i>
     <h3>Aucun contenu débloqué</h3>

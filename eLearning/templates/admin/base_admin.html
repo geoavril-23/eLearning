@@ -408,6 +408,67 @@
         .modal-content { border-radius: 16px !important; overflow: hidden !important; }
         .modal-header  { border-radius: 0 !important; }
 
+        /* ── Boutons d'action dans les tableaux — classes globales ─────────── */
+        /* Bouton texte (ex: Évaluer, Voir, Corriger) */
+        .btn-tbl {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; font-size: 0.78rem; font-weight: 700;
+            background: linear-gradient(135deg, #133e3f 0%, #1a5556 100%);
+            color: #FFC107; border: none; border-radius: 6px;
+            text-decoration: none; letter-spacing: 0.3px;
+            transition: all 0.2s; white-space: nowrap; cursor: pointer;
+        }
+        .btn-tbl:hover {
+            background: linear-gradient(135deg, #0f2e2f 0%, #133e3f 100%);
+            color: #FFC107; text-decoration: none;
+            box-shadow: 0 3px 10px rgba(19,62,63,0.25); transform: translateY(-1px);
+        }
+        /* Bouton texte destructif (Supprimer) */
+        .btn-tbl-danger {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; font-size: 0.78rem; font-weight: 700;
+            background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;
+            border-radius: 6px; text-decoration: none;
+            transition: all 0.2s; white-space: nowrap; cursor: pointer;
+        }
+        .btn-tbl-danger:hover {
+            background: #fca5a5; color: #7f1d1d; text-decoration: none;
+            box-shadow: 0 3px 8px rgba(185,28,28,0.2); transform: translateY(-1px);
+        }
+        /* Bouton icône rond (edit) */
+        .btn-tbl-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; padding: 0; font-size: 0.78rem;
+            background: rgba(19,62,63,0.1); color: #133e3f;
+            border: 1.5px solid rgba(19,62,63,0.25); border-radius: 50%;
+            text-decoration: none; transition: all 0.2s; cursor: pointer;
+        }
+        .btn-tbl-icon:hover {
+            background: #133e3f; color: #FFC107;
+            box-shadow: 0 3px 8px rgba(19,62,63,0.2);
+        }
+        /* Bouton icône rond (delete) */
+        .btn-tbl-icon-danger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; padding: 0; font-size: 0.78rem;
+            background: #fee2e2; color: #b91c1c;
+            border: 1.5px solid #fca5a5; border-radius: 50%;
+            text-decoration: none; transition: all 0.2s; cursor: pointer;
+        }
+        .btn-tbl-icon-danger:hover {
+            background: #b91c1c; color: #fff;
+            box-shadow: 0 3px 8px rgba(185,28,28,0.2);
+        }
+        /* Dark mode overrides */
+        body.dark-mode .btn-tbl { background: linear-gradient(135deg, #fec913 0%, #e6b400 100%); color: #133e3f; }
+        body.dark-mode .btn-tbl:hover { filter: brightness(1.1); color: #133e3f; }
+        body.dark-mode .btn-tbl-danger { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
+        body.dark-mode .btn-tbl-danger:hover { background: rgba(239,68,68,0.3); color: #fca5a5; }
+        body.dark-mode .btn-tbl-icon { background: rgba(254,201,19,0.12); color: #fec913; border-color: rgba(254,201,19,0.3); }
+        body.dark-mode .btn-tbl-icon:hover { background: #fec913; color: #133e3f; }
+        body.dark-mode .btn-tbl-icon-danger { background: rgba(239,68,68,0.12); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
+        body.dark-mode .btn-tbl-icon-danger:hover { background: rgba(239,68,68,0.3); color: #fca5a5; }
+
         /* ── Light-mode teal border — all card variants, all pages ──
            Uses body:not(.dark-mode) so it NEVER fires in dark mode,
            and !important wins over page-level light-gray borders.      */
